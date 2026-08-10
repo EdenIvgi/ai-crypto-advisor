@@ -181,11 +181,11 @@ const QuizPlaceholder = () => (
   <main className="mx-auto max-w-2xl px-6 py-16" role="status" aria-live="polite">
     <span className="sr-only">Loading the questions</span>
     <div className="h-1 w-full rounded-full bg-border" />
-    <div className="mt-8 h-9 w-2/3 animate-pulse rounded bg-muted" />
-    <div className="mt-3 h-5 w-full animate-pulse rounded bg-muted" />
+    <div className="skeleton mt-8 h-9 w-2/3" />
+    <div className="skeleton mt-3 h-5 w-full" />
     <div className="mt-8 grid gap-2 sm:grid-cols-2">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="h-[4.5rem] animate-pulse rounded-lg bg-muted" />
+        <div key={index} className="skeleton h-[4.5rem] rounded-lg" />
       ))}
     </div>
   </main>

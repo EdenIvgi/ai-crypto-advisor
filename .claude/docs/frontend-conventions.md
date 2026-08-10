@@ -51,5 +51,22 @@ Tailwind utility classes in the markup. Reach for a shadcn component before writ
 one. Avoid arbitrary values (`w-[437px]`) unless there is no scale value that works. Both
 light and dark themes must look deliberate — check both before calling a screen done.
 
+`index.css` is the only stylesheet, and it holds decisions rather than layouts: every colour,
+face and radius is a token there, so no component ever writes a literal value. Two kinds of
+thing earn a place in it beyond the tokens:
+
+- **A token, when a value is a decision that recurs** — `--rule` is the hairline between rows
+  in a data list. It is one choice about how loud the interface is, so changing it is one line
+  rather than a search for an opacity repeated in four files.
+- **A class in `@layer components`, when a repeated set of utilities has a name** —
+  `.eyebrow`, `.data-label`, `.skeleton`. The test is whether the name says something the
+  utilities do not. "Small mono capitals used for metadata" is an idea; "border on top" is a
+  border, and stays a utility.
+
+Class order is sorted by `prettier-plugin-tailwindcss`, so never argue about it and never
+hand-order a list. Class names are also read out of these files as plain text at build time:
+a name assembled at runtime (`` `bg-${colour}` ``) is never generated, and the element ends up
+with no styling and no error. Write the whole name, both branches.
+
 Every interactive element needs an accessible name; icon-only buttons (the vote thumbs) need
 an `aria-label`. The onboarding quiz must be completable with the keyboard alone.
