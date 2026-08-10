@@ -115,3 +115,40 @@ data came from, which is exactly what the `isFallback` flag needs a home for.
 The sign-in page's ticker rail deliberately shows dashes instead of prices. There is no data
 for a signed-out visitor, and inventing numbers on a sign-in screen is a small lie the rest of
 the product would have to live up to.
+
+### M4 — Onboarding quiz
+
+The best thing to come out of this milestone was a bug that the verification found and a human
+reviewer probably would not have.
+
+Driving the finished quiz through a script, three rapid clicks on the asset step registered only
+**one** selection. Each click handler computed the next array from the `answers` value captured
+in its own render, so every click that landed before React re-rendered read the same stale
+selection, and the last one overwrote the rest. Clicking at human speed hides it; a fast user on
+a slow device would not. The fix was to update from the previous state through a shared
+`toggleSelection` helper, and re-running the same no-pause script then recorded all three.
+
+This is the argument for verifying by driving the real interface rather than by reading the
+code. Nothing about the code looked wrong.
+
+The twelve CoinGecko asset ids were checked against the live API instead of being typed from
+memory, which was worth doing: several are not what the symbol suggests, including `ripple` for
+XRP and `avalanche-2` for AVAX. A wrong id would not have failed here — it would have shown up
+in M8 as a row that silently never appeared.
+
+One planned step was deliberately not completed. `loadCurrentUser` and `requireOnboarding` were
+written as the plan specified, then deleted before committing: no dashboard routes exist yet, so
+merging them would have put middleware wired to nothing onto `main`. They moved to M5, and the
+plan file records the move rather than quietly ticking the box.
+
+### Documentation audit
+
+At the human's request, the repository was audited against the brief before continuing. The audit
+found four gaps, all in documentation rather than code: no `README.md` at all, a collaboration
+journal that stopped at M3, two undocumented dependency choices, and a deliberate deviation from
+the brief's example content categories that nothing in the repository explained.
+
+The README gap was a planning error worth naming. The plan scheduled it for the final milestone,
+which meant a public repository sat for days with no explanation of what it was — the plan should
+have created it at the first milestone and grown it. `docs/decisions.md` was added at the same
+time, because "I told the human in conversation" is not documentation.
