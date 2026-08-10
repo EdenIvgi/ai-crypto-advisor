@@ -10,7 +10,8 @@ import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-const GIT_COMMANDS_WORTH_REMINDING = /\bgit\s+(commit|push|switch|checkout|branch|merge|rebase|tag)\b|\bgh\s+(pr|repo)\b/
+const GIT_COMMANDS_WORTH_REMINDING =
+  /\bgit\s+(commit|push|switch|checkout|branch|merge|rebase|tag)\b|\bgh\s+(pr|repo)\b/
 
 const readHookInput = async () => {
   const chunks = []
@@ -28,7 +29,10 @@ const attemptedCommand = hookInput?.tool_input?.command ?? ''
 if (!GIT_COMMANDS_WORTH_REMINDING.test(attemptedCommand)) process.exit(0)
 
 const sessionId = hookInput?.session_id ?? 'unknown-session'
-const alreadyRemindedMarkerPath = join(tmpdir(), `ai-crypto-advisor-git-doc-${sessionId}.marker`)
+const alreadyRemindedMarkerPath = join(
+  tmpdir(),
+  `ai-crypto-advisor-git-doc-${sessionId}.marker`
+)
 
 if (existsSync(alreadyRemindedMarkerPath)) process.exit(0)
 

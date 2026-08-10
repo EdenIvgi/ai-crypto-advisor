@@ -48,7 +48,7 @@ Rules:
 - One logical change per commit. If the subject needs an "and", split it.
 - Never commit a broken state — `npm run lint && npm test` must pass first.
 - Never commit `.env`, keys, tokens, or `node_modules`.
-- Write the body only when the *why* is not obvious from the subject. Wrap at 72.
+- Write the body only when the _why_ is not obvious from the subject. Wrap at 72.
 
 ## Pull requests
 
