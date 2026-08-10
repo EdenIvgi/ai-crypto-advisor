@@ -47,7 +47,16 @@ export class NotFoundError extends ApiError {
 }
 
 export class ConflictError extends ApiError {
-  constructor(message = 'That conflicts with something that already exists') {
-    super(message, 409, 'CONFLICT')
+  /**
+   * @param {string} message
+   * @param {string} [code] - Override when the client has to branch on which conflict it
+   *   was. `requireOnboarding` sends `ONBOARDING_REQUIRED` so the client can redirect to the
+   *   quiz instead of showing an error.
+   */
+  constructor(
+    message = 'That conflicts with something that already exists',
+    code = 'CONFLICT'
+  ) {
+    super(message, 409, code)
   }
 }

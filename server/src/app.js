@@ -10,6 +10,7 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { healthRoutes } from './routes/healthRoutes.js'
 import { authRoutes } from './routes/authRoutes.js'
 import { preferencesRoutes } from './routes/preferencesRoutes.js'
+import { dashboardRoutes } from './routes/dashboardRoutes.js'
 
 /**
  * Builds the Express app without starting a server, so tests can drive it in-process
@@ -35,6 +36,7 @@ export const createApp = () => {
   app.use('/api', healthRoutes)
   app.use('/api/auth', authRoutes)
   app.use('/api/preferences', preferencesRoutes)
+  app.use('/api/dashboard', dashboardRoutes)
 
   app.use(notFoundHandler)
   app.use(errorHandler)
