@@ -69,7 +69,7 @@ export const CryptoMemeSection = ({ className }) => {
 
 const CryptoMemeSkeleton = () => (
   <div className="max-w-xl">
-    <div className="aspect-[8/5] w-full animate-pulse rounded-lg bg-muted" />
-    <div className="mt-3 h-4 w-2/3 animate-pulse rounded bg-muted" />
+    <div className="skeleton aspect-[8/5] w-full rounded-lg" />
+    <div className="skeleton mt-3 h-4 w-2/3" />
   </div>
 )

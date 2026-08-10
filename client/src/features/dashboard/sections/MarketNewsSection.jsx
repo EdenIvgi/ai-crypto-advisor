@@ -51,7 +51,7 @@ export const MarketNewsSection = ({ className }) => {
 }
 
 const NewsHeadline = ({ article }) => (
-  <li className="break-inside-avoid border-t border-border/70">
+  <li className="break-inside-avoid border-t border-rule">
     <a
       href={article.url}
       target="_blank"
@@ -74,9 +74,9 @@ const NewsHeadline = ({ article }) => (
 const MarketNewsSkeleton = () => (
   <ul className="lg:columns-2 lg:gap-x-10">
     {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-      <li key={index} className="break-inside-avoid border-t border-border/70 py-3.5">
-        <div className="h-4 w-full animate-pulse rounded bg-muted" />
-        <div className="mt-2.5 h-3 w-24 animate-pulse rounded bg-muted" />
+      <li key={index} className="break-inside-avoid border-t border-rule py-3.5">
+        <div className="skeleton h-4 w-full" />
+        <div className="skeleton mt-2.5 h-3 w-24" />
       </li>
     ))}
   </ul>

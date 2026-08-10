@@ -47,9 +47,9 @@ export const AiInsightSection = ({ className }) => {
 
 const AiInsightSkeleton = () => (
   <div className="space-y-2.5 border-l-2 border-border pl-5">
-    <div className="h-4 w-full animate-pulse rounded bg-muted" />
-    <div className="h-4 w-full animate-pulse rounded bg-muted" />
-    <div className="h-4 w-11/12 animate-pulse rounded bg-muted" />
-    <div className="h-4 w-3/5 animate-pulse rounded bg-muted" />
+    <div className="skeleton h-4 w-full" />
+    <div className="skeleton h-4 w-full" />
+    <div className="skeleton h-4 w-11/12" />
+    <div className="skeleton h-4 w-3/5" />
   </div>
 )

@@ -48,7 +48,7 @@ export const CoinPricesSection = ({ className }) => {
 }
 
 const CoinPriceRow = ({ coin }) => (
-  <li className="flex items-baseline justify-between gap-4 border-t border-border/70 py-3.5">
+  <li className="flex items-baseline justify-between gap-4 border-t border-rule py-3.5">
     <div className="min-w-0">
       <span className="font-mono text-sm font-semibold">{coin.symbol}</span>
       <span className="ml-2 truncate text-sm text-muted-foreground">{coin.name}</span>
@@ -77,10 +77,10 @@ const CoinPricesSkeleton = () => (
     {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
       <li
         key={index}
-        className="flex items-center justify-between gap-4 border-t border-border/70 py-3.5"
+        className="flex items-center justify-between gap-4 border-t border-rule py-3.5"
       >
-        <div className="h-4 w-28 animate-pulse rounded bg-muted" />
-        <div className="h-9 w-20 animate-pulse rounded bg-muted" />
+        <div className="skeleton h-4 w-28" />
+        <div className="skeleton h-9 w-20" />
       </li>
     ))}
   </ul>

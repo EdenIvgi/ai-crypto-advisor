@@ -48,6 +48,15 @@
    */
   --market-up: oklch(0.58 0.13 165);
   --market-down: oklch(0.6 0.19 22);
+
+  /*
+   * The hairline that separates rows in a list of data, and the quietest line in the
+   * interface — lighter than a border, because it is there to let the eye track across a row
+   * rather than to divide anything. It has its own token because it is a decision about how
+   * loud the interface is, and those belong here rather than repeated as an opacity in every
+   * list that draws one.
+   */
+  --rule: oklch(0.929 0.013 255.508 / 70%);
 }
 
 .dark {
@@ -73,6 +82,12 @@
 
   --market-up: oklch(0.72 0.14 165);
   --market-down: oklch(0.7 0.18 22);
+
+  /*
+   * Not the light rule dimmed: on a dark card a hairline has to be lighter than what it sits
+   * on, not darker, so it is its own value rather than the same one at a lower opacity.
+   */
+  --rule: oklch(1 0 0 / 12%);
 }
 
 @theme inline {
@@ -81,6 +96,7 @@
 
   --color-market-up: var(--market-up);
   --color-market-down: var(--market-down);
+  --color-rule: var(--rule);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -148,5 +164,17 @@
   .eyebrow::before {
     @apply h-px w-4 bg-current opacity-50;
     content: '';
+  }
+
+  /*
+   * A block standing in for content that has not arrived. Named rather than spelled out at
+   * each of its dozen uses because it is one idea with one answer: if the placeholder ever
+   * stops pulsing and starts shimmering, it changes here and nowhere else.
+   *
+   * Size is left to the caller — a skeleton is only honest when it is the shape of the thing
+   * it is standing in for.
+   */
+  .skeleton {
+    @apply animate-pulse rounded bg-muted;
   }
 }

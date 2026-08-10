@@ -36,7 +36,7 @@ export const DashboardSectionCard = ({
       <div className="min-w-0">
         <p className="eyebrow">
           {sourceLabel ?? (
-            <span className="h-2 w-24 animate-pulse rounded-full bg-muted" aria-hidden="true" />
+            <span className="skeleton h-2 w-24 rounded-full" aria-hidden="true" />
           )}
         </p>
         <h2 className="mt-2.5 font-semibold tracking-tight">{title}</h2>
