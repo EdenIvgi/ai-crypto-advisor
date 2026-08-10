@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "node --watch --env-file-if-exists=.env src/index.js",
     "start": "node src/index.js",
+    "check:db": "node --env-file-if-exists=.env scripts/checkDatabaseConnection.js",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
