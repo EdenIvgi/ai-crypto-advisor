@@ -107,6 +107,19 @@ the end. Under the current order there is a working, deployable product from M5 
 time runs out what is missing is one section rather than the product. The least predictable
 integration, the LLM, is last and has the strongest fallback.
 
+## Dates and numbers are pinned to the interface's language
+
+`Intl` follows the browser's locale unless you tell it otherwise, and normally that is the
+right default. Here it produced a Hebrew weekday inside an English paragraph, laid out
+right-to-left in a left-to-right label, and a price written `118,432.50$` with the currency
+symbol trailing.
+
+The rejected alternative was to keep the browser default and accept it. Every word of this
+interface is written in English; a date and a price that follow a different language are not
+localisation, they are an interface that disagrees with itself. `INTERFACE_LOCALE` in
+`client/src/features/dashboard/dashboardFormatters.js` is the single line to change if this is
+ever localised for real, at which point the copy would have to move with it.
+
 ## The test suite is capped
 
 Two integration tests, one unit test, one smoke test, and a written rule against adding more

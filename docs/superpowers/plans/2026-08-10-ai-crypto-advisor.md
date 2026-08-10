@@ -39,8 +39,8 @@ mongodb-memory-server, Playwright.
 | M2 — Database and JWT auth            | done   |
 | M3 — Frontend auth and Demo Mode      | done   |
 | M4 — Onboarding quiz                  | done   |
-| M5 — Dashboard UI on mock data        | next   |
-| M6 — Feedback voting                  | todo   |
+| M5 — Dashboard UI on mock data        | done   |
+| M6 — Feedback voting                  | next   |
 | M7 — First deploy                     | todo   |
 | M8 — Coin prices (CoinGecko)          | todo   |
 | M9 — Market news (CryptoPanic)        | todo   |
@@ -271,11 +271,14 @@ criterion, and this is the screen that gets graded.
 
 - Create: `server/src/data/mockDashboard.js`, `server/src/routes/dashboardRoutes.js`,
   `server/src/controllers/dashboardController.js`
+- Create: `server/src/services/{pricesService,newsService,aiInsightService,memeService}.js`
+  (added to the plan during the task — see the note below), `server/src/lib/dateKeys.js`
 - Create: `server/src/middleware/{loadCurrentUser,requireOnboarding}.js` (moved here from M4,
   because these are the first routes that use them)
-- Create: `client/src/features/dashboard/{dashboardApi.js,DashboardPage.jsx}`
+- Create: `client/src/features/dashboard/{dashboardApi.js,useDashboard.js,dashboardFormatters.js,DashboardPage.jsx}`
 - Create: `client/src/features/dashboard/components/DashboardSectionCard.jsx`
 - Create: `client/src/features/dashboard/sections/{CoinPricesSection,MarketNewsSection,AiInsightSection,CryptoMemeSection}.jsx`
+- Create: `client/public/memes/sample-buying-the-dip.svg`
 
 **Interfaces:**
 
@@ -288,21 +291,35 @@ criterion, and this is the screen that gets graded.
   - insight: `{ insight: { id, text, date }, isFallback }`
   - meme: `{ meme: { id, title, imageUrl, sourceUrl }, isFallback }`
 
-- [ ] **Step 1:** `mockDashboard.js` — realistic fixed data for all four sections, shaped
+- [x] **Step 1:** `mockDashboard.js` — realistic fixed data for all four sections, shaped
       exactly as the frozen contract above.
-- [ ] **Step 2:** Dashboard controller and routes serving the mocks, filtered by the
+- [x] **Step 2:** Dashboard controller and routes serving the mocks, filtered by the
       user's `watchedAssetIds` where that applies.
-- [ ] **Step 3:** `DashboardSectionCard.jsx` — the shared shell: title, optional fallback
+- [x] **Step 3:** `DashboardSectionCard.jsx` — the shared shell: title, optional fallback
       badge, skeleton while loading, inline error with a retry button, and a slot for the
       vote buttons added in M6.
-- [ ] **Step 4:** The four section components, each with its own `useQuery` so one failure
+- [x] **Step 4:** The four section components, each with its own `useQuery` so one failure
       cannot take down the others.
-- [ ] **Step 5:** `DashboardPage.jsx` — a responsive grid rendering only the sections the
+- [x] **Step 5:** `DashboardPage.jsx` — a responsive layout rendering only the sections the
       user selected during onboarding. No placeholder card for a section they skipped.
-- [ ] **Step 6:** Check both light and dark themes, and widths from 375px to 1440px.
-- [ ] **Step 7:** Verify in a browser: the dashboard looks finished; deselecting a section
+- [x] **Step 6:** Check both light and dark themes, and widths from 375px to 1440px.
+- [x] **Step 7:** Verify in a browser: the dashboard looks finished; deselecting a section
       in preferences removes it.
-- [ ] **Step 8:** Lint, format, test, commit, open the PR.
+- [x] **Step 8:** Lint, format, test, commit, open the PR.
+
+**Deviation recorded — the four services were created here rather than in M8 to M11.** The
+plan had the controller read the mock directly and each later milestone create its service
+and edit the controller. Writing it that way meant the controller changing four more times,
+which is exactly the churn freezing the contract was supposed to prevent. Instead
+`loadCoinPrices`, `loadMarketNews`, `loadDailyInsight` and `loadDailyMeme` exist now with
+mock bodies, and M8 to M11 replace one body each and touch nothing else. Their file entries
+move from those tasks to this one.
+
+**Layout decision:** the sections are laid out with flex bases, not grid columns. A grid
+gives a section a fixed track, so a user who selected the insight but not the meme would get
+a half-width card with a hole beside it. With `grow` and a basis, the pair shares a row when
+both are present and a lone one expands to fill it — no conditional span logic, and every
+combination of the four answers produces a layout that looks deliberate.
 
 ---
 
