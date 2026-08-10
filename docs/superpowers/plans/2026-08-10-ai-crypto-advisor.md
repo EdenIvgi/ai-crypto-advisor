@@ -505,11 +505,16 @@ criterion, and this is the screen that gets graded.
 - Modify: `README.md`, `docs/ai-collaboration.md`
 - Create: `docs/feedback-model-proposal.md`
 
-- [ ] **Step 1:** README — what it is, a screenshot, the deployed URLs, the demo account
-      credentials, local setup, an environment variable table, and a Mermaid architecture
-      diagram.
+- [x] **Step 1:** README — what it is, local setup, an environment variable table, a Mermaid
+      architecture diagram, the demo account, and pointers to the conventions and decisions.
+      **Written early, after M4.** Scheduling it here was a planning error: a public
+      repository should never have sat for days with no explanation of what it is.
+- [ ] **Step 1b:** Add to the README what only exists after deploying — the public URLs and a
+      screenshot of the finished dashboard.
 - [ ] **Step 2:** README — a short "known tradeoffs" section: the Atlas `0.0.0.0/0` rule,
       Render cold starts, and the deliberately capped test suite with the reasoning.
+      (`docs/decisions.md`, added after M4, already covers the reasoning; this step is the
+      deployment-specific part.)
 - [ ] **Step 3:** `docs/feedback-model-proposal.md` (the assignment's bonus, design only):
       what the votes give you as implicit labels, the features available per event
       (`investorType`, `sectionType`, content source, time of day), a cold-start-safe
