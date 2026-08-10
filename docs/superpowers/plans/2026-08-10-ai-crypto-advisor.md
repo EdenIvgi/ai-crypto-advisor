@@ -37,8 +37,8 @@ mongodb-memory-server, Playwright.
 | M0 — Workspace and conventions        | done   |
 | M1 — Scaffold and middleware skeleton | done   |
 | M2 — Database and JWT auth            | done   |
-| M3 — Frontend auth and Demo Mode      | next   |
-| M4 — Onboarding quiz                  | todo   |
+| M3 — Frontend auth and Demo Mode      | done   |
+| M4 — Onboarding quiz                  | next   |
 | M5 — Dashboard UI on mock data        | todo   |
 | M6 — Feedback voting                  | todo   |
 | M7 — First deploy                     | todo   |
@@ -194,26 +194,26 @@ handler automatically, so the planned `asyncHandler` wrapper is unnecessary and 
 - Produces: `useCurrentUser()`, `useLogin()`, `useSignup()`, `useLogout()`,
   `useDemoLogin()`, `ProtectedRoute`, and `POST /api/auth/demo`.
 
-- [ ] **Step 1:** `authApi.js` — thin wrappers over `requestApi` for register, login,
+- [x] **Step 1:** `authApi.js` — thin wrappers over `requestApi` for register, login,
       logout, demo, and me.
-- [ ] **Step 2:** `useAuth.js` — `useCurrentUser` query on key `['auth', 'me']` (treat 401
+- [x] **Step 2:** `useAuth.js` — `useCurrentUser` query on key `['auth', 'me']` (treat 401
       as "signed out", not an error), plus the four mutations, each invalidating that key.
-- [ ] **Step 3:** `LoginPage.jsx` and `SignupPage.jsx` using shadcn form primitives, with
+- [x] **Step 3:** `LoginPage.jsx` and `SignupPage.jsx` using shadcn form primitives, with
       inline field errors driven by `error.fieldErrors` from the API.
-- [ ] **Step 4:** `ProtectedRoute.jsx` — while loading show a spinner; if signed out
+- [x] **Step 4:** `ProtectedRoute.jsx` — while loading show a spinner; if signed out
       redirect to `/login`; if signed in without preferences redirect to `/onboarding`.
-- [ ] **Step 5:** `App.jsx` — react-router with `/login`, `/signup`, `/onboarding`,
+- [x] **Step 5:** `App.jsx` — react-router with `/login`, `/signup`, `/onboarding`,
       `/dashboard`, and a catch-all redirect.
-- [ ] **Step 6:** `POST /api/auth/demo` — finds or creates the demo user and issues the
+- [x] **Step 6:** `POST /api/auth/demo` — finds or creates the demo user and issues the
       same cookie as a normal login. No special-casing anywhere else in the auth path.
-- [ ] **Step 7:** `server/scripts/seedDemoUser.js` — idempotent upsert of
+- [x] **Step 7:** `server/scripts/seedDemoUser.js` — idempotent upsert of
       `demo@aicryptoadvisor.app` with preferences already filled in; add
       `npm run seed:demo` to `server/package.json`.
-- [ ] **Step 8:** Add the "Try Demo Account" button to `LoginPage.jsx`, visually secondary
+- [x] **Step 8:** Add the "Try Demo Account" button to `LoginPage.jsx`, visually secondary
       to the real sign-in.
-- [ ] **Step 9:** Verify in a browser: sign up lands on `/onboarding`; a refresh keeps the
+- [x] **Step 9:** Verify in a browser: sign up lands on `/onboarding`; a refresh keeps the
       session; logout returns to `/login`; the demo button skips straight past onboarding.
-- [ ] **Step 10:** Lint, format, test, commit, open the PR.
+- [x] **Step 10:** Lint, format, test, commit, open the PR.
 
 ---
 

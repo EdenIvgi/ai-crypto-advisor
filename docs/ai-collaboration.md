@@ -64,5 +64,54 @@ Two plugins from Anthropic's official marketplace were installed at project scop
 declared in `.claude/settings.json`, so anyone who opens this repository gets the same
 tooling: **superpowers** (structured planning, systematic debugging, red/green TDD,
 subagent-driven development, and a branch-finishing workflow that matches the PR-per-milestone
-rule) and **frontend-design** (used in M5 and M12, where "clean UX" is an explicit grading
+rule) and **frontend-design** (used in M3 and M5, where "clean UX" is an explicit grading
 criterion).
+
+The `superpowers:writing-plans` methodology then produced
+`docs/superpowers/plans/2026-08-10-ai-crypto-advisor.md`: every milestone as a task with its
+exact file list, an interfaces block naming what it consumes and produces, and bite-sized
+steps as checkboxes ticked as the work lands. That file is the working plan from M2 onward.
+
+### M1 — Scaffold and middleware skeleton
+
+The Express app is built by a `createApp()` factory that does not listen, so Supertest can
+drive it in-process. The global middleware chain and its order were fixed here.
+
+One planned piece was dropped after checking it: Express 5 forwards a rejected promise from a
+handler to the error handler by itself, so the `asyncHandler` wrapper the plan called for was
+dead weight. `.claude/docs/backend-conventions.md` was corrected to match rather than left
+describing code that does not exist.
+
+### M2 — Database and JWT auth
+
+Two decisions here were about what _not_ to reveal. The JWT payload carries only the user id,
+so everything else is loaded fresh per request and a week-old token can never carry stale
+data. A wrong password and an unknown email return byte-identical 401s, and a test asserts the
+equality, because distinguishing them tells an attacker which addresses have accounts.
+
+Development runs with no configuration at all: with no `MONGODB_URI` the server starts an
+in-memory MongoDB, with no `JWT_SECRET` it generates a random one per process, and both warn
+loudly about what that costs. Production refuses to start without real values. A hardcoded
+fallback secret would have been the easy version of this and a much worse one.
+
+The human supplied a real Atlas cluster at the end of this milestone. The connection string
+was never pasted into the conversation and never read by the agent: the agent wrote everything
+_except_ the URI into `server/.env`, the human filled that line in, and a check script
+confirmed the connection by reporting the host, database, and document counts without printing
+the string.
+
+### M3 — Frontend auth and Demo Mode
+
+The visual identity was decided deliberately here rather than defaulting, since the dashboard
+inherits it. IBM Plex Sans and Mono, bundled rather than pulled from a font CDN; an
+indigo-violet primary chosen specifically to avoid the neon-green-on-black look that crypto
+interfaces default to; and market up/down colours separated by lightness as well as hue so
+they survive the common forms of colour blindness.
+
+The signature device is a monospace eyebrow label. It earns its place by carrying real
+information rather than decorating: on the dashboard each one will report where its section's
+data came from, which is exactly what the `isFallback` flag needs a home for.
+
+The sign-in page's ticker rail deliberately shows dashes instead of prices. There is no data
+for a signed-out visitor, and inventing numbers on a sign-in screen is a small lie the rest of
+the product would have to live up to.
