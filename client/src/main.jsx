@@ -10,7 +10,10 @@ import '@fontsource/ibm-plex-mono/500.css'
 
 import { App } from './App.jsx'
 import { queryClient } from './lib/queryClient.js'
+import { wakeApi } from './lib/wakeApi.js'
 import './index.css'
+
+wakeApi()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
