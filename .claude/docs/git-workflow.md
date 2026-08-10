@@ -4,7 +4,9 @@ Read this before any `git` command, and before opening or merging a pull request
 
 ## Branches
 
-`main` is always deployable. **Never commit directly to `main`.**
+`main` is always deployable. **Never commit directly to `main`.** The one exception is the
+M0 bootstrap commit, which necessarily creates the branch; from M1 onward every change
+arrives through a pull request.
 
 One branch per milestone, named `<type>/<milestone>-<slug>`:
 
