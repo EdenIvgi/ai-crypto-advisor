@@ -38,8 +38,8 @@ mongodb-memory-server, Playwright.
 | M1 — Scaffold and middleware skeleton | done   |
 | M2 — Database and JWT auth            | done   |
 | M3 — Frontend auth and Demo Mode      | done   |
-| M4 — Onboarding quiz                  | next   |
-| M5 — Dashboard UI on mock data        | todo   |
+| M4 — Onboarding quiz                  | done   |
+| M5 — Dashboard UI on mock data        | next   |
 | M6 — Feedback voting                  | todo   |
 | M7 — First deploy                     | todo   |
 | M8 — Coin prices (CoinGecko)          | todo   |
@@ -223,33 +223,42 @@ handler automatically, so the planned `asyncHandler` wrapper is unnecessary and 
 
 - Create: `server/src/data/supportedAssets.js`, `server/src/services/preferencesService.js`,
   `server/src/controllers/preferencesController.js`, `server/src/routes/preferencesRoutes.js`
-- Create: `server/src/middleware/{loadCurrentUser,requireOnboarding}.js`
-- Create: `client/src/features/onboarding/{preferencesApi.js,OnboardingPage.jsx}` and
+- Create: `client/src/features/onboarding/{preferencesApi.js,useOnboarding.js,toggleSelection.js,OnboardingPage.jsx}`,
+  `client/src/features/onboarding/components/SelectableOption.jsx` and
   `client/src/features/onboarding/steps/{AssetSelectionStep,InvestorTypeStep,ContentPreferencesStep}.jsx`
 
 **Interfaces:**
 
 - Consumes: `requireAuth`, `validateRequest`, `User` (M2); `ProtectedRoute` (M3).
-- Produces: `GET/PUT /api/preferences`, `GET /api/preferences/asset-options`,
-  `loadCurrentUser` (sets `request.currentUser`), `requireOnboarding` (409
-  `ONBOARDING_REQUIRED`), and `useSavePreferences()`.
+- Produces: `GET/PUT /api/preferences`, `GET /api/preferences/options`,
+  `useQuizOptions()`, and `useSavePreferences()`.
 
-- [ ] **Step 1:** `supportedAssets.js` — a curated list of roughly 12 assets as
+- [x] **Step 1:** `supportedAssets.js` — a curated list of roughly 12 assets as
       `{ id, symbol, name }`, where `id` is the CoinGecko id the price service will use.
-- [ ] **Step 2:** `preferencesService.js` — `loadPreferences(userId)` and
-      `savePreferences(userId, preferences)`, both returning the preferences object.
-- [ ] **Step 3:** Zod schema for the preferences body: at least one asset, a valid
-      `investorType`, at least one content section.
-- [ ] **Step 4:** Controllers and routes, chained
+      Every id verified against the live CoinGecko API, since several are not what the
+      symbol suggests (XRP is `ripple`, AVAX is `avalanche-2`).
+- [x] **Step 2:** `preferencesService.js` — `getQuizOptions()`, `loadPreferences(userId)`
+      and `savePreferences(userId, preferences)`.
+- [x] **Step 3:** Zod schema for the preferences body: at least one asset, at most eight, a
+      valid `investorType`, at least one content section.
+- [x] **Step 4:** Controllers and routes, chained
       `requireAuth → validateRequest → controller`.
-- [ ] **Step 5:** `loadCurrentUser.js` and `requireOnboarding.js`.
-- [ ] **Step 6:** The three quiz steps as separate components, each fully
+- [ ] **Step 5:** `loadCurrentUser.js` and `requireOnboarding.js`. **Moved to M5**, which
+      creates the dashboard routes that use them. Merging middleware wired to nothing would
+      have put dead code on `main`.
+- [x] **Step 6:** The three quiz steps as separate components, each fully
       keyboard-operable, with a progress indicator and a back button.
-- [ ] **Step 7:** `OnboardingPage.jsx` — holds the draft in local state, submits once at
-      the end, then invalidates `['auth', 'me']` and navigates to `/dashboard`.
-- [ ] **Step 8:** Verify: completing the quiz makes `GET /api/auth/me` report
+- [x] **Step 7:** `OnboardingPage.jsx` — holds the draft in local state, submits once at
+      the end, then replaces the cached user and navigates to `/dashboard`.
+- [x] **Step 8:** Verify: completing the quiz makes `GET /api/auth/me` report
       `hasCompletedOnboarding: true`; revisiting `/onboarding` redirects to the dashboard.
-- [ ] **Step 9:** Lint, format, test, commit, open the PR.
+- [x] **Step 9:** Lint, format, test, commit, open the PR.
+
+**Bug found and fixed during verification:** three rapid clicks on the asset step registered
+only one selection. Each handler computed the next array from the `answers` value captured in
+its own render, so clicks landing before a re-render all read the same stale selection and the
+last one overwrote the rest. Fixed by updating from the previous state
+(`setAnswers(current => …)`) via a shared `toggleSelection` helper.
 
 ---
 
@@ -262,6 +271,8 @@ criterion, and this is the screen that gets graded.
 
 - Create: `server/src/data/mockDashboard.js`, `server/src/routes/dashboardRoutes.js`,
   `server/src/controllers/dashboardController.js`
+- Create: `server/src/middleware/{loadCurrentUser,requireOnboarding}.js` (moved here from M4,
+  because these are the first routes that use them)
 - Create: `client/src/features/dashboard/{dashboardApi.js,DashboardPage.jsx}`
 - Create: `client/src/features/dashboard/components/DashboardSectionCard.jsx`
 - Create: `client/src/features/dashboard/sections/{CoinPricesSection,MarketNewsSection,AiInsightSection,CryptoMemeSection}.jsx`
