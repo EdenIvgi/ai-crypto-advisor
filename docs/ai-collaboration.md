@@ -59,3 +59,10 @@ Four human course-corrections materially changed the plan:
 One idea came from the human and earned its place in the plan: a **"Try Demo Account"** button
 that logs a reviewer into a seeded account with preferences and votes already in place. A
 reviewer with five minutes should not have to register and fill in a quiz to see the product.
+
+Two plugins from Anthropic's official marketplace were installed at project scope and are
+declared in `.claude/settings.json`, so anyone who opens this repository gets the same
+tooling: **superpowers** (structured planning, systematic debugging, red/green TDD,
+subagent-driven development, and a branch-finishing workflow that matches the PR-per-milestone
+rule) and **frontend-design** (used in M5 and M12, where "clean UX" is an explicit grading
+criterion).
