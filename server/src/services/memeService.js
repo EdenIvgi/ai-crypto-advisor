@@ -7,6 +7,10 @@ import { MOCK_MEME } from '../data/mockDashboard.js'
  * refuses — which it often does from cloud IP ranges, so the fallback path is the expected
  * one rather than the exceptional one.
  *
- * @returns {Promise<{ meme: { id: string, title: string, imageUrl: string, sourceUrl: string }, isFallback: boolean }>}
+ * @returns {Promise<{ contentId: string, meme: { id: string, title: string, imageUrl: string, sourceUrl: string }, isFallback: boolean }>}
  */
-export const loadDailyMeme = async () => ({ meme: MOCK_MEME, isFallback: true })
+export const loadDailyMeme = async () => ({
+  contentId: MOCK_MEME.id,
+  meme: MOCK_MEME,
+  isFallback: true,
+})

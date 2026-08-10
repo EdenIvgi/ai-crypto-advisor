@@ -1,4 +1,5 @@
 import { MOCK_NEWS_ARTICLES } from '../data/mockDashboard.js'
+import { getTodayDateKey } from '../lib/dateKeys.js'
 
 const ARTICLE_COUNT = 5
 
@@ -8,7 +9,7 @@ const ARTICLE_COUNT = 5
  * M9 replaces the body with a CryptoPanic call filtered by the user's assets, falling back
  * to a static file on any failure. The shape returned here is the one it has to produce.
  *
- * @returns {Promise<{ articles: Array<{ id: string, title: string, url: string, source: string, publishedAt: string }>, isFallback: boolean }>}
+ * @returns {Promise<{ contentId: string, articles: Array<{ id: string, title: string, url: string, source: string, publishedAt: string }>, isFallback: boolean }>}
  */
 export const loadMarketNews = async () => {
   const now = Date.now()
@@ -20,5 +21,7 @@ export const loadMarketNews = async () => {
     })
   )
 
-  return { articles, isFallback: true }
+  // The vote is on the day's selection of headlines, not on a single article — the section
+  // shows a list and carries one thumb.
+  return { contentId: getTodayDateKey(), articles, isFallback: true }
 }
