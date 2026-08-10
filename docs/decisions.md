@@ -120,6 +120,21 @@ localisation, they are an interface that disagrees with itself. `INTERFACE_LOCAL
 `client/src/features/dashboard/dashboardFormatters.js` is the single line to change if this is
 ever localised for real, at which point the copy would have to move with it.
 
+## A vote names the content it was cast on, and the server names it
+
+`contentId` identifies what a section was showing when someone voted. Sections that show a
+single item use its id; the two that show a list use the day, because the thumb is about that
+day's selection rather than about one headline in it.
+
+The rejected alternative was to let the client derive an identity from the payload — hashing
+the article ids, say. That makes the client responsible for naming content it did not produce,
+and the name would change whenever the list did, scattering one person's opinion of a section
+across rows nobody could group again.
+
+The unique index is on `{ userId, sectionType, contentId }` rather than on `contentId` alone,
+so two people can disagree about the same meme and both opinions survive. That is the entire
+value of the data.
+
 ## The test suite is capped
 
 Two integration tests, one unit test, one smoke test, and a written rule against adding more

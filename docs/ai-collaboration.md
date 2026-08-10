@@ -186,6 +186,50 @@ weekday in an English paragraph.
 The one thing measurements could not settle is whether the screen looks finished, and that
 was checked by eye in both themes.
 
+### M6 — Feedback voting
+
+The assignment's fourth requirement, and the one the bonus question is about: every section
+gets a thumb, and the votes are stored as data a model could later learn from.
+
+**A vote has to be able to say what it was about.** The M5 contracts had no identifier for the
+content a section was showing, so there was nothing for a vote to point at. The choice was
+between the client inventing an identity for content it did not produce, or the server naming
+what it served. The server won: each section response now carries a `contentId`. Sections
+showing a single item use its id; the two that show a list use the day, because the vote is
+about that day's selection rather than about one headline. The M5 contract note was updated
+rather than quietly widened — adding a field before any integration exists costs nothing, and
+pretending it had always been there would have made the freeze meaningless.
+
+**The test the plan asked for was a test that proved nothing.** The plan specified: vote up,
+vote down on the same content, assert one document exists. That is the behaviour the feature
+promises, and it is what the testing policy says proves the unique compound index works. It
+does not. `findOneAndUpdate` with an upsert finds the existing row and updates it whether or
+not any index exists — so the test was run again with the index commented out, and it stayed
+green. A test that cannot fail is documentation with a passing badge.
+
+Two assertions were added that do fail without the index: a duplicate written straight to the
+model, which the database itself has to reject, and two votes fired at the same moment, which
+have to leave exactly one row behind. Both were confirmed to fail with the index removed and
+pass with it.
+
+The second of those exposed something the plan had not considered. A real unique index means
+a race between two clicks ends with one insert rejected — so the feature the index protects
+would answer 500 on a double click. `submitVote` now catches that specific error code and
+repeats itself, updating the row the winner just created. The constraint and the interface
+agree instead of fighting.
+
+**Verified against the real database, not only in memory.** After voting through the interface,
+the Atlas collection was queried directly: the unique index is present, the changed vote is one
+row rather than two, and two different people holding opposite opinions about the same meme are
+two separate rows — which is the case a naive index on `contentId` alone would have broken.
+
+One dead end worth recording, because it cost time and was not a bug: the sample meme stopped
+rendering. The image was on disk, the production build contained it, and the file was
+unchanged — but the running Vite process had been started before `client/public/` existed, and
+Vite decides once at boot whether that directory is there. Restarting it fixed everything. The
+lesson is the same one M4 and M5 taught: check what the running process actually believes
+before you go looking for the bug in the code.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit

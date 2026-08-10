@@ -21,7 +21,8 @@ Work in progress, built milestone by milestone against
 | Sign-in, sign-up, and demo login        | done  |
 | Onboarding quiz                         | done  |
 | Dashboard, four sections on sample data | done  |
-| Voting, deploy, live integrations       | next  |
+| Feedback voting                         | done  |
+| Deploy and live integrations            | next  |
 
 **Deployed URL:** not yet — the first public deploy is the next-but-one milestone, deliberately
 scheduled before the external integrations so there is a working public app for as long as

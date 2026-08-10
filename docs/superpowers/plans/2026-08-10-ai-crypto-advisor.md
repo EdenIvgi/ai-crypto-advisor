@@ -40,8 +40,8 @@ mongodb-memory-server, Playwright.
 | M3 — Frontend auth and Demo Mode      | done   |
 | M4 — Onboarding quiz                  | done   |
 | M5 — Dashboard UI on mock data        | done   |
-| M6 — Feedback voting                  | next   |
-| M7 — First deploy                     | todo   |
+| M6 — Feedback voting                  | done   |
+| M7 — First deploy                     | next   |
 | M8 — Coin prices (CoinGecko)          | todo   |
 | M9 — Market news (CryptoPanic)        | todo   |
 | M10 — Crypto meme (Reddit)            | todo   |
@@ -286,10 +286,15 @@ criterion, and this is the screen that gets graded.
 - Produces: `GET /api/dashboard/{prices,news,insight,meme}`, each returning its section
   payload plus `isFallback`. **These response shapes are frozen here** — M8 to M11 swap the
   data source behind them without changing the contract.
-  - prices: `{ coins: [{ id, symbol, name, priceUsd, change24hPercent }], isFallback }`
-  - news: `{ articles: [{ id, title, url, source, publishedAt }], isFallback }`
-  - insight: `{ insight: { id, text, date }, isFallback }`
-  - meme: `{ meme: { id, title, imageUrl, sourceUrl }, isFallback }`
+  - prices: `{ contentId, coins: [{ id, symbol, name, priceUsd, change24hPercent }], isFallback }`
+  - news: `{ contentId, articles: [{ id, title, url, source, publishedAt }], isFallback }`
+  - insight: `{ contentId, insight: { id, text, date }, isFallback }`
+  - meme: `{ contentId, meme: { id, title, imageUrl, sourceUrl }, isFallback }`
+
+  **`contentId` was added in M6**, which is when it became clear a vote needs to name what it
+  was cast on. Adding a field before any integration exists costs nothing; the alternative was
+  the client inventing an identity for content the server served, which is worse. M8 to M11
+  still have to produce this exact shape.
 
 - [x] **Step 1:** `mockDashboard.js` — realistic fixed data for all four sections, shaped
       exactly as the frozen contract above.
@@ -340,22 +345,35 @@ combination of the four answers produces a layout that looks deliberate.
 - Produces: `POST /api/feedback`, `GET /api/feedback/mine`,
   `submitVote({ userId, sectionType, contentId, vote })`, `useFeedbackVote(sectionType)`.
 
-- [ ] **Step 1:** `FeedbackVote.js` — `{ userId, sectionType, contentId, vote, votedOnDate }`
+- [x] **Step 1:** `FeedbackVote.js` — `{ userId, sectionType, contentId, vote, votedOnDate }`
       with a unique compound index on `{ userId, sectionType, contentId }`.
-- [ ] **Step 2:** `feedbackService.js` — `submitVote` as an upsert keyed by that index, so
+- [x] **Step 2:** `feedbackService.js` — `submitVote` as an upsert keyed by that index, so
       changing a vote updates the existing document instead of adding a second one.
-- [ ] **Step 3:** Controller and routes with Zod validation on the body.
-- [ ] **Step 4:** Write `server/src/tests/feedbackVote.test.js` (integration test #2 of the
+- [x] **Step 3:** Controller and routes with Zod validation on the body.
+- [x] **Step 4:** Write `server/src/tests/feedbackVote.test.js` (integration test #2 of the
       capped suite): vote up, vote down on the same content, assert exactly one document
       exists and it now reads `down`, then assert `GET /api/feedback/mine` returns it.
-- [ ] **Step 5:** Run `npm test` — expect failure first, then pass.
-- [ ] **Step 6:** `useFeedbackVote.js` — mutation with an optimistic update and rollback in
+- [x] **Step 5:** Run `npm test` — expect failure first, then pass.
+- [x] **Step 6:** `useFeedbackVote.js` — mutation with an optimistic update and rollback in
       `onError`.
-- [ ] **Step 7:** `FeedbackVoteButtons.jsx` — two icon buttons, each with an `aria-label`,
+- [x] **Step 7:** `FeedbackVoteButtons.jsx` — two icon buttons, each with an `aria-label`,
       showing the current vote state.
-- [ ] **Step 8:** Verify: a vote survives a page refresh; changing a vote does not create a
+- [x] **Step 8:** Verify: a vote survives a page refresh; changing a vote does not create a
       duplicate in the database.
-- [ ] **Step 9:** Lint, format, test, commit, open the PR.
+- [x] **Step 9:** Lint, format, test, commit, open the PR.
+
+**The test as the plan specified it did not test what it claimed.** Step 4 describes voting
+up, then down, then asserting one document — and that passes on the upsert's own semantics
+with the unique index removed, which was confirmed by removing it. Two assertions were added
+that do fail without it: a duplicate written straight to the model, which the database has to
+reject, and two votes fired concurrently, which have to leave one row behind.
+
+**Consequence, added to Step 2:** once the index is real, a race between two clicks makes one
+of them fail with a duplicate key error. `submitVote` catches exactly that code and repeats
+itself, so the constraint cannot turn a working feature into a 500.
+
+**Files added beyond the plan:** `server/src/data/feedbackOptions.js` (the two vote values,
+shared by the Mongoose enum and the Zod schema) and `client/src/features/dashboard/feedbackApi.js`.
 
 ---
 

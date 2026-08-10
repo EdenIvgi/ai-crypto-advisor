@@ -13,8 +13,14 @@ Do not add tests beyond the list below without asking first.
    returns 401. One test covers the JWT, `requireAuth`, and the cookie together.
 
 2. **Feedback voting** (`server/src/tests/feedbackVote.test.js`) — cast a vote, vote again on
-   the same content and confirm it updates rather than duplicating (this is what proves the
-   unique compound index works), then read it back from `GET /api/feedback/mine`.
+   the same content and confirm it updates rather than duplicating, then read it back from
+   `GET /api/feedback/mine`.
+
+   Note what that does **not** cover: the upsert finds and updates the existing row whether or
+   not the unique index exists, so those assertions stay green with the index removed. Two
+   more carry it — a duplicate written straight to the model, which the database has to
+   reject, and two votes cast concurrently, which have to leave one row behind. If you change
+   this file, delete the index and check that something still fails.
 
 3. _Optional, only if time allows_ — `requireOnboarding` blocks dashboard routes before the
    quiz is completed.
