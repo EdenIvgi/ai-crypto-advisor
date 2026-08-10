@@ -10,7 +10,14 @@ const MINIMUM_JWT_SECRET_LENGTH = 32
 const environmentSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
-  CLIENT_ORIGIN: z.url().default('http://localhost:5173'),
+  // A trailing slash here is the single easiest way to break authentication in production
+  // and nowhere else: the browser's `Origin` header never has one, so `https://app.tld/`
+  // would silently match nothing and every signed-in request would come back 401. There is
+  // only one thing a trailing slash could mean, so it is removed rather than rejected.
+  CLIENT_ORIGIN: z
+    .url()
+    .default('http://localhost:5173')
+    .transform((origin) => origin.replace(/\/+$/, '')),
 
   // Optional in the schema so development and tests can run without any setup; production
   // requires both, enforced below where the failure message can say why.
