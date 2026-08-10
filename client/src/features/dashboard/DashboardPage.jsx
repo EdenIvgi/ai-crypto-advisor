@@ -47,7 +47,7 @@ export const DashboardPage = () => {
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {firstName ? `Your briefing, ${firstName}` : 'Your briefing'}
         </h1>
-        <p className="mt-3 max-w-md text-muted-foreground text-pretty">
+        <p className="mt-3 max-w-lg text-muted-foreground text-pretty">
           Built from the answers you gave. Every section below is one you asked for.
         </p>
       </header>

@@ -3,7 +3,17 @@ const DOLLAR_DECIMALS = 2
 const MINUTES_PER_HOUR = 60
 const HOURS_PER_DAY = 24
 
-const relativeTimeFormatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+/**
+ * Pinned rather than following the browser, which is the opposite of the usual advice and
+ * deliberate: every word in this interface is written in English, and a reader whose browser
+ * is set to another language would otherwise get a Hebrew weekday inside an English sentence,
+ * a right-to-left date in a left-to-right label, and `118,432.50$` instead of `$118,432.50`.
+ * A half-translated interface is worse than an untranslated one. This is the line to change
+ * first if the product is ever actually localised.
+ */
+const INTERFACE_LOCALE = 'en-US'
+
+const relativeTimeFormatter = new Intl.RelativeTimeFormat(INTERFACE_LOCALE, { numeric: 'auto' })
 
 /**
  * A price with the precision the number actually needs. Crypto spans six figures and
@@ -16,7 +26,7 @@ const relativeTimeFormatter = new Intl.RelativeTimeFormat(undefined, { numeric: 
 export const formatPriceUsd = (priceUsd) => {
   const decimals = priceUsd < 1 ? SUB_DOLLAR_DECIMALS : DOLLAR_DECIMALS
 
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat(INTERFACE_LOCALE, {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: decimals,
@@ -54,13 +64,13 @@ export const formatTimeSince = (isoTimestamp) => {
 }
 
 /**
- * The date at the top of the briefing, in the reader's own locale and without the year —
- * nobody needs telling what year today is.
+ * The date at the top of the briefing, without the year — nobody needs telling what year
+ * today is.
  *
  * @returns {string}
  */
 export const formatBriefingDate = () =>
-  new Intl.DateTimeFormat(undefined, {
+  new Intl.DateTimeFormat(INTERFACE_LOCALE, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
