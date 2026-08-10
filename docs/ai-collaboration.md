@@ -230,6 +230,51 @@ Vite decides once at boot whether that directory is there. Restarting it fixed e
 lesson is the same one M4 and M5 taught: check what the running process actually believes
 before you go looking for the bug in the code.
 
+### M7 — First public deploy
+
+The milestone exists because of one fact: the authentication stack cannot be tested locally.
+Locally the client and the API are both `localhost`, and the cookie travels with `SameSite=lax`
+and no `Secure`. In production they are two unrelated domains, and five things have to agree at
+once — `SameSite=None`, `Secure`, `trust proxy` because the host terminates TLS at its own
+edge, an exact-origin CORS allow-list, and `credentials: 'include'` on every request. Miss one
+and nobody can sign in, in production and nowhere else.
+
+The human raised a fair challenge before we started: nobody sees the URL until it is sent, so
+why not finish the integrations first and deploy once? Two of the three original arguments did
+not survive it. The reviewer-might-look argument was void, and the "wait until we know all the
+environment variables" argument was backwards — both API keys are optional by design, so there
+was nothing to wait for. What was left is the argument that actually decided it: **the deploy
+is the only work in this project that can fail for reasons that cannot be fixed by editing a
+file.** Everything else fails in ways a code change repairs. That kind of risk belongs early.
+
+It failed twice, which is the entire point of having done it now.
+
+**The build died at install** with `husky: not found` and exit 127. `NODE_ENV=production` makes
+npm omit `devDependencies` — which is what we want, since it keeps vitest and
+mongodb-memory-server off the server — but the root `prepare` script runs regardless. The fix
+is one character sequence, `husky || exit 0`. The part worth recording is that it was not
+pushed on reasoning: a clean clone was built under the same two conditions, failing at 127
+before and passing after. The same run was used to check that `createApp()` still builds with
+devDependencies absent, which is how you find out whether something needed at runtime is
+sitting in the wrong dependency list.
+
+**Then the app died at boot** on `CLIENT_ORIGIN: Invalid URL` — a Vercel domain copied from its
+dashboard, which displays the host without a scheme. The failure took a minute to fix. What
+took longer, and mattered more, was checking the other shapes somebody might paste into that
+field. A trailing slash, a stray path and a copied-in leading space all **passed** validation.
+Each of them would then have matched no `Origin` header at all, so the deploy would have gone
+green and every signed-in request would have come back 401 with nothing anywhere saying why.
+The noisy failure was the lucky one. That field now reduces anything parseable to its origin,
+and rejects a missing scheme with the fix written into the message.
+
+Verification was done from the outside first and the inside second: the actual `Set-Cookie`
+header on the deployed API, confirming `HttpOnly; Secure; SameSite=None` rather than trusting
+the code that writes it, then the CORS headers for the real client origin, then the deployed
+bundle read back to confirm which API it had been compiled against. Only then the browser —
+demo login from a session with no cookies, a hard reload of `/dashboard` as a deep link to
+exercise the SPA rewrite and the session together, and a vote cast and found still there
+afterwards.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit
