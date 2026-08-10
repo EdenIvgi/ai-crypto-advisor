@@ -48,7 +48,7 @@ export const savePreferences = async (userId, preferences) => {
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     { $set: { preferences } },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   )
 
   if (!updatedUser) throw new NotFoundError('That account no longer exists')
