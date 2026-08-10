@@ -41,8 +41,8 @@ mongodb-memory-server, Playwright.
 | M4 — Onboarding quiz                  | done   |
 | M5 — Dashboard UI on mock data        | done   |
 | M6 — Feedback voting                  | done   |
-| M7 — First deploy                     | next   |
-| M8 — Coin prices (CoinGecko)          | todo   |
+| M7 — First deploy                     | done   |
+| M8 — Coin prices (CoinGecko)          | next   |
 | M9 — Market news (CryptoPanic)        | todo   |
 | M10 — Crypto meme (Reddit)            | todo   |
 | M11 — AI insight (OpenRouter)         | todo   |
@@ -384,22 +384,40 @@ shared by the Mongoose enum and the Zod schema) and `client/src/features/dashboa
 - Create: `render.yaml` (or the equivalent dashboard configuration), `client/vercel.json`
 - Modify: `README.md` (deployed URLs), `client/.env.example`
 
-- [ ] **Step 1:** MongoDB Atlas — allow `0.0.0.0/0` (Render's free tier has no static
+- [x] **Step 1:** MongoDB Atlas — allow `0.0.0.0/0` (Render's free tier has no static
       egress IP) and note the tradeoff in the README.
-- [ ] **Step 2:** Render web service from `server/`, health check path `/api/health`,
+- [x] **Step 2:** Render web service from `server/`, health check path `/api/health`,
       environment variables `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`,
-      `CLIENT_ORIGIN` (the Vercel URL).
-- [ ] **Step 3:** Vercel project from `client/`, environment variable
+      `CLIENT_ORIGIN` (the Vercel URL). Done as a `render.yaml` blueprint rather than by
+      hand, so the configuration is in the repository where a reviewer can read it.
+- [x] **Step 3:** Vercel project from `client/`, environment variable
       `VITE_API_BASE_URL` set to the Render URL.
-- [ ] **Step 4:** Set `CLIENT_ORIGIN` on Render to the final Vercel origin — exact, no
+- [x] **Step 4:** Set `CLIENT_ORIGIN` on Render to the final Vercel origin — exact, no
       trailing slash — and redeploy.
-- [ ] **Step 5:** Run `npm run seed:demo` against the production database.
-- [ ] **Step 6:** **Verify in a fresh incognito window on the public URL:** demo login
+- [x] **Step 5:** Run `npm run seed:demo` against the production database. Nothing to do:
+      development already points at the same Atlas cluster, so the demo account was there.
+- [x] **Step 6:** **Verify on the public URL from a session with no cookies:** demo login
       works, the cookie is set with `SameSite=None; Secure`, a refresh keeps the session.
       This is the milestone's real purpose — cross-site cookies fail only in production.
-- [ ] **Step 7:** Add a health ping on client load so a cold Render instance starts waking
+- [x] **Step 7:** Add a health ping on client load so a cold Render instance starts waking
       before the user submits anything.
-- [ ] **Step 8:** Commit and open the PR.
+- [x] **Step 8:** Commit and open the PR.
+
+**Two failures, both in configuration rather than code, and both worth recording.**
+
+1. The build died at install with `husky: not found`, exit 127. `NODE_ENV=production` makes
+   npm omit `devDependencies`, but the root `prepare` script runs anyway. Fixed with
+   `husky || exit 0`, and reproduced first in a clean clone under the same two conditions
+   rather than guessed at, because a wrong guess costs a deploy.
+2. The app then died at boot on `CLIENT_ORIGIN: Invalid URL` — a Vercel domain copied from
+   its dashboard, which shows the host without a scheme. Checking the other shapes someone
+   might paste turned out to matter more than the failure itself: a trailing slash, a stray
+   path and a leading space all **passed** validation and would then have matched no `Origin`
+   header at all, making every signed-in request a silent 401. Anything that parses is now
+   reduced to its origin; a missing scheme is rejected with the fix in the message.
+
+**Live URLs:** client `https://ai-crypto-advisor-client-pi.vercel.app`, API
+`https://ai-crypto-advisor-api-qlag.onrender.com`.
 
 ---
 

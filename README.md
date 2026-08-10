@@ -22,11 +22,18 @@ Work in progress, built milestone by milestone against
 | Onboarding quiz                         | done  |
 | Dashboard, four sections on sample data | done  |
 | Feedback voting                         | done  |
-| Deploy and live integrations            | next  |
+| First public deploy                     | done  |
+| Live integrations                       | next  |
 
-**Deployed URL:** not yet — the first public deploy is the next-but-one milestone, deliberately
-scheduled before the external integrations so there is a working public app for as long as
-possible.
+**Live: https://ai-crypto-advisor-client-pi.vercel.app** — press "Look around with a demo
+account" and you are on a populated dashboard. The API is at
+`https://ai-crypto-advisor-api-qlag.onrender.com`; `/api/health` answers if you want to check
+it directly. Give the first request up to a minute — the free instance stops when nobody is
+using it.
+
+The four sections currently show sample data, and say so: each one is labelled with where its
+content came from. Replacing those with live sources is the next four milestones, one section
+at a time, which is why deploying came before them rather than after.
 
 ## Running it locally
 
