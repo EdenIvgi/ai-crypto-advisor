@@ -3,8 +3,10 @@ import { ArrowUpRight } from 'lucide-react'
 import { useMarketNews } from '../useDashboard.js'
 import { formatTimeSince } from '../dashboardFormatters.js'
 import { DashboardSectionCard } from '../components/DashboardSectionCard.jsx'
+import { FeedbackVoteButtons } from '../components/FeedbackVoteButtons.jsx'
 
 const SKELETON_ROW_COUNT = 4
+const SECTION_TITLE = 'Market news'
 
 export const MarketNewsSection = ({ className }) => {
   const news = useMarketNews()
@@ -12,7 +14,7 @@ export const MarketNewsSection = ({ className }) => {
   return (
     <DashboardSectionCard
       className={className}
-      title="Market news"
+      title={SECTION_TITLE}
       sourceLabel={
         news.data && (news.data.isFallback ? 'Sample headlines' : 'CryptoPanic · live')
       }
@@ -20,6 +22,15 @@ export const MarketNewsSection = ({ className }) => {
       error={news.error}
       onRetry={news.refetch}
       skeleton={<MarketNewsSkeleton />}
+      actions={
+        news.data ? (
+          <FeedbackVoteButtons
+            sectionType="market_news"
+            contentId={news.data.contentId}
+            sectionLabel={SECTION_TITLE}
+          />
+        ) : null
+      }
     >
       {news.data?.articles.length ? (
         // Multi-column rather than a grid: a grid would lay five headlines out across the

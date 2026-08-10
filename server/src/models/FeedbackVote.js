@@ -1,0 +1,53 @@
+import mongoose from 'mongoose'
+
+import { CONTENT_SECTIONS } from '../data/preferenceOptions.js'
+import { VOTE_VALUES } from '../data/feedbackOptions.js'
+
+/**
+ * A thumb on one section's content. Its own collection rather than an array on the user,
+ * because votes are append-heavy, unbounded per person, and the thing the assignment calls
+ * training data — they get queried on their own, across users, not as a property of one.
+ *
+ * `contentId` is whatever the section that was voted on calls the thing it showed: the
+ * insight's id, the meme's id, or the day for the sections that show a list.
+ */
+const feedbackVoteSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    sectionType: {
+      type: String,
+      required: true,
+      enum: CONTENT_SECTIONS,
+    },
+    contentId: {
+      type: String,
+      required: true,
+    },
+    vote: {
+      type: String,
+      required: true,
+      enum: VOTE_VALUES,
+    },
+    // The day the opinion was formed, kept even though `createdAt` exists: an upsert
+    // rewrites `updatedAt` and leaves `createdAt` pointing at the first vote, so neither
+    // answers "which day's dashboard is this about" once someone changes their mind.
+    votedOnDate: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true }
+)
+
+// The whole point of the voting feature: one person has one opinion per piece of content.
+// Changing your mind updates this document; it never adds a second one. Enforced in the
+// database rather than in the service, because a race between two clicks would defeat a
+// check written in JavaScript.
+feedbackVoteSchema.index({ userId: 1, sectionType: 1, contentId: 1 }, { unique: true })
+
+export const FeedbackVote = mongoose.model('FeedbackVote', feedbackVoteSchema)

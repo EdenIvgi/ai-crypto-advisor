@@ -1,5 +1,8 @@
 import { useCryptoMeme } from '../useDashboard.js'
 import { DashboardSectionCard } from '../components/DashboardSectionCard.jsx'
+import { FeedbackVoteButtons } from '../components/FeedbackVoteButtons.jsx'
+
+const SECTION_TITLE = 'Meme of the day'
 
 export const CryptoMemeSection = ({ className }) => {
   const meme = useCryptoMeme()
@@ -7,7 +10,7 @@ export const CryptoMemeSection = ({ className }) => {
   return (
     <DashboardSectionCard
       className={className}
-      title="Meme of the day"
+      title={SECTION_TITLE}
       sourceLabel={
         meme.data && (meme.data.isFallback ? 'Sample meme' : 'r/cryptocurrencymemes')
       }
@@ -15,6 +18,15 @@ export const CryptoMemeSection = ({ className }) => {
       error={meme.error}
       onRetry={meme.refetch}
       skeleton={<CryptoMemeSkeleton />}
+      actions={
+        meme.data ? (
+          <FeedbackVoteButtons
+            sectionType="fun_meme"
+            contentId={meme.data.contentId}
+            sectionLabel={SECTION_TITLE}
+          />
+        ) : null
+      }
     >
       {meme.data ? (
         // Capped rather than filling the card: when the insight is not selected this card

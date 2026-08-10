@@ -1,5 +1,8 @@
 import { useAiInsight } from '../useDashboard.js'
 import { DashboardSectionCard } from '../components/DashboardSectionCard.jsx'
+import { FeedbackVoteButtons } from '../components/FeedbackVoteButtons.jsx'
+
+const SECTION_TITLE = 'Insight of the day'
 
 export const AiInsightSection = ({ className }) => {
   const insight = useAiInsight()
@@ -7,7 +10,7 @@ export const AiInsightSection = ({ className }) => {
   return (
     <DashboardSectionCard
       className={className}
-      title="Insight of the day"
+      title={SECTION_TITLE}
       sourceLabel={
         insight.data && (insight.data.isFallback ? 'Sample insight' : 'Written for you today')
       }
@@ -15,6 +18,15 @@ export const AiInsightSection = ({ className }) => {
       error={insight.error}
       onRetry={insight.refetch}
       skeleton={<AiInsightSkeleton />}
+      actions={
+        insight.data ? (
+          <FeedbackVoteButtons
+            sectionType="ai_insight"
+            contentId={insight.data.contentId}
+            sectionLabel={SECTION_TITLE}
+          />
+        ) : null
+      }
     >
       {/*
         The one piece of generated prose on the page, so it is the one thing set as prose:

@@ -11,13 +11,16 @@ const DEFAULT_INVESTOR_TYPE = 'hodler'
  * sample insight and a vote cast on a generated one identify their target the same way.
  *
  * @param {{ userId: string, investorType: string }} reader
- * @returns {Promise<{ insight: { id: string, text: string, date: string }, isFallback: boolean }>}
+ * @returns {Promise<{ contentId: string, insight: { id: string, text: string, date: string }, isFallback: boolean }>}
  */
 export const loadDailyInsight = async ({ userId, investorType }) => {
   const date = getTodayDateKey()
   const text =
     MOCK_INSIGHTS_BY_INVESTOR_TYPE[investorType] ??
     MOCK_INSIGHTS_BY_INVESTOR_TYPE[DEFAULT_INVESTOR_TYPE]
+  const insight = { id: `${userId}:${date}`, text, date }
 
-  return { insight: { id: `${userId}:${date}`, text, date }, isFallback: true }
+  // This section shows exactly one thing, so the vote names it. That is what makes the
+  // feedback worth keeping: a thumb down here is about one piece of generated writing.
+  return { contentId: insight.id, insight, isFallback: true }
 }

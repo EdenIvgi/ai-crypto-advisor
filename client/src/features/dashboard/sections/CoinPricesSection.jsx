@@ -3,8 +3,10 @@ import { cn } from '@/lib/utils'
 import { useCoinPrices } from '../useDashboard.js'
 import { formatPriceUsd, formatChangePercent } from '../dashboardFormatters.js'
 import { DashboardSectionCard } from '../components/DashboardSectionCard.jsx'
+import { FeedbackVoteButtons } from '../components/FeedbackVoteButtons.jsx'
 
 const SKELETON_ROW_COUNT = 3
+const SECTION_TITLE = 'Coin prices'
 
 export const CoinPricesSection = ({ className }) => {
   const prices = useCoinPrices()
@@ -12,7 +14,7 @@ export const CoinPricesSection = ({ className }) => {
   return (
     <DashboardSectionCard
       className={className}
-      title="Coin prices"
+      title={SECTION_TITLE}
       sourceLabel={
         prices.data && (prices.data.isFallback ? 'Sample prices' : 'CoinGecko · live')
       }
@@ -20,6 +22,15 @@ export const CoinPricesSection = ({ className }) => {
       error={prices.error}
       onRetry={prices.refetch}
       skeleton={<CoinPricesSkeleton />}
+      actions={
+        prices.data ? (
+          <FeedbackVoteButtons
+            sectionType="coin_prices"
+            contentId={prices.data.contentId}
+            sectionLabel={SECTION_TITLE}
+          />
+        ) : null
+      }
     >
       {prices.data?.coins.length ? (
         <ul className="grid gap-x-10 sm:grid-cols-2 xl:grid-cols-3">
