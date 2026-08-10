@@ -36,8 +36,8 @@ mongodb-memory-server, Playwright.
 | ------------------------------------- | ------ |
 | M0 — Workspace and conventions        | done   |
 | M1 — Scaffold and middleware skeleton | done   |
-| M2 — Database and JWT auth            | next   |
-| M3 — Frontend auth and Demo Mode      | todo   |
+| M2 — Database and JWT auth            | done   |
+| M3 — Frontend auth and Demo Mode      | next   |
 | M4 — Onboarding quiz                  | todo   |
 | M5 — Dashboard UI on mock data        | todo   |
 | M6 — Feedback voting                  | todo   |
@@ -139,38 +139,42 @@ handler automatically, so the planned `asyncHandler` wrapper is unnecessary and 
   - `requireAuth` middleware setting `request.userId`
   - `validateRequest({ body, query, params })` middleware factory
 
-- [ ] **Step 1:** Add `MONGODB_URI` (required) and `JWT_SECRET` (min 32 chars) to the env
-      schema and to `server/.env.example`. Create a free MongoDB Atlas cluster and a
-      database user; put the URI in `server/.env`.
-- [ ] **Step 2:** `config/database.js` — `connectToDatabase()` wrapping
-      `mongoose.connect(env.MONGODB_URI)`, logging success and exiting on failure.
-- [ ] **Step 3:** `models/User.js` — schema with `email` (lowercase, trimmed, unique
+- [x] **Step 1:** Add `MONGODB_URI` and `JWT_SECRET` (min 32 chars) to the env schema and to
+      `server/.env.example`. Both are required in production and optional in development.
+- [ ] **Step 1b:** Create the free MongoDB Atlas cluster and database user, and put the URI
+      in `server/.env`. **Deferred to M7**, where the deploy needs it. Creating the account
+      requires a human — the agent cannot and should not sign up for services.
+- [x] **Step 2:** `config/database.js` — `connectToDatabase()` wrapping
+      `mongoose.connect(env.MONGODB_URI)`, logging success and exiting on failure. Falls back
+      to an in-memory MongoDB in development when no URI is set, so a fresh clone runs with
+      zero setup.
+- [x] **Step 3:** `models/User.js` — schema with `email` (lowercase, trimmed, unique
       index), `name`, `passwordHash` (`select: false`), embedded optional `preferences`
       (`watchedAssetIds: [String]`, `investorType` enum, `contentSections: [String]` enum),
       `timestamps: true`.
-- [ ] **Step 4:** `services/authService.js` — bcrypt hashing (cost 10), JWT sign/verify with
+- [x] **Step 4:** `services/authService.js` — bcrypt hashing (cost 10), JWT sign/verify with
       a payload of only `{ userId }` and `expiresIn: '7d'`, and the two cookie helpers.
       Cookie options: `httpOnly: true`, `sameSite: isProduction ? 'none' : 'lax'`,
       `secure: isProduction`, `maxAge: 7 days`, no `domain`.
-- [ ] **Step 5:** `middleware/validateRequest.js` — factory that runs Zod schemas against
+- [x] **Step 5:** `middleware/validateRequest.js` — factory that runs Zod schemas against
       `body`/`query`/`params` and throws `BadRequestError` with `fieldErrors` on failure.
-- [ ] **Step 6:** `middleware/requireAuth.js` — reads `request.cookies.token`, calls
+- [x] **Step 6:** `middleware/requireAuth.js` — reads `request.cookies.token`, calls
       `verifyAccessToken`, sets `request.userId`, throws `UnauthorizedError` otherwise.
-- [ ] **Step 7:** `middleware/authRateLimiter.js` — `express-rate-limit`, 10 requests per
+- [x] **Step 7:** `middleware/authRateLimiter.js` — `express-rate-limit`, 10 requests per
       15 minutes per IP, applied only to login and register.
-- [ ] **Step 8:** `controllers/authController.js` + `routes/authRoutes.js` for
+- [x] **Step 8:** `controllers/authController.js` + `routes/authRoutes.js` for
       `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`,
       `GET /api/auth/me`. Login and register both set the cookie and return `{ user }`.
       A wrong email and a wrong password must produce the identical 401 message.
-- [ ] **Step 9:** Write `server/src/tests/authFlow.test.js` (integration test #1 of the
+- [x] **Step 9:** Write `server/src/tests/authFlow.test.js` (integration test #1 of the
       capped suite) using `mongodb-memory-server` and Supertest against `createApp()`:
       register succeeds; duplicate email returns 409; wrong password returns 401;
       `GET /me` with the cookie returns the user; `GET /me` without it returns 401.
-- [ ] **Step 10:** Run `npm test` — expect it to fail before the implementation is
+- [x] **Step 10:** Run `npm test` — expect it to fail before the implementation is
       complete, then pass.
-- [ ] **Step 11:** Verify by hand: register, then confirm the `token` cookie is `HttpOnly`
+- [x] **Step 11:** Verify by hand: register, then confirm the `token` cookie is `HttpOnly`
       and the `passwordHash` never appears in any response body.
-- [ ] **Step 12:** `npm run lint && npm run format:check && npm test`, commit, open the PR.
+- [x] **Step 12:** `npm run lint && npm run format:check && npm test`, commit, open the PR.
 
 ---
 
