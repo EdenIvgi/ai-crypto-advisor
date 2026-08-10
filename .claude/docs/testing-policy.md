@@ -16,7 +16,7 @@ Do not add tests beyond the list below without asking first.
    the same content and confirm it updates rather than duplicating (this is what proves the
    unique compound index works), then read it back from `GET /api/feedback/mine`.
 
-3. *Optional, only if time allows* — `requireOnboarding` blocks dashboard routes before the
+3. _Optional, only if time allows_ — `requireOnboarding` blocks dashboard routes before the
    quiz is completed.
 
 4. **Cache unit test** (`server/src/lib/inMemoryCache.test.js`) — returns a cached value

@@ -27,7 +27,7 @@ module. Components import the hook, never `apiClient` directly.
 
 Query keys are arrays, coarse to fine, matching the endpoint:
 
-```js
+```text
 ['auth', 'me']
 ['dashboard', 'prices']
 ['feedback', 'mine']

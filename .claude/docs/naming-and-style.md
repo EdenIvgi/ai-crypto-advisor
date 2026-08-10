@@ -11,13 +11,13 @@ covers the boundaries instead.
 
 ## Files
 
-| Kind | Convention | Example |
-| --- | --- | --- |
-| Server module | camelCase | `aiInsightService.js`, `requireAuth.js` |
-| React component / page | PascalCase | `LoginPage.jsx`, `FeedbackVoteButtons.jsx` |
-| React hook | camelCase, `use` prefix | `useFeedbackVote.js` |
-| Mongoose model | PascalCase, singular | `User.js`, `FeedbackVote.js` |
-| Test | mirrors subject + `.test.js` | `authFlow.test.js` |
+| Kind                   | Convention                   | Example                                    |
+| ---------------------- | ---------------------------- | ------------------------------------------ |
+| Server module          | camelCase                    | `aiInsightService.js`, `requireAuth.js`    |
+| React component / page | PascalCase                   | `LoginPage.jsx`, `FeedbackVoteButtons.jsx` |
+| React hook             | camelCase, `use` prefix      | `useFeedbackVote.js`                       |
+| Mongoose model         | PascalCase, singular         | `User.js`, `FeedbackVote.js`               |
+| Test                   | mirrors subject + `.test.js` | `authFlow.test.js`                         |
 
 Named exports only — no `export default`, including for React components. Named exports are
 greppable and keep the imported name honest.
@@ -63,7 +63,7 @@ tmp / arr     → filteredMemePosts
 
 ## Comments
 
-The code says *what*. A comment exists only to say something the code cannot: a non-obvious
+The code says _what_. A comment exists only to say something the code cannot: a non-obvious
 constraint, an external quirk, a deliberate tradeoff.
 
 ```js

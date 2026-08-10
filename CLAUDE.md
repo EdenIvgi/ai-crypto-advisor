@@ -31,13 +31,13 @@ npm test
 Each file is short and single-purpose. Read only the ones that match what you are about
 to do, and read them **before** writing the code or running the command, not after.
 
-| About to... | Read first |
-| --- | --- |
-| Commit, branch, push, or open a pull request | [.claude/docs/git-workflow.md](.claude/docs/git-workflow.md) |
-| Name a variable, function, file, or component — or write any new code | [.claude/docs/naming-and-style.md](.claude/docs/naming-and-style.md) |
-| Add or change anything under `server/` | [.claude/docs/backend-conventions.md](.claude/docs/backend-conventions.md) |
-| Add or change anything under `client/` | [.claude/docs/frontend-conventions.md](.claude/docs/frontend-conventions.md) |
-| Write, change, or delete a test | [.claude/docs/testing-policy.md](.claude/docs/testing-policy.md) |
+| About to...                                                           | Read first                                                                   |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Commit, branch, push, or open a pull request                          | [.claude/docs/git-workflow.md](.claude/docs/git-workflow.md)                 |
+| Name a variable, function, file, or component — or write any new code | [.claude/docs/naming-and-style.md](.claude/docs/naming-and-style.md)         |
+| Add or change anything under `server/`                                | [.claude/docs/backend-conventions.md](.claude/docs/backend-conventions.md)   |
+| Add or change anything under `client/`                                | [.claude/docs/frontend-conventions.md](.claude/docs/frontend-conventions.md) |
+| Write, change, or delete a test                                       | [.claude/docs/testing-policy.md](.claude/docs/testing-policy.md)             |
 
 Writing a new backend feature usually means reading two: `naming-and-style` and
 `backend-conventions`.

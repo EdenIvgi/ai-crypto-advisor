@@ -9,13 +9,13 @@ routes → controllers → services → models        (database)
                     ↘ services → clients        (external HTTP)
 ```
 
-| Layer | Does | Never does |
-| --- | --- | --- |
-| `routes/` | Maps a path to a middleware chain and one controller. | Contains logic. |
-| `controllers/` | Reads `req.userId` / `req.body` / `req.query`, calls **one** service, sends JSON. | Touches Mongoose, calls an external API, validates input, or catches errors. |
-| `services/` | Business logic, caching, fallbacks, orchestration. | Touches `req` or `res`. A service is callable from a script or a test. |
-| `models/` | Mongoose schemas and indexes only. | Business logic. |
-| `clients/` | One external API each: build the request, parse the response, return plain objects. | Caching, fallbacks, or business decisions. |
+| Layer          | Does                                                                                | Never does                                                                   |
+| -------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `routes/`      | Maps a path to a middleware chain and one controller.                               | Contains logic.                                                              |
+| `controllers/` | Reads `req.userId` / `req.body` / `req.query`, calls **one** service, sends JSON.   | Touches Mongoose, calls an external API, validates input, or catches errors. |
+| `services/`    | Business logic, caching, fallbacks, orchestration.                                  | Touches `req` or `res`. A service is callable from a script or a test.       |
+| `models/`      | Mongoose schemas and indexes only.                                                  | Business logic.                                                              |
+| `clients/`     | One external API each: build the request, parse the response, return plain objects. | Caching, fallbacks, or business decisions.                                   |
 
 A controller should read like four lines. If it is longer, the logic belongs in a service.
 
@@ -28,9 +28,9 @@ import { ConflictError } from '../lib/httpErrors.js'
 if (existingUser) throw new ConflictError('Email is already registered')
 ```
 
-`errorHandler.js` is the only place that turns an error into a response. Every async
-controller is wrapped in `asyncHandler` so rejections reach it — no `try`/`catch` in
-controllers. Use `try`/`catch` inside a service only when you are genuinely recovering
+`errorHandler.js` is the only place that turns an error into a response. Express 5 forwards a
+rejected promise from a handler to it automatically, so async controllers need no wrapper and
+no `try`/`catch`. Use `try`/`catch` inside a service only when you are genuinely recovering
 (falling back to cached or static data), never to swallow.
 
 ## Validation
