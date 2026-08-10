@@ -72,6 +72,8 @@ git switch main && git pull && git branch -d feat/m4-onboarding
 ## Authorization
 
 - Committing, pushing to a **feature branch**, and opening a PR: pre-authorized, just do it.
-- Merging a PR into `main`: ask first.
+- Merging a milestone PR into `main` once CI is green: also pre-authorized. This is a
+  single-author repository and the next milestone branches off `main`, so leaving a verified
+  PR unmerged just blocks the next one. Merge it as the last step of the milestone.
 - Force push, `reset --hard`, `clean -fd`, branch deletion on the remote, rewriting pushed
   history: never, unless the user explicitly asks in that message.
