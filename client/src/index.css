@@ -6,14 +6,29 @@
 :root {
   --radius: 0.65rem;
 
+  /*
+   * IBM Plex, in two roles. Plex was drawn for a technical products company, so it reads as
+   * engineered rather than as the startup-default grotesque. The mono is not decoration:
+   * prices, percentages and provenance labels all need tabular figures, and giving them a
+   * distinct face makes data legible as data.
+   */
+  --font-sans:
+    'IBM Plex Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
+  /*
+   * Indigo-violet rather than the neutral slate shadcn ships with, and deliberately not the
+   * neon green or acid purple that crypto interfaces default to. It carries authority
+   * without pretending to be a trading terminal — this product is a daily briefing.
+   */
+  --primary: oklch(0.52 0.19 275);
+  --primary-foreground: oklch(0.985 0.005 275);
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
@@ -24,7 +39,15 @@
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --ring: oklch(0.52 0.19 275);
+
+  /*
+   * Price movement. Softened from the usual signal green and red so a table of numbers reads
+   * as information rather than as an alarm, and so the two stay distinguishable for the most
+   * common forms of colour blindness — they differ in lightness, not only in hue.
+   */
+  --market-up: oklch(0.58 0.13 165);
+  --market-down: oklch(0.6 0.19 22);
 }
 
 .dark {
@@ -34,8 +57,8 @@
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: oklch(0.208 0.042 265.755);
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
+  --primary: oklch(0.68 0.16 275);
+  --primary-foreground: oklch(0.16 0.03 275);
   --secondary: oklch(0.279 0.041 260.031);
   --secondary-foreground: oklch(0.984 0.003 247.858);
   --muted: oklch(0.279 0.041 260.031);
@@ -46,10 +69,19 @@
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
+  --ring: oklch(0.68 0.16 275);
+
+  --market-up: oklch(0.72 0.14 165);
+  --market-down: oklch(0.7 0.18 22);
 }
 
 @theme inline {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --color-market-up: var(--market-up);
+  --color-market-down: var(--market-down);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -83,5 +115,28 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Figures in data must line up in columns, so they never use proportional widths. */
+  .font-mono,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /*
+   * The signature device of this interface. On the dashboard each of these carries the
+   * provenance of the section below it — "COINGECKO · LIVE" or "SHOWING SAVED HEADLINES" —
+   * so the label reports something true rather than decorating a heading.
+   */
+  .eyebrow {
+    @apply flex items-center gap-2 font-mono text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase;
+  }
+
+  .eyebrow::before {
+    @apply h-px w-4 bg-current opacity-50;
+    content: '';
   }
 }
