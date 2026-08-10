@@ -4,6 +4,20 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /*
+   * Two jobs, and the second one is not obvious.
+   *
+   * It tells the browser how to paint the parts of the interface we do not draw ourselves —
+   * scrollbars, the text caret, autofilled fields, the canvas behind the page — so those
+   * match the theme instead of following the operating system into a different one.
+   *
+   * And it is the declaration that means "this page decides its own colours". Without it,
+   * Chrome's automatic dark mode treats a page as one that never considered the question and
+   * inverts it after the fact, which is what leaves haloes around edges and recolours the
+   * caret. The theme here is chosen by the `.dark` class, never by the OS, so this says so.
+   */
+  color-scheme: light;
+
   --radius: 0.65rem;
 
   /*
@@ -60,6 +74,8 @@
 }
 
 .dark {
+  color-scheme: dark;
+
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
