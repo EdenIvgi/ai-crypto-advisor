@@ -1,6 +1,7 @@
 import {
   registerUser,
   authenticateUser,
+  logInAsDemoUser,
   loadUserById,
   issueAccessToken,
   setAuthCookie,
@@ -24,6 +25,11 @@ export const register = async (request, response) => {
 
 export const logIn = async (request, response) => {
   const user = await authenticateUser(request.body)
+  respondWithSession(response, user)
+}
+
+export const logInAsDemo = async (_request, response) => {
+  const user = await logInAsDemoUser()
   respondWithSession(response, user)
 }
 

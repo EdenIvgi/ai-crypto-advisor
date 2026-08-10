@@ -14,6 +14,8 @@ export default [
       '**/dist/**',
       '**/node_modules/**',
       '**/coverage/**',
+      // Vite's pre-bundled dependency cache: generated third-party code, not ours.
+      '**/.vite/**',
       'client/src/components/ui/**',
     ],
   },

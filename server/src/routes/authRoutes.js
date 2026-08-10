@@ -1,7 +1,13 @@
 import { Router } from 'express'
 import { z } from 'zod'
 
-import { register, logIn, logOut, getCurrentUser } from '../controllers/authController.js'
+import {
+  register,
+  logIn,
+  logInAsDemo,
+  logOut,
+  getCurrentUser,
+} from '../controllers/authController.js'
 import { validateRequest } from '../middleware/validateRequest.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { authRateLimiter } from '../middleware/authRateLimiter.js'
@@ -37,6 +43,10 @@ authRoutes.post(
 )
 
 authRoutes.post('/login', authRateLimiter, validateRequest({ body: loginBodySchema }), logIn)
+
+// Rate limited like the password endpoints: it writes to the database, so it should not be
+// something a script can hammer for free.
+authRoutes.post('/demo', authRateLimiter, logInAsDemo)
 
 authRoutes.post('/logout', logOut)
 

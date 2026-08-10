@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { randomBytes } from 'node:crypto'
 
 import { User } from '../models/User.js'
+import { DEMO_ACCOUNT } from '../data/demoAccount.js'
 import { env, isProduction, isTest } from '../config/env.js'
 import { ConflictError, UnauthorizedError } from '../lib/httpErrors.js'
 
@@ -134,6 +135,28 @@ export const authenticateUser = async ({ email, password }) => {
   }
 
   return toUserDto(user)
+}
+
+/**
+ * Signs the visitor in as the shared demo account, creating it on first use so a fresh
+ * deployment needs no seeding step. The session it hands out is an ordinary one — same
+ * token, same cookie — so the demo path exercises the real auth code rather than a
+ * shortcut around it.
+ *
+ * @returns {Promise<ReturnType<typeof toUserDto>>}
+ */
+export const logInAsDemoUser = async () => {
+  const existingDemoUser = await User.findOne({ email: DEMO_ACCOUNT.email })
+  if (existingDemoUser) return toUserDto(existingDemoUser)
+
+  const createdDemoUser = await User.create({
+    email: DEMO_ACCOUNT.email,
+    name: DEMO_ACCOUNT.name,
+    passwordHash: await hashPassword(randomBytes(32).toString('hex')),
+    preferences: DEMO_ACCOUNT.preferences,
+  })
+
+  return toUserDto(createdDemoUser)
 }
 
 /**
