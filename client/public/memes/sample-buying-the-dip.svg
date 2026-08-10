@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="A chart falling steadily, captioned buying the dip, day 41">
+  <!--
+    Stand-in artwork for the meme section, drawn here rather than linked from an image host
+    so the sample dashboard cannot render a broken image. M10 replaces the URL with a real
+    Reddit one. Fonts are generic families on purpose: an SVG loaded through <img> gets no
+    access to the page's bundled webfonts.
+  -->
+  <defs>
+    <linearGradient id="falling-area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e2585d" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#e2585d" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="400" fill="#0e1220" />
+
+  <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1">
+    <line x1="48" y1="150" x2="592" y2="150" />
+    <line x1="48" y1="210" x2="592" y2="210" />
+    <line x1="48" y1="270" x2="592" y2="270" />
+    <line x1="48" y1="330" x2="592" y2="330" />
+  </g>
+
+  <path
+    d="M48 148 L112 176 L176 158 L240 214 L304 196 L368 258 L432 240 L496 302 L560 330 L560 330 L48 330 Z"
+    fill="url(#falling-area)"
+  />
+  <polyline
+    points="48,148 112,176 176,158 240,214 304,196 368,258 432,240 496,302 560,330"
+    fill="none"
+    stroke="#e2585d"
+    stroke-width="3"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+  <circle cx="560" cy="330" r="5.5" fill="#e2585d" />
+
+  <text
+    x="320"
+    y="76"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+    font-size="34"
+    font-weight="700"
+    letter-spacing="4"
+  >
+    BUYING THE DIP
+  </text>
+
+  <text
+    x="320"
+    y="372"
+    text-anchor="middle"
+    fill="#ffffff"
+    fill-opacity="0.6"
+    font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+    font-size="17"
+    letter-spacing="6"
+  >
+    DAY 41
+  </text>
+</svg>

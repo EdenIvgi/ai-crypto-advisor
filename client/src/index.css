@@ -127,9 +127,19 @@
 
 @layer components {
   /*
-   * The signature device of this interface. On the dashboard each of these carries the
-   * provenance of the section below it — "COINGECKO · LIVE" or "SHOWING SAVED HEADLINES" —
-   * so the label reports something true rather than decorating a heading.
+   * Small mono capitals, the voice this interface uses for anything that labels rather than
+   * says: a source name, a timestamp, a caption. Distinct from body text on purpose, so a
+   * reader can tell metadata from content without reading either.
+   */
+  .data-label {
+    @apply font-mono text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase;
+  }
+
+  /*
+   * The signature device of this interface: the same voice, plus a rule, used once at the
+   * head of each section. On the dashboard every one of them carries the provenance of the
+   * section below it — "SAMPLE PRICES" today, "COINGECKO · LIVE" once M8 lands — so the
+   * label reports something true rather than decorating a heading.
    */
   .eyebrow {
     @apply flex items-center gap-2 font-mono text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase;

@@ -141,6 +141,51 @@ written as the plan specified, then deleted before committing: no dashboard rout
 merging them would have put middleware wired to nothing onto `main`. They moved to M5, and the
 plan file records the move rather than quietly ticking the box.
 
+### M5 — Dashboard on mock data
+
+The milestone that turns four separate features into a product, built entirely against fixed
+sample data. The reason for the order is scheduling rather than architecture, and it is
+covered in `docs/decisions.md`; what it bought here was the freedom to design the graded
+screen without a rate limit, an API key, or an outage anywhere in the loop.
+
+Two decisions were changed while implementing, both away from what the plan said:
+
+**The four services were written now instead of in M8 to M11.** The plan had the controller
+read the mock file directly, and each integration milestone add its service and edit the
+controller. That is four more edits to the same file, which is precisely the churn that
+freezing the response contract was meant to prevent. `loadCoinPrices`, `loadMarketNews`,
+`loadDailyInsight` and `loadDailyMeme` therefore exist already with mock bodies, and each
+later milestone now replaces one function body and touches nothing else.
+
+**The sections are laid out with flex bases rather than grid columns.** A grid assigns each
+card a fixed track, so somebody who picked the AI insight but not the meme would get a
+half-width card with a hole beside it. Giving the pair a basis and letting it grow means they
+share a row when both are chosen and a lone one expands to fill it — every combination of the
+four answers produces a layout that looks deliberate, with no conditional span logic to get
+wrong.
+
+The design continues what M3 set up rather than restarting it. The monospace eyebrow,
+introduced there as the interface's signature, finally does the job it was designed for: each
+one now reports where its section's data came from. Today every one of them reads "SAMPLE
+PRICES" or "SAMPLE HEADLINES", because that is what is true — M8 to M11 change those strings
+to real source names as each integration lands, and the fallback wording is already in place
+for when a source is unavailable. The mock is disclosed in the interface rather than dressed
+up as live data.
+
+**A bug that only a real browser would have found, again.** The dashboard was verified with
+measurements first — card geometry at 375, 768 and 1440 pixels, no horizontal overflow at any
+of them, every colour token resolving correctly in dark mode. All of it passed. Then the same
+page was opened in an actual Chrome window, and the date at the top of the briefing read
+`יום שני, 10 באוגוסט` and the Bitcoin price read `118,432.50$`, with the currency symbol
+trailing the number. `Intl` follows the browser's locale by default, and this browser is set
+to Hebrew: a right-to-left date inside an English sentence, in a left-to-right label. Both
+formatters are now pinned to the interface's own language, with the reasoning written at the
+constant. Every automated check had been green — the machine has no opinion about a Hebrew
+weekday in an English paragraph.
+
+The one thing measurements could not settle is whether the screen looks finished, and that
+was checked by eye in both themes.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit

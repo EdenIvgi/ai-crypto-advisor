@@ -1,0 +1,72 @@
+import { ArrowUpRight } from 'lucide-react'
+
+import { useMarketNews } from '../useDashboard.js'
+import { formatTimeSince } from '../dashboardFormatters.js'
+import { DashboardSectionCard } from '../components/DashboardSectionCard.jsx'
+
+const SKELETON_ROW_COUNT = 4
+
+export const MarketNewsSection = ({ className }) => {
+  const news = useMarketNews()
+
+  return (
+    <DashboardSectionCard
+      className={className}
+      title="Market news"
+      sourceLabel={
+        news.data && (news.data.isFallback ? 'Sample headlines' : 'CryptoPanic · live')
+      }
+      isPending={news.isPending}
+      error={news.error}
+      onRetry={news.refetch}
+      skeleton={<MarketNewsSkeleton />}
+    >
+      {news.data?.articles.length ? (
+        // Multi-column rather than a grid: a grid would lay five headlines out across the
+        // rows, so the second-newest would sit to the right of the newest instead of below
+        // it. Columns fill downwards, which is the order the list is sorted in.
+        <ol className="lg:columns-2 lg:gap-x-10">
+          {news.data.articles.map((article) => (
+            <NewsHeadline key={article.id} article={article} />
+          ))}
+        </ol>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Nothing has been published about the assets you follow today.
+        </p>
+      )}
+    </DashboardSectionCard>
+  )
+}
+
+const NewsHeadline = ({ article }) => (
+  <li className="break-inside-avoid border-t border-border/70">
+    <a
+      href={article.url}
+      target="_blank"
+      rel="noreferrer"
+      className="group block py-3.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+    >
+      <p className="flex items-start gap-1.5 text-sm leading-snug font-medium text-pretty">
+        <span className="group-hover:underline group-hover:decoration-primary/40 group-hover:underline-offset-4">
+          {article.title}
+        </span>
+        <ArrowUpRight className="mt-0.5 size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+      </p>
+      <p className="data-label mt-1.5">
+        {article.source} · {formatTimeSince(article.publishedAt)}
+      </p>
+    </a>
+  </li>
+)
+
+const MarketNewsSkeleton = () => (
+  <ul className="lg:columns-2 lg:gap-x-10">
+    {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
+      <li key={index} className="break-inside-avoid border-t border-border/70 py-3.5">
+        <div className="h-4 w-full animate-pulse rounded bg-muted" />
+        <div className="mt-2.5 h-3 w-24 animate-pulse rounded bg-muted" />
+      </li>
+    ))}
+  </ul>
+)
