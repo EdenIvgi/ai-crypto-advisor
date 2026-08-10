@@ -7,17 +7,30 @@ import { z } from 'zod'
  */
 const MINIMUM_JWT_SECRET_LENGTH = 32
 
+const canBeParsedAsUrl = (value) => URL.canParse(value)
+
 const environmentSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
-  // A trailing slash here is the single easiest way to break authentication in production
-  // and nowhere else: the browser's `Origin` header never has one, so `https://app.tld/`
-  // would silently match nothing and every signed-in request would come back 401. There is
-  // only one thing a trailing slash could mean, so it is removed rather than rejected.
+  // The most fragile value in this file, and the only one whose mistakes surface exclusively
+  // in production. It is compared against the browser's `Origin` header character for
+  // character, and that header is only ever scheme, host and port — so a trailing slash, a
+  // stray path or a copied-in space all match nothing, and every signed-in request comes
+  // back 401 with no clue as to why.
+  //
+  // Rather than trusting anyone to paste it perfectly, anything that parses is reduced to
+  // its origin. What cannot be repaired is a missing scheme, because `https` and `http` are
+  // a real choice — so that one is rejected, by name, with the fix in the message.
   CLIENT_ORIGIN: z
-    .url()
+    .string()
+    .trim()
     .default('http://localhost:5173')
-    .transform((origin) => origin.replace(/\/+$/, '')),
+    .refine(canBeParsedAsUrl, {
+      message:
+        'must include the scheme — https://your-app.vercel.app, not your-app.vercel.app ' +
+        '(hosting dashboards show the domain without it)',
+    })
+    .transform((value) => new URL(value).origin),
 
   // Optional in the schema so development and tests can run without any setup; production
   // requires both, enforced below where the failure message can say why.
