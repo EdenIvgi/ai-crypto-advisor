@@ -90,13 +90,17 @@ const ATTENTION_BY_INVESTOR_TYPE = {
  *
  * 1. **Today's stored insight**, if there is one. One model call per person per day, so a
  *    refresh costs nothing and — more importantly — shows the same paragraph as an hour ago.
- * 2. **A generated one**, from the day's real prices and headlines, which is then stored.
- * 3. **A composed one**, assembled from those same real prices when no key is configured or
- *    every model fails. It reports `isFallback: true`, and it is still about today.
+ * 2. **A generated one**, from the day's prices and headlines, stored only if that material
+ *    was live. An insight inherits the honesty of what it was written from: if either source
+ *    was serving sample content, the paragraph reports `isFallback: true` even though a model
+ *    wrote it, and is not cached — otherwise one refused API would hold an invented market on
+ *    the page for a full day.
+ * 3. **A composed one**, assembled from the prices themselves when no key is configured or
+ *    every model fails. It reports `isFallback: true`.
  *
- * There is no sample text behind this section. The two sources above it both run on live
- * figures, so falling back to a fixed paragraph about a market that never happened would be a
- * worse answer than the plain one this composes.
+ * There is no sample text behind this section. The sources above both run on whatever the
+ * price service has, so falling back to a fixed paragraph about a market that never happened
+ * would be a worse answer than the plain one this composes.
  *
  * This function never throws. A section of a dashboard is not worth an error page.
  *
@@ -111,24 +115,35 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssetIds }
 
   // Both of these are documented never to throw, which is what lets the guarded region below
   // be only the part that can, and lets the fallback always have real figures to work with.
-  const { coins } = await loadCoinPrices(watchedAssetIds)
+  const prices = await loadCoinPrices(watchedAssetIds)
 
   if (!isHuggingFaceConfigured) {
-    return buildResponse(userId, date, composeFromPrices(investorType, coins), true)
+    return buildResponse(userId, date, composeFromPrices(investorType, prices.coins), true)
   }
 
   try {
-    const { articles } = await loadMarketNews(watchedAssetIds)
+    const news = await loadMarketNews(watchedAssetIds)
     const insightText = await generateChatCompletion(
-      buildInsightMessages(investorType, coins, articles)
+      buildInsightMessages(investorType, prices.coins, news.articles)
     )
 
-    await rememberTodaysInsight(userId, date, insightText)
+    // A paragraph is only as true as the material it was written from, and this is the case
+    // that taught it: while CoinGecko was refusing this host, a model was handed the sample
+    // prices and wrote "Dogecoin's 5.07% rise outpaces Bitcoin's 1.84% gain, a spread of about
+    // 3.23 percentage points" — a computed, confident claim about a day that never happened,
+    // over a card reading "Written for you today". A stale price is a wrong number; prose built
+    // on one is an argument.
+    //
+    // So the flag is inherited, and such an insight is deliberately not stored: this cache is
+    // keyed by the day, and storing it would hold the invented market for a full twenty-four
+    // hours instead of letting the next request try again on real figures.
+    const wroteFromSampleMaterial = prices.isFallback || news.isFallback
+    if (!wroteFromSampleMaterial) await rememberTodaysInsight(userId, date, insightText)
 
-    return buildResponse(userId, date, insightText, false)
+    return buildResponse(userId, date, insightText, wroteFromSampleMaterial)
   } catch (generationError) {
     console.warn('Composing the insight from prices instead:', generationError.message)
-    return buildResponse(userId, date, composeFromPrices(investorType, coins), true)
+    return buildResponse(userId, date, composeFromPrices(investorType, prices.coins), true)
   }
 }
 

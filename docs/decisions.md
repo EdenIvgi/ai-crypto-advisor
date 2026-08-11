@@ -265,6 +265,33 @@ its style nothing, and no prompt makes that impossible. Passing each investing s
 actually _looks at_, rather than only its label, did more than any rule — a paragraph is only
 genuinely different when the thing being examined is different.
 
+## An insight inherits the honesty of what it was written from
+
+Found in production, not in a test. While CoinGecko was refusing this host, a model was handed
+the sample prices and wrote:
+
+> Dogecoin's **5.07%** rise outpaces Bitcoin's **1.84%** gain, generating a spread of about
+> **3.23 percentage points**.
+
+Every figure is from `MOCK_COIN_PRICES`, and the card above it read **Written for you today**.
+This is the M8 rule — a fallback must not lie — broken one level up, and worse than the original:
+a stale price is a wrong number, while prose built on one is a confident argument, complete with
+a spread computed to two decimals for a day that never happened.
+
+So `isFallback` is now inherited: if the prices or the headlines that fed the prompt were sample
+content, the paragraph reports `isFallback: true` even though a model wrote it. And such an
+insight is **not stored** — this cache is keyed by the day, so caching it would hold the invented
+market on the page for a full twenty-four hours instead of letting the next request try again on
+real figures.
+
+**The known imprecision, stated rather than hidden.** `isFallback` is one boolean over three
+different situations: no key configured, every model failed, or a model wrote from sample
+material. The label reads "From today's prices", which is exactly right for the first two — they
+compose from live figures — and imprecise for the third, where the prices were samples too.
+Naming all three would mean widening a response contract that four sections share, for a state
+that only occurs while a third party is down, and the prices card beside it already reads
+**Saved prices** whenever it happens. Left as is, deliberately.
+
 ## Only the production frontend can sign in, and Vercel preview URLs cannot
 
 `CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —
