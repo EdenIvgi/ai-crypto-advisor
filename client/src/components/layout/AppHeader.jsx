@@ -17,10 +17,8 @@ export const AppHeader = () => {
           <span className="font-semibold tracking-tight">Crypto Advisor</span>
         </Link>
 
-        <div className="flex items-center gap-4">
-          {user ? (
-            <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span>
-          ) : null}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {user ? <ProfileLink name={user.name} /> : null}
           <Button
             variant="ghost"
             size="sm"
@@ -34,3 +32,26 @@ export const AppHeader = () => {
     </header>
   )
 }
+
+/**
+ * The way into the settings screen, and the only one — which is why the initial stays visible when
+ * the name does not. On a narrow screen there is no room for both the name and Sign out, and
+ * hiding the whole control would leave a phone with no way to change an answer.
+ *
+ * The `sr-only` line names the destination rather than the person, since "Eden A" on its own does
+ * not tell anybody what the link does.
+ */
+const ProfileLink = ({ name }) => (
+  <Button variant="ghost" size="sm" asChild>
+    <Link to="/settings">
+      <span
+        aria-hidden="true"
+        className="flex size-6 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-medium text-primary"
+      >
+        {name.trim().charAt(0).toUpperCase()}
+      </span>
+      <span className="sr-only">Your preferences</span>
+      <span className="hidden max-w-32 truncate text-muted-foreground sm:inline">{name}</span>
+    </Link>
+  </Button>
+)

@@ -8,7 +8,7 @@ const INVESTOR_TYPE_DESCRIPTIONS = {
 }
 
 /** Single choice, with radio semantics so it announces as one-of-these. */
-export const InvestorTypeStep = ({ investorTypes, selectedInvestorType, onChange }) => (
+export const InvestorTypeQuestion = ({ investorTypes, selectedInvestorType, onChange }) => (
   <div role="radiogroup" aria-label="How you invest" className="grid gap-2">
     {investorTypes.map(({ value, label }) => (
       <SelectableOption

@@ -3,13 +3,16 @@ import { SelectableOption } from '../components/SelectableOption.jsx'
 /** What each section actually puts on the dashboard, so the choice is concrete. */
 const CONTENT_SECTION_DESCRIPTIONS = {
   coin_prices: 'Live prices and the last 24 hours for the assets you picked.',
-  market_news: 'Headlines filtered down to those assets.',
+  // Not "filtered down to those assets": headlines about them are lifted to the top, and the
+  // rest of the feed still shows. Filtering was dropped because matching a headline to a coin is
+  // a guess, and a wrong guess would cost the reader an article.
+  market_news: 'Headlines from four publishers, with the ones about those assets first.',
   ai_insight: 'A few sentences each morning, written for how you invest.',
   fun_meme: 'One crypto meme. It changes daily.',
 }
 
 /** Multiple choice. Anything left unpicked simply will not appear on the dashboard. */
-export const ContentPreferencesStep = ({
+export const ContentPreferencesQuestion = ({
   contentSections,
   selectedSections,
   onToggleSection,
