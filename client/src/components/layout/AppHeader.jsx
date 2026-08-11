@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button.jsx'
+import { ThemeToggle } from '@/components/layout/ThemeToggle.jsx'
 import { useCurrentUser, useLogout } from '@/features/auth/useAuth.js'
 
 export const AppHeader = () => {
@@ -19,6 +20,7 @@ export const AppHeader = () => {
 
         <div className="flex items-center gap-1 sm:gap-2">
           {user ? <ProfileLink name={user.name} /> : null}
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="sm"
