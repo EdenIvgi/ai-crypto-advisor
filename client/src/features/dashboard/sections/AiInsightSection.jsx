@@ -11,8 +11,11 @@ export const AiInsightSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
+      // Both labels are true statements about live data, which is why neither says "sample":
+      // the fallback here is composed from today's real prices, not a fixed paragraph.
       sourceLabel={
-        insight.data && (insight.data.isFallback ? 'Sample insight' : 'Written for you today')
+        insight.data &&
+        (insight.data.isFallback ? "From today's prices" : 'Written for you today')
       }
       isPending={insight.isPending}
       error={insight.error}
@@ -33,13 +36,17 @@ export const AiInsightSection = ({ className }) => {
         a rule down the left in the accent colour, and a longer measure than the cards
         around it. Nothing else on the dashboard is allowed to look like this.
       */}
-      <blockquote className="flex h-full items-center border-l-2 border-primary/50 pl-5">
+      <blockquote className="flex h-full flex-col justify-center border-l-2 border-primary/50 pl-5">
         {/* Capped at a readable measure for the same reason the meme is: with the meme
             deselected this card takes the full row, and prose does not stay readable at
             eleven hundred pixels a line. */}
         <p className="max-w-prose text-[0.9375rem] leading-relaxed text-pretty">
           {insight.data?.insight.text}
         </p>
+        {/* Small, and not negotiable. This is the one section where a machine writes about
+            somebody's own holdings, which is exactly where a reader could mistake a
+            description for a recommendation. The model is told the same thing in its prompt. */}
+        {insight.data ? <p className="data-label mt-4">Observations, not advice</p> : null}
       </blockquote>
     </DashboardSectionCard>
   )
