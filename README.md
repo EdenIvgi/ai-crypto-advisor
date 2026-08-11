@@ -7,6 +7,14 @@ press **"Look around with a demo account"** on either auth screen and you land o
 dashboard, no signup. Give the first request up to a minute: the API runs on a free instance that
 stops when nobody is using it.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/dashboard-dark.png">
+  <img
+    alt="The dashboard on the demo account: live coin prices, an insight written for a long-term holder, the day's meme, and market news with Bitcoin headlines at the top"
+    src="docs/dashboard-light.png"
+  >
+</picture>
+
 ## What it does
 
 Three questions at sign-up — what kind of investor you are, which assets you follow, which
@@ -137,6 +145,14 @@ The client is a static build on **Vercel**, the API is a web service on **Render
 database is **MongoDB Atlas**. The two halves live on different origins, which is the whole reason
 the configuration below is fussy.
 
+| Half   | Origin                                                                                                |
+| ------ | ----------------------------------------------------------------------------------------------------- |
+| Client | [ai-crypto-advisor-client-pi.vercel.app](https://ai-crypto-advisor-client-pi.vercel.app)              |
+| API    | [ai-crypto-advisor-api-qlag.onrender.com](https://ai-crypto-advisor-api-qlag.onrender.com/api/health) |
+
+The API link goes to `/api/health`, which is the one endpoint that answers without a session — and
+the one that tells you whether a slow page is a cold instance or a real fault.
+
 | Where  | Setting                        | Value                                |
 | ------ | ------------------------------ | ------------------------------------ |
 | Render | Blueprint                      | [`render.yaml`](render.yaml)         |
@@ -194,11 +210,78 @@ browser can answer: a vote surviving a reload rather than being optimistically p
 choice beating a system preference set the other way, and a quiz answer changed with the keyboard
 alone. They are not in CI — there is no database or seeded demo account there — so they run locally.
 
+## Reading the stored feedback
+
+The votes are the deliverable behind the dashboard, so they're inspectable rather than described.
+Three collections in `ai-crypto-advisor`:
+
+| Collection        | Holds                                                                       |
+| ----------------- | --------------------------------------------------------------------------- |
+| `users`           | credentials and the three quiz answers, embedded on the user                |
+| `feedbackvotes`   | one document per person per piece of content                                |
+| `dailyaiinsights` | the paragraph written for one person on one day, so it isn't paid for twice |
+
+A vote looks like this, and the shape is the reason it's usable as training data rather than as a
+counter:
+
+```json
+{
+  "userId": "…",
+  "sectionType": "market_news",
+  "contentId": "2026-08-11",
+  "vote": "up",
+  "votedOnDate": "2026-08-11",
+  "createdAt": "…",
+  "updatedAt": "…"
+}
+```
+
+`votedOnDate` is stored even though `createdAt` exists, because changing your mind updates the
+document in place — `updatedAt` moves and `createdAt` stays at the first thumb, so neither answers
+which day's dashboard the opinion was about.
+
+A **read-only database user** exists for reviewers. Its credential is not in this repository — a
+connection string in public source is a public database, whatever its permissions — so it comes
+with the submission instead. With it:
+
+```bash
+mongosh "mongodb+srv://<user>:<password>@<cluster>/ai-crypto-advisor" --eval "db.feedbackvotes.find().sort({ updatedAt: -1 }).limit(20)"
+```
+
+The account can read and nothing else, so there is no way to alter the data being reviewed.
+Running the API against it would fail at the first write, which is the intended outcome.
+
+For a local database of your own, `npm run check:db --workspace server` prints the host, database,
+collections and document counts, and never prints the connection string.
+
+## Known tradeoffs
+
+Every one of these is a choice rather than an oversight, and each costs something real.
+
+- **Atlas is open to `0.0.0.0/0`.** Render's free tier has no static outbound address, so no
+  narrower rule would let the API connect at all. The credential is what protects the database,
+  which makes the connection string the one secret that must never be committed.
+- **A cold API takes about a minute to answer.** The client pre-warms it from the sign-in page, so
+  the wait overlaps with reading rather than following a click — but it doesn't remove it.
+- **The test suite is capped on purpose.** Two integration tests and a unit test, with the limit
+  and its reasoning written into [the testing policy](.claude/docs/testing-policy.md) so it can't
+  drift upward unnoticed. The bar is whether a test can fail for the right reason, not coverage.
+- **The Playwright tests are not in CI**, because CI has no database and no seeded demo account.
+  So keyboard access and vote persistence are verified by someone remembering to run
+  `npm run test:e2e` — automated, but not automatic.
+- **The insight is written once per user per day** and cached until midnight. An afternoon
+  development doesn't reach it, which is exactly why the prompt is built from the day's events
+  rather than from figures that would be stale by then.
+
 ## Roadmap
 
-- Turning the collected votes into a training signal — the data model is designed for it and the
-  votes are being stored; the write-up of how to use them isn't done.
-- Read-only database access for reviewers who want to see the stored feedback for themselves.
+- **Ranking driven by the collected votes.** The design is written up in
+  [`docs/feedback-model-proposal.md`](docs/feedback-model-proposal.md); the votes are being stored
+  against the exact content they were cast on, and nothing reads them yet.
+- **News matched by meaning rather than by name.** A headline about an ETF approval matters to a
+  Bitcoin holder without containing the word, and today's ranking would miss it.
+- **A briefing you can look back at.** Each day's insight replaces the last one, so there's no
+  history to show a returning user what changed.
 
 ## Documentation
 
@@ -206,5 +289,7 @@ alone. They are not in CI — there is no database or seeded demo account there 
   different from the plan it started with, including what was rejected.
 - [`docs/ai-collaboration.md`](docs/ai-collaboration.md) — how this was built with AI tooling:
   what changed the result, what the tools caught, and where they were wrong.
+- [`docs/feedback-model-proposal.md`](docs/feedback-model-proposal.md) — how the collected votes
+  would become a ranking model: the labels, the features, evaluation, and what would go wrong.
 - [`docs/assignment-brief.pdf`](docs/assignment-brief.pdf) — the original brief this was built
   against.

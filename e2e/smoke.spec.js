@@ -33,7 +33,10 @@ test('a reviewer can sign in, read every section, and vote', async ({ page }) =>
   }
 
   // The thumbs need the content they are voting on, so wait for a price rather than for the card.
-  await expect(page.getByText('Bitcoin')).toBeVisible()
+  // Matched on the ticker exactly, because "Bitcoin" also appears in the headlines this dashboard
+  // renders — a locator that resolves to five elements the moment the news card lands, and passes
+  // only while the news is still slower than the prices.
+  await expect(page.getByText('BTC', { exact: true })).toBeVisible()
 
   const thumbUp = page.getByRole('button', { name: PRICES_THUMB_UP })
 

@@ -258,3 +258,48 @@ dispatches synthetic key events that reach JavaScript listeners but do not trigg
 own activation behaviour, so pressing Space on a focused button appeared to do nothing there.
 Playwright presses keys properly and showed the buttons were fine all along — but it means keyboard
 operability is now asserted by a test rather than by my having watched it work.
+
+## The reviewer's database credential does not live in the repository
+
+The plan asked for a read-only Atlas user and for the instructions to connect. Only the second half
+belongs here. A connection string in public source is a public database whatever its permissions —
+read-only still exposes every user row and every vote to anyone who reads the README — so the
+README documents the collections, the shape of a vote and the `mongosh` command, and the credential
+travels with the submission instead.
+
+Read-only is worth having even so: the reviewer cannot alter the data being reviewed, and pointing
+the API at it fails on the first write rather than quietly succeeding.
+
+## The screenshot follows the reader's theme
+
+Both themes were captured and served from a `<picture>` with a `prefers-color-scheme` source, so a
+reader on a dark GitHub sees the dark dashboard. A light screenshot glowing inside a dark page is
+the same mismatch the app itself avoids by applying the theme before the bundle loads.
+
+Captured with a throwaway Playwright script rather than by hand, which is why the shot could be
+checked rather than trusted: the prices in it match what CoinGecko returned that minute and appear
+nowhere in the fallback table, so the `COINGECKO · LIVE` label on the card is accurate.
+
+## Two of the four sections cannot be trained on as they stand
+
+Found while writing `docs/feedback-model-proposal.md`, and the most useful thing that document
+produced. `contentId` is the day for `coin_prices` and `market_news`, so a thumbs-down on the news
+card records that the card missed and not which of five headlines caused it — and those headlines
+came from live RSS and are gone. The meme is the one section where the same content is seen by
+everyone, and the insight is recoverable because its text is stored.
+
+No model fixes this, so the proposal leads with an impressions log — the ordered item ids, the
+source, `isFallback`, and the exploration probability, written at render time. That is also the
+cheapest thing to do early, because the probability of a choice already made cannot be reconstructed
+afterwards.
+
+## A smoke test that only passed because the news was slow
+
+`getByText('Bitcoin')` in the M12 suite resolved to five elements against production, where the news
+card had already landed: the headlines contain the word too. It passed locally because the prices
+render first, so the assertion ran during the window where only one match existed. Matched on the
+exact ticker now.
+
+Worth recording because the test was verified by sabotage when it was written, and sabotage proves
+a test can fail — not that it fails for the reason intended. Running it against a faster environment
+is what exposed the difference.

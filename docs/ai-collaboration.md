@@ -70,6 +70,15 @@ something is needed, and it turns out it isn't.
   from its title and the whole sentence explaining it — "Day TraderYou are in and out, and the
   charts matter today" — which is the name of nothing. Found by reading the accessibility tree
   rather than the markup.
+- **A test that only passed because one section was slower than another.** The smoke test waited
+  for the text "Bitcoin", which the headlines contain as well as the price row. It passed locally
+  and broke the moment it ran against production, where the news had already arrived. It had been
+  sabotage-verified when it was written, which proves a test can fail and not that it fails for the
+  intended reason.
+- **Two of the four sections can't be trained on.** Writing up the feedback-model bonus surfaced
+  that a vote on the news or prices card is keyed to the day, so it records that the card missed
+  without recording which headline caused it. The design changed as a result: log what was shown
+  before building anything that learns from it.
 
 ## Where it was wrong, and how that showed up
 
