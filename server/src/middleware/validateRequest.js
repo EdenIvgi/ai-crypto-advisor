@@ -26,10 +26,29 @@ export const validateRequest = (schemas) => (request, _response, next) => {
       )
     }
 
-    request[part] = parseResult.data
+    replaceRequestPart(request, part, parseResult.data)
   }
 
   next()
+}
+
+/**
+ * Writes the parsed value over the original.
+ *
+ * `defineProperty` rather than plain assignment, because Express 5 exposes `req.query` through a
+ * prototype getter with **no setter**: `request.query = parsed` throws `Cannot set property query
+ * of #<IncomingMessage> which has only a getter`, and every module here is an ES module, so that
+ * failure is a thrown TypeError rather than a silent no-op. `body` and `params` are ordinary
+ * properties and were always fine — which is why the `query` support this function has always
+ * advertised stayed broken until the first route needed it.
+ */
+const replaceRequestPart = (request, part, parsedValue) => {
+  Object.defineProperty(request, part, {
+    value: parsedValue,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  })
 }
 
 /**

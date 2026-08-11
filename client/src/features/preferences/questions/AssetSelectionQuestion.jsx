@@ -7,7 +7,7 @@ const MAX_WATCHED_ASSETS = 8
  * disabling the unpicked options once the limit is reached — the person finds out before
  * they submit, not after.
  */
-export const AssetSelectionStep = ({ assets, selectedAssetIds, onToggleAsset }) => {
+export const AssetSelectionQuestion = ({ assets, selectedAssetIds, onToggleAsset }) => {
   const hasReachedLimit = selectedAssetIds.length >= MAX_WATCHED_ASSETS
 
   return (

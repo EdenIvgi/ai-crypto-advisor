@@ -4,11 +4,11 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button.jsx'
 import { useCurrentUser } from '@/features/auth/useAuth.js'
 
-import { useQuizOptions, useSavePreferences } from './useOnboarding.js'
+import { useQuizOptions, useSavePreferences } from './usePreferences.js'
 import { toggleSelection } from './toggleSelection.js'
-import { AssetSelectionStep } from './steps/AssetSelectionStep.jsx'
-import { InvestorTypeStep } from './steps/InvestorTypeStep.jsx'
-import { ContentPreferencesStep } from './steps/ContentPreferencesStep.jsx'
+import { AssetSelectionQuestion } from './questions/AssetSelectionQuestion.jsx'
+import { InvestorTypeQuestion } from './questions/InvestorTypeQuestion.jsx'
+import { ContentPreferencesQuestion } from './questions/ContentPreferencesQuestion.jsx'
 
 const QUIZ_STEPS = [
   {
@@ -101,7 +101,7 @@ export const OnboardingPage = () => {
       </header>
 
       {currentStep.key === 'assets' ? (
-        <AssetSelectionStep
+        <AssetSelectionQuestion
           assets={quizOptions.data.assets}
           selectedAssetIds={answers.watchedAssetIds}
           onToggleAsset={toggleAnswerIn('watchedAssetIds')}
@@ -109,7 +109,7 @@ export const OnboardingPage = () => {
       ) : null}
 
       {currentStep.key === 'investorType' ? (
-        <InvestorTypeStep
+        <InvestorTypeQuestion
           investorTypes={quizOptions.data.investorTypes}
           selectedInvestorType={answers.investorType}
           onChange={(investorType) => setAnswers((current) => ({ ...current, investorType }))}
@@ -117,7 +117,7 @@ export const OnboardingPage = () => {
       ) : null}
 
       {currentStep.key === 'contentSections' ? (
-        <ContentPreferencesStep
+        <ContentPreferencesQuestion
           contentSections={quizOptions.data.contentSections}
           selectedSections={answers.contentSections}
           onToggleSection={toggleAnswerIn('contentSections')}

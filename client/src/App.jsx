@@ -4,7 +4,8 @@ import { AppHeader } from '@/components/layout/AppHeader.jsx'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute.jsx'
 import { LoginPage } from '@/features/auth/LoginPage.jsx'
 import { SignupPage } from '@/features/auth/SignupPage.jsx'
-import { OnboardingPage } from '@/features/onboarding/OnboardingPage.jsx'
+import { OnboardingPage } from '@/features/preferences/OnboardingPage.jsx'
+import { SettingsPage } from '@/features/preferences/SettingsPage.jsx'
 import { DashboardPage } from '@/features/dashboard/DashboardPage.jsx'
 
 /** Signed-in screens share the header; the auth screens have their own full-page layout. */
@@ -31,6 +32,8 @@ export const App = () => (
       <Route element={<ProtectedRoute />}>
         <Route element={<SignedInLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          {/* Editing answers requires having given them, so this sits behind the same guard. */}
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>
 

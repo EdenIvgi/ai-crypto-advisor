@@ -150,3 +150,50 @@ left with the staleness problem.
 The composed fallback still uses figures, which isn't inconsistent: it's rebuilt every request
 and never stored. The rule isn't "no numbers" — it's that a paragraph kept for a day may not
 contain anything that expires sooner.
+
+## A vote can be withdrawn, which reverses an earlier decision of mine
+
+The thumbs used to be one-way: pressing the pressed one did nothing, on the reasoning that an
+opinion is either kept or reversed. That was wrong in the one case that matters. With only "up"
+and "down" reachable, a mis-click can be flipped but never cleared — so somebody who never meant
+to say anything is forced to leave an opinion they don't hold in the data.
+
+Withdrawing **deletes the row**. I rejected a third value like `vote: 'none'`, which would fill
+the dataset these votes exist to become with records of nobody thinking anything.
+
+The target travels as query parameters — `DELETE /api/feedback?sectionType=…&contentId=…` —
+rather than as a body, because a body on DELETE is legal but has no agreed meaning and
+intermediaries are free to drop it. That required fixing `validateRequest`, whose documented
+`query` support had never actually worked: Express 5 exposes `req.query` through a getter with no
+setter, so assigning the parsed value threw a `TypeError`. No route had used it until this one.
+
+## Changing your answers rewrites today's insight
+
+While answers were write-once, nothing could go stale. Now that they're editable, one section
+can: the insight is generated per reader per day and stored, so switching from HODLer to day
+trader at noon would leave a paragraph addressed to the profile you'd just abandoned on screen
+until midnight, under a **Written for you today** label.
+
+So saving discards today's stored paragraph — but only when the change would change the writing.
+The prompt is built from the investing style and the asset names and nothing else, so toggling a
+_section_ on or off spends no model call and keeps a paragraph the reader may already have voted
+on. Verified both ways: changing sections leaves the text byte-identical, changing the style
+produces a visibly different one.
+
+The thumb on a discarded paragraph goes with it. `contentId` is `userId:date` rather than a hash
+of the text, so a vote left behind would silently reattach to whatever gets written next — an
+opinion about writing nobody read, in the one dataset this project keeps.
+
+## Editing answers is a form, not the wizard again
+
+Onboarding asks one question per screen, which is right for somebody answering for the first
+time. Somebody returning to change one answer should see all three at once and go straight to the
+one they came for, so `/settings` stacks the same three questions behind one Save button. Saving
+lands on the dashboard, because the dashboard is what these answers configure and therefore the
+only real confirmation that it worked.
+
+Two consequences of reusing the quiz's components in a second place. They moved to
+`features/preferences/` and stopped being called steps, because on this screen they aren't steps.
+And `ContentPreferencesQuestion` stopped promising "Headlines filtered down to those assets",
+which had been untrue since filtering became ranking in M9 — reading the copy in a new context is
+what surfaced it.

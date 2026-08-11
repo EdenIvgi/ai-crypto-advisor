@@ -22,6 +22,12 @@ Do not add tests beyond the list below without asking first.
    reject, and two votes cast concurrently, which have to leave one row behind. If you change
    this file, delete the index and check that something still fails.
 
+   One more case covers **withdrawing** a vote, because that is the operation whose failure is
+   invisible from the interface: the thumb clears optimistically, so a `DELETE` that answers 204
+   without removing anything looks perfect until a reload brings the vote back. It asserts the row
+   is gone, that `/mine` agrees, and that a second withdrawal is still 204. Confirmed to fail with
+   the delete stubbed out.
+
 3. _Optional, only if time allows_ — `requireOnboarding` blocks dashboard routes before the
    quiz is completed.
 

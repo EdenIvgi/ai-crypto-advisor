@@ -34,6 +34,25 @@ export const submitVote = async ({ userId, sectionType, contentId, vote }) => {
 }
 
 /**
+ * Withdraws an opinion, rather than recording a third kind of one.
+ *
+ * A vote is a row, so having no opinion is having no row. The alternative — keeping the row with
+ * something like `vote: 'none'` — would fill the very dataset these votes exist to become with
+ * records of nobody thinking anything.
+ *
+ * Deleting a vote that is not there is not an error. Two clicks on a pressed thumb should leave
+ * the same state as one, and a retry after a dropped response should not fail.
+ *
+ * @param {{ userId: string, sectionType: string, contentId: string }} target
+ * @returns {Promise<boolean>} Whether a vote was actually removed.
+ */
+export const removeVote = async ({ userId, sectionType, contentId }) => {
+  const { deletedCount } = await FeedbackVote.deleteOne({ userId, sectionType, contentId })
+
+  return deletedCount > 0
+}
+
+/**
  * Every vote this user has cast. The dashboard needs them all on load so a thumb still looks
  * pressed after a refresh — without this the interface would forget an opinion the database
  * remembers, which reads as the vote not having been saved.
