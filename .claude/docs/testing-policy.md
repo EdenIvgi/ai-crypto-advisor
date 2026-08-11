@@ -26,7 +26,11 @@ Do not add tests beyond the list below without asking first.
    quiz is completed.
 
 4. **Cache unit test** (`server/src/lib/inMemoryCache.test.js`) — returns a cached value
-   inside the TTL, refetches after it expires.
+   inside the TTL, refetches after it expires, and — added when the cache was written —
+   serves the expired value when the fetcher fails, rethrows when there is nothing to fall
+   back on, and keeps keys apart. The first two describe a cache; the rest describe the
+   reason this one exists, which is that a rate limit from a free API must not empty a
+   section of the dashboard.
 
 5. **Smoke test** (`e2e/smoke.spec.js`, Playwright, written in M12) — one pass through
    demo login → dashboard renders → vote registers.

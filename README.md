@@ -23,7 +23,8 @@ Work in progress, built milestone by milestone against
 | Dashboard, four sections on sample data | done  |
 | Feedback voting                         | done  |
 | First public deploy                     | done  |
-| Live integrations                       | next  |
+| Live coin prices (CoinGecko)            | done  |
+| News, memes, and the AI insight         | next  |
 
 **Live: https://ai-crypto-advisor-client-pi.vercel.app** — press "Look around with a demo
 account" and you are on a populated dashboard. The API is at
@@ -31,9 +32,9 @@ account" and you are on a populated dashboard. The API is at
 it directly. Give the first request up to a minute — the free instance stops when nobody is
 using it.
 
-The four sections currently show sample data, and say so: each one is labelled with where its
-content came from. Replacing those with live sources is the next four milestones, one section
-at a time, which is why deploying came before them rather than after.
+Coin prices are live. The other three sections still show sample data and say so — each
+section is labelled with where its content came from, so the label is never a decoration.
+Replacing the remaining three is the next three milestones, one at a time.
 
 ## Running it locally
 
@@ -59,6 +60,7 @@ Everything works; nothing survives a restart. To keep your data, copy `server/.e
 | `MONGODB_URI`       | server | in production | Include the database name before the `?`               |
 | `JWT_SECRET`        | server | in production | At least 32 characters                                 |
 | `VITE_API_BASE_URL` | client | in production | Origin of the API. Defaults to `http://localhost:4000` |
+| `COINGECKO_API_KEY` | server | never         | Free demo key. Raises a per-IP allowance, nothing more |
 
 Percent-encode special characters in the Mongo password: an unquoted `#` truncates the value
 where the `.env` parser treats it as a comment.
