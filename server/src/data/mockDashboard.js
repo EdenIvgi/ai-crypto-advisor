@@ -1,12 +1,16 @@
 /**
- * Stand-in content for the four dashboard sections, shaped exactly like the responses the
- * real integrations will produce in M8 to M11. Building the whole dashboard against these
- * first is deliberate: the response contracts get fixed and the UI gets finished while no
- * third party can break either, and each later milestone then replaces one source without
- * the client noticing.
+ * Stand-in content for the dashboard sections that depend on somebody else's server, shaped
+ * exactly like the responses those integrations produce. Building the whole dashboard against
+ * these first fixed the response contracts and finished the UI while no third party could
+ * break either, and each integration since has replaced one source without the client
+ * noticing.
  *
- * Everything served from here goes out with `isFallback: true`, so the interface says
- * "sample data" rather than claiming a live source it does not have yet.
+ * These are no longer only a starting point. Prices and news reach for them when their source
+ * refuses, which on free public APIs is an ordinary Tuesday — so this is what a reader sees on
+ * a bad day, and it goes out with `isFallback: true` so the interface says so.
+ *
+ * The meme section has no entry here. It has no third party to fall back from; see
+ * `data/dailyMemes.js`.
  */
 
 /**
@@ -102,16 +106,4 @@ export const MOCK_INSIGHTS_BY_INVESTOR_TYPE = {
     'targets congestion during mints, which is exactly where collectors have been paying for ' +
     'failed transactions. Floor prices have not reacted yet. Ethereum activity continuing to ' +
     'move to layer twos is the slower story, and it is where most new collections are landing.',
-}
-
-/**
- * The image is served from the client's own `public/` directory, so the sample section can
- * never render a broken image because a third-party host expired a URL. M10 returns absolute
- * Reddit URLs here instead; `<img>` resolves either kind without the component caring.
- */
-export const MOCK_MEME = {
-  id: 'sample-meme-1',
-  title: 'Buying the dip, day 41',
-  imageUrl: '/memes/sample-buying-the-dip.svg',
-  sourceUrl: 'https://www.reddit.com/r/cryptocurrencymemes/',
 }

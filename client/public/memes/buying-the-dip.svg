@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="A chart falling steadily, captioned buying the dip, day 41">
   <!--
-    Stand-in artwork for the meme section, drawn here rather than linked from an image host
-    so the sample dashboard cannot render a broken image. M10 replaces the URL with a real
-    Reddit one. Fonts are generic families on purpose: an SVG loaded through <img> gets no
-    access to the page's bundled webfonts.
+    One of the seven memes this dashboard rotates through. Drawn here rather than linked from
+    an image host so the section cannot render a broken image, and so nothing in this
+    repository is someone else's artwork. Fonts are generic families on purpose: an SVG
+    loaded through <img> gets no access to the page's bundled webfonts.
   -->
   <defs>
     <linearGradient id="falling-area" x1="0" y1="0" x2="0" y2="1">

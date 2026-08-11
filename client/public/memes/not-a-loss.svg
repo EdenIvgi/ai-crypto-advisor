@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="A chart that has fallen ninety per cent, labelled unrealised, captioned it is not a loss until you sell">
+  <defs>
+    <linearGradient id="collapse-area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e2585d" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#e2585d" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="400" fill="#0e1220" />
+
+  <text x="320" y="76" text-anchor="middle" fill="#ffffff" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="34" font-weight="700" letter-spacing="4">
+    NOT A LOSS
+  </text>
+
+  <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1">
+    <line x1="48" y1="140" x2="592" y2="140" />
+    <line x1="48" y1="200" x2="592" y2="200" />
+    <line x1="48" y1="260" x2="592" y2="260" />
+    <line x1="48" y1="320" x2="592" y2="320" />
+  </g>
+
+  <path d="M48 132 L120 148 L192 136 L264 210 L336 268 L408 296 L480 314 L560 320 L560 320 L48 320 Z" fill="url(#collapse-area)" />
+  <polyline points="48,132 120,148 192,136 264,210 336,268 408,296 480,314 560,320" fill="none" stroke="#e2585d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <circle cx="560" cy="320" r="5.5" fill="#e2585d" />
+
+  <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" letter-spacing="2">
+    <text x="60" y="122" fill="#ffffff" fill-opacity="0.5" font-size="15">ENTRY</text>
+    <text x="548" y="300" text-anchor="end" fill="#e2585d" font-size="17" font-weight="700">-91%</text>
+    <text x="548" y="278" text-anchor="end" fill="#ffffff" fill-opacity="0.5" font-size="14">UNREALISED</text>
+  </g>
+
+  <text x="320" y="372" text-anchor="middle" fill="#ffffff" fill-opacity="0.6" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" letter-spacing="6">
+    UNTIL YOU SELL
+  </text>
+</svg>

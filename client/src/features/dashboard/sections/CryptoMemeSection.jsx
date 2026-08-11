@@ -11,9 +11,9 @@ export const CryptoMemeSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
-      sourceLabel={
-        meme.data && (meme.data.isFallback ? 'Sample meme' : 'r/cryptocurrencymemes')
-      }
+      // A constant, unlike every other section: this one has no third party behind it, so
+      // there is no live-or-fallback distinction to report. See services/memeService.js.
+      sourceLabel={meme.data && 'Drawn for this app'}
       isPending={meme.isPending}
       error={meme.error}
       onRetry={meme.refetch}
@@ -34,10 +34,10 @@ export const CryptoMemeSection = ({ className }) => {
         // worse joke than the same meme at a readable size.
         <figure className="max-w-xl">
           {/*
-            A fixed frame with the image contained inside it, never cropped: from M10 these
-            are arbitrary Reddit uploads whose proportions nobody controls, and cropping a
-            meme is how you cut off the caption that makes it one. The frame's own ratio
-            keeps the card from resizing when the image arrives.
+            A fixed frame with the image contained inside it, never cropped. These are drawn
+            to one ratio today, but the frame is what keeps that from being an assumption —
+            the card does not resize when the image arrives, and cropping a meme is how you
+            cut off the caption that makes it one.
 
             The alt text is the caption because the caption is the joke — describing the
             picture instead would leave a screen reader with the setup and no punchline.

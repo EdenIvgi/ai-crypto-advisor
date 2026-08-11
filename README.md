@@ -25,7 +25,8 @@ Work in progress, built milestone by milestone against
 | First public deploy                     | done  |
 | Live coin prices (CoinGecko)            | done  |
 | Live market news (publisher feeds)      | done  |
-| Memes and the AI insight                | next  |
+| Meme of the day                         | done  |
+| AI insight of the day                   | next  |
 
 **Live: https://ai-crypto-advisor-client-pi.vercel.app** — press "Look around with a demo
 account" and you are on a populated dashboard. The API is at
@@ -33,9 +34,9 @@ account" and you are on a populated dashboard. The API is at
 it directly. Give the first request up to a minute — the free instance stops when nobody is
 using it.
 
-Coin prices and market news are live. The other two sections still show sample data and say
-so — each section is labelled with where its content came from, so the label is never a
-decoration. Replacing the remaining two is the next two milestones, one at a time.
+Prices, news and the meme are real; only the AI insight still shows sample copy, and says so.
+Each section is labelled with where its content came from, so the label is never a decoration.
+That is the last milestone of the four.
 
 ## Running it locally
 
@@ -98,7 +99,7 @@ flowchart LR
     Browser["React 19 + Vite<br/>TanStack Query"]
     API["Express 5<br/>routes → controllers → services"]
     DB[("MongoDB Atlas<br/>users · votes · insights")]
-    Ext["CoinGecko · publisher RSS<br/>Reddit · OpenRouter"]
+    Ext["CoinGecko · publisher RSS<br/>OpenRouter"]
 
     Browser -- "JWT in an httpOnly cookie" --> API
     API --> DB
