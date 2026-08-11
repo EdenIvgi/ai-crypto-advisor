@@ -36,6 +36,12 @@ const environmentSchema = z.object({
   // requires both, enforced below where the failure message can say why.
   MONGODB_URI: z.string().min(1).optional(),
   JWT_SECRET: z.string().min(MINIMUM_JWT_SECRET_LENGTH).optional(),
+
+  // Optional everywhere, including production. CoinGecko's public tier needs no key at all;
+  // a free one just raises the allowance, which matters because that allowance is counted
+  // per IP address and a cloud host shares its address with strangers. Anyone cloning this
+  // repository has to be able to run it without signing up for anything.
+  COINGECKO_API_KEY: z.string().min(1).optional(),
 })
 
 const exitWithConfigurationProblems = (problems) => {

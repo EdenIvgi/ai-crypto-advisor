@@ -275,6 +275,46 @@ demo login from a session with no cookies, a hard reload of `/dashboard` as a de
 exercise the SPA rewrite and the session together, and a vote cast and found still there
 afterwards.
 
+### M8 — Live coin prices
+
+The first mock replaced by a real source, and the milestone that tested whether M5's frozen
+contract was worth the trouble. It was: `loadCoinPrices` kept its signature and its return
+shape, so the controller, the endpoint, the query, the component and the vote all stayed
+exactly as they were. One function body changed.
+
+**The interesting design question was what a fallback is allowed to claim.** Prices resolve
+from three places — a live CoinGecko response, the last one that worked, or the sample data
+the dashboard was built against. The first draft labelled the fallback "Sample prices", which
+is a lie whenever the fallback is a two-minute-old real quote. The label became "Saved prices",
+because the only distinction a reader actually needs is the one it makes: these numbers are
+what the market is quoting, or they are not.
+
+**A test that only covers the easy half is the M6 mistake with a different name.** The plan
+asked for two cases on the cache: it returns a cached value inside the TTL, and refetches
+after. Both describe any cache ever written. Neither touches the behaviour this cache exists
+for, which is handing back an expired value when the source refuses. Three cases were added
+and the testing policy corrected to match.
+
+The service was then driven through all four of its states by taking control of both the
+network and the clock — cold cache with the source down, source reachable, source down while
+the cache is fresh, and source down after the cache expires. The last one is the one worth
+having: it confirmed that an expired cache serves the last real price rather than quietly
+reverting to the sample. Only the second of those four can be produced by asking the live API
+nicely.
+
+Two smaller things the real response taught that the sample never would have. CoinGecko
+returns assets in market-capitalisation order, not the order anyone chose them in, so the
+service reorders them — a list that reshuffles itself relative to the quiz is harder to read.
+And `price_change_percentage_24h` is nullable. It becomes zero rather than dropping the asset,
+which meant the interface also had to stop painting exactly zero green: otherwise a flat day
+and a missing figure both read as good news.
+
+`COINGECKO_API_KEY` was added as optional, which the plan did not call for. The public tier
+needs no key, but its allowance is counted per IP address and a free cloud host shares one
+with strangers — so the key changes nothing about how the code runs and everything about how
+often it is turned away. Optional in every environment, because a fresh clone has to run
+without signing up for anything.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit

@@ -42,8 +42,8 @@ mongodb-memory-server, Playwright.
 | M5 — Dashboard UI on mock data        | done   |
 | M6 — Feedback voting                  | done   |
 | M7 — First deploy                     | done   |
-| M8 — Coin prices (CoinGecko)          | next   |
-| M9 — Market news (CryptoPanic)        | todo   |
+| M8 — Coin prices (CoinGecko)          | done   |
+| M9 — Market news (CryptoPanic)        | next   |
 | M10 — Crypto meme (Reddit)            | todo   |
 | M11 — AI insight (OpenRouter)         | todo   |
 | M12 — Polish and smoke test           | todo   |
@@ -435,19 +435,40 @@ shared by the Mongoose enum and the Zod schema) and `client/src/features/dashboa
 - Produces: `createTtlCache({ ttlMs })` with `getOrFetch(key, fetcher)` and a stale fallback;
   `fetchCoinMarkets(assetIds)`; `loadCoinPrices(watchedAssetIds)`.
 
-- [ ] **Step 1:** `inMemoryCache.js` — a `Map` of `{ value, expiresAtMs }` with
+- [x] **Step 1:** `inMemoryCache.js` — a `Map` of `{ value, expiresAtMs }` with
       `getOrFetch`, keeping the last good value so it can be served stale on error.
-- [ ] **Step 2:** Write `inMemoryCache.test.js` (the one unit test in the capped suite):
-      returns the cached value inside the TTL, refetches after it expires.
-- [ ] **Step 3:** `coinGeckoClient.js` — one request to
+- [x] **Step 2:** Write `inMemoryCache.test.js` (the one unit test in the capped suite):
+      returns the cached value inside the TTL, refetches after it expires. Three more cases
+      were added and `testing-policy.md` updated to match — see the note below.
+- [x] **Step 3:** `coinGeckoClient.js` — one request to
       `/coins/markets?vs_currency=usd&ids=<joined>`, never one request per coin. Parse the
       response with a Zod schema and map it to the frozen shape.
-- [ ] **Step 4:** `pricesService.js` — 60-second TTL keyed by the sorted asset ids; on
+- [x] **Step 4:** `pricesService.js` — 60-second TTL keyed by the sorted asset ids; on
       failure serve the stale value, else the M5 mock, with `isFallback: true`.
-- [ ] **Step 5:** Point the prices endpoint at the service instead of the mock.
-- [ ] **Step 6:** Verify: real prices for the selected assets; a second request within
+- [x] **Step 5:** Point the prices endpoint at the service instead of the mock. **Nothing to
+      do:** M5 created `pricesService.loadCoinPrices` with a mock body precisely so that this
+      milestone would replace one function body and touch neither the controller nor the
+      client. That decision paid here.
+- [x] **Step 6:** Verify: real prices for the selected assets; a second request within
       60 seconds does not hit CoinGecko; blocking the network still renders the section.
-- [ ] **Step 7:** Lint, format, test, commit, open the PR, deploy.
+- [x] **Step 7:** Lint, format, test, commit, open the PR, deploy.
+
+**Test scope widened, deliberately.** The two cases the plan named describe any cache. They
+do not touch the behaviour this cache was written for — serving an expired value when the
+source fails. After M6, where a test passed with the constraint it claimed to prove removed,
+covering only the easy half was not defensible. Three cases added: stale-on-failure, rethrow
+when there is nothing to fall back on, and keys kept apart.
+
+**`COINGECKO_API_KEY` added as optional**, which the plan did not call for. CoinGecko's public
+tier needs no key, but the allowance is per IP address and Render's free tier shares one with
+strangers. The key changes nothing about how the code runs and everything about how often it
+is turned away. Optional in every environment: a fresh clone must run without signing up for
+anything.
+
+**Extra care that turned out to be needed:** `price_change_percentage_24h` is nullable in
+CoinGecko's response. It becomes zero rather than dropping the asset, and the interface now
+paints exactly zero in a neutral colour rather than green — otherwise both a flat day and a
+missing figure would have read as a gain.
 
 ---
 
