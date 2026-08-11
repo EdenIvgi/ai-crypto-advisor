@@ -292,6 +292,43 @@ Naming all three would mean widening a response contract that four sections shar
 that only occurs while a third party is down, and the prices card beside it already reads
 **Saved prices** whenever it happens. Left as is, deliberately.
 
+## The 24-hour change is shown to one decimal, and not derived
+
+Reported as "the percentages are wrong", and the investigation went somewhere unexpected.
+
+Our value turned out to be a faithful copy of `price_change_percentage_24h` — no arithmetic
+anywhere, and all twelve assets matched CoinGecko field-for-field. But **that field arrives
+rounded to a tenth of a per cent**: twelve assets sampled together came back as exact multiples
+of 0.1. Rendering it as `-0.90%` claimed a hundredth nobody had given us, and made a coarse
+number look stuck rather than coarse.
+
+**The tempting fix was the wrong one, and only the human's evidence caught it.** The same
+response carries `price_change_24h` and `current_price` at full precision, and deriving from
+them agrees with `market_cap_change_percentage_24h` to within 0.03 points — a value that is
+internally consistent and, for BTC, differs from the given field by 0.15 points. On other assets
+the gap reached a full point, and Litecoin's sign flipped. That looked conclusive.
+
+Then screenshots of CoinGecko's own site showed BTC at **-0.9% on the markets table** and
+**-1.1% on the coin page**, at the same moment. Four answers to one question, three of them
+theirs:
+
+| Source                                       | BTC 24h |
+| -------------------------------------------- | ------- |
+| CoinGecko markets table                      | -0.9%   |
+| CoinGecko coin page                          | -1.1%   |
+| `price_change_percentage_24h` — what we read | -0.9%   |
+| derived from `price_change_24h`              | -0.745% |
+
+They are inconsistent across their own surfaces, so "correct" is not on the menu. The only
+question left is which of their numbers a reader can reconcile — and the rounded field is the one
+on the listing anybody would check. Deriving would have invented a fourth answer that matches
+nothing.
+
+So: the field is read as given, the display shows one decimal, and the reasoning sits in
+`clients/coinGeckoClient.js` so the derivation is not "fixed" back in later. The prompt was
+handed the same false precision, which is where an early insight got "a spread of about 3.23
+percentage points" from figures accurate to a tenth.
+
 ## Only the production frontend can sign in, and Vercel preview URLs cannot
 
 `CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —
