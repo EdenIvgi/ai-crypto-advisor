@@ -667,8 +667,20 @@ because the first one needs the second one's service function to clean up after 
       removes only its own row, a bad section in the query string is a 400, a section change
       leaves the insight byte-identical, and a style change rewrites it and drops its vote. The
       demo account was restored to its starting state afterwards.
-- [ ] **Step 8:** Browser pass over both features. Blocked on `PORT` in `server/.env`, which is
-      set to 5173 and collides with Vite — the API and the dev server fight over one port, and
-      the client looks for the API on 4000. One line, in a file only the human can edit.
+- [x] **Step 8:** Browser pass over both features, on the demo account: a thumb pressed, kept
+      across a reload, pressed again to withdraw it, and still withdrawn after another reload;
+      the settings screen prefilled, "Discard changes" appearing only once something changed, and
+      Save landing on a dashboard whose insight had been rewritten from "For a long-term holder"
+      to "For a day trader" off the same headline. The demo account was put back afterwards.
+
+      Blocked for a while on a diagnosis of mine that was wrong. The API was binding 5173 and
+          fighting Vite for it, and I read that as `PORT=5173` in `server/.env` — a file I cannot
+          read — and asked for it to be changed. It already said 4000. The real cause was the
+          `full-stack` entry I had just added to `.claude/launch.json`: the harness injects that
+          entry's `port` into the process environment, and `--env-file-if-exists` does not override a
+          variable that is already set, so the declared 5173 beat the file's 4000. Confirmed by
+          declaring 4321 and watching the API bind 4321. Fixed by declaring the API on 4000 and
+          leaving 5173 to the client, which is two entries rather than one.
+
 - [x] **Step 9:** `docs/decisions.md`, the testing policy, the README, and this file.
 - [ ] **Step 10:** Commit, open the PR, and merge once CI is green.
