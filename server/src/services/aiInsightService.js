@@ -1,5 +1,6 @@
 import { DailyAiInsight } from '../models/DailyAiInsight.js'
 import { INVESTOR_TYPE_LABELS } from '../data/preferenceOptions.js'
+import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
 import {
   generateChatCompletion,
   isHuggingFaceConfigured,
@@ -8,56 +9,58 @@ import { loadCoinPrices } from './pricesService.js'
 import { loadMarketNews } from './newsService.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
 
-const DUPLICATE_KEY_ERROR_CODE = 11000
+const ASSETS_BY_ID = new Map(SUPPORTED_ASSETS.map((asset) => [asset.id, asset]))
 
-// How much of the day's material the model is shown. Enough to have something to say, few
-// enough that the paragraph stays about the reader rather than summarising a feed.
-const HEADLINES_IN_PROMPT = 4
+const DUPLICATE_KEY_ERROR_CODE = 11000
 
 /**
  * What the model is and is not allowed to do.
  *
- * The paragraph in the second block is there because the first draft of this prompt produced a
- * competent news digest: it walked through every asset and every headline, which is precisely
- * what the two cards sitting beside it on the dashboard already do. Telling the model what the
- * reader can already see is what stops it duplicating them.
+ * **No figures, and that is the load-bearing rule.** This paragraph is written once and stored
+ * for the day, while a 24-hour percentage changes continuously — so an insight that cited
+ * "Bitcoin is down 0.9%" was quoting a number that had stopped being true by lunchtime, on a
+ * page whose prices card was showing the current one two inches away. Headlines do not spoil
+ * that way: an event that happened this morning still happened this evening. So the prompt is
+ * given events and asked for interpretation, which is also the one thing the cards beside it
+ * cannot do.
  *
- * Rule 3 is the one that must not be relaxed — this section is a daily read on the market, not
- * an adviser, and a model asked for an "insight" about somebody's own holdings drifts into
- * telling them what to buy unless it is forbidden. Rule 4 exists because a model given three
- * real figures will invent a fourth that fits the sentence.
+ * Rule 3 must not be relaxed — this section is a daily read on the market, not an adviser, and a
+ * model asked for an "insight" about somebody's own holdings drifts into telling them what to buy
+ * unless it is forbidden.
  */
 const INSIGHT_SYSTEM_PROMPT = [
   'You write the "Insight of the day" paragraph for a crypto dashboard, addressed to one',
-  'reader whose holdings and investing style you are given.',
+  'reader whose assets and investing style you are given.',
   '',
-  "This reader can already see their prices and the day's headlines, in their own sections,",
-  'directly beside your paragraph. Summarising either is wasted space. Your job is the thing',
-  'those lists cannot do: say what today means for somebody who invests the way this reader',
-  'does.',
+  "This reader can already see their prices and the day's headlines, in their own sections",
+  'directly beside your paragraph, and those update through the day while your paragraph is',
+  'written once. So your job is neither a price report nor a news summary: it is to say what',
+  "today's events mean for somebody who invests the way this reader does.",
   '',
   'Rules:',
-  '1. Pick ONE thing worth noticing and stay on it. Do not walk through every asset or every',
-  '   headline.',
-  "2. Tie it to this reader's style, using what they are said to pay attention to. The same",
-  '   day should produce genuinely different paragraphs for different styles, not the same',
-  '   paragraph with different adjectives.',
+  '1. **Never mention a price, a percentage, or any number describing market movement.** Do not',
+  '   say an asset rose, fell, gained, dipped, slipped or is flat. You are not being shown',
+  '   prices, and anything you claimed about them would be out of date within the hour.',
+  '2. Pick ONE thing from the headlines worth understanding and stay on it. Do not list them.',
+  '   Say what it is and why it matters to this reader.',
   '3. Never recommend buying, selling or holding. Never predict a price or a direction. Never',
   '   instruct the reader at all — no "keep an eye on", no "watch for", no "consider". You are',
-  '   not an adviser. State what is worth seeing and let them do the seeing.',
-  '4. Ignore any headline unrelated to the assets this reader follows.',
-  '5. Three sentences. Four at the very most. Plain prose — no lists, no headings, no emoji,',
-  '   and no preamble such as "Here is your insight". Return the paragraph itself.',
+  '   not an adviser. State what is worth understanding and let them draw the conclusion.',
+  "4. Tie it to this reader's style, using what they are said to pay attention to. The same day",
+  '   should produce genuinely different paragraphs for different styles, not the same paragraph',
+  '   with different adjectives.',
+  '5. Prefer a headline that touches the assets they follow. If none does, take the most',
+  '   consequential one for the market as a whole and say plainly that it is the wider picture.',
+  '6. Three sentences. Four at the very most. Plain prose — no lists, no headings, no emoji, and',
+  '   no preamble such as "Here is your insight". Return the paragraph itself.',
   '',
-  'You have no information beyond what appears below. Every figure you write must be one that',
-  'was given to you. Do not state transaction fees, volumes, inflows, market caps or anything',
-  'else that is absent, do not write "according to data", and do not explain why a price moved',
-  'unless a headline below says why.',
+  'You have no information beyond the headlines below. Do not state fees, volumes, inflows,',
+  'market caps, supply figures or dates that are not there, do not write "according to data",',
+  'and do not assert a cause for anything unless a headline says it.',
   '',
   'You also know nothing about this reader beyond the style and the asset list. You do not know',
   'what else they own, which chains anything of theirs sits on, or how long they have held it —',
-  'so never write as though you do. If the day gives you nothing that suits their style, make a',
-  'smaller and plainer point about what the figures actually show.',
+  'so never write as though you do.',
 ].join('\n')
 
 /**
@@ -65,22 +68,22 @@ const INSIGHT_SYSTEM_PROMPT = [
  * this feature passed only the label, and the model read "HODLer" as an instruction about tone;
  * a paragraph is only genuinely different when the thing being looked at is different.
  *
- * Every hint here is answerable from the prices and headlines the model is given, which is a
- * constraint learned the hard way. An earlier version told the collector to care about fees and
- * congestion — data this application never supplies — and the model duly invented a twenty per
- * cent fee rise and attributed it to "data". Asking for attention to a figure you do not
- * provide is a request to make one up.
+ * Every hint is answerable from headlines alone. That is a constraint learned twice. First a
+ * hint about fees and congestion — data this application never supplies — had the model invent a
+ * twenty per cent fee rise and credit it to "data". Then a hint about the spread between assets
+ * kept pulling the paragraph back to percentages, which is exactly what this section must not
+ * talk about. **A hint that names something the model cannot see is a request to make it up.**
  */
 const ATTENTION_BY_INVESTOR_TYPE = {
   hodler:
-    'cares whether anything structural changed, and treats one day of movement as noise ' +
-    'unless it is unusually large',
+    'cares only about things that change an asset for years rather than for a day — protocol ' +
+    'changes, regulation, custody, who is adopting it — and is indifferent to daily movement',
   day_trader:
-    'cares about the spread between these assets today — which of them is moving out of ' +
-    'step with the others, and by how much',
+    'cares about events that put a market in play over the next few sessions — listings, ' +
+    'outages, security incidents, launches, anything that changes how people trade an asset',
   nft_collector:
-    "cares about the chains their collections live on, so watches those chains' own tokens " +
-    'and any headline concerning them',
+    'cares about the chains collections live on and the places they are traded — network ' +
+    'upgrades, marketplaces, and where new activity is going',
 }
 
 /**
@@ -90,17 +93,20 @@ const ATTENTION_BY_INVESTOR_TYPE = {
  *
  * 1. **Today's stored insight**, if there is one. One model call per person per day, so a
  *    refresh costs nothing and — more importantly — shows the same paragraph as an hour ago.
- * 2. **A generated one**, from the day's prices and headlines, stored only if that material
- *    was live. An insight inherits the honesty of what it was written from: if either source
- *    was serving sample content, the paragraph reports `isFallback: true` even though a model
- *    wrote it, and is not cached — otherwise one refused API would hold an invented market on
- *    the page for a full day.
- * 3. **A composed one**, assembled from the prices themselves when no key is configured or
- *    every model fails. It reports `isFallback: true`.
+ * 2. **A generated one**, written from today's headlines and stored if those headlines were
+ *    live. An insight inherits the honesty of its material: written from the sample feed it
+ *    reports `isFallback: true` even though a model wrote it, and is not cached — otherwise a
+ *    refused source would hold events that never happened on the page for a full day.
+ * 3. **A composed one**, assembled from live prices when no key is configured or every model
+ *    fails. It reports `isFallback: true`.
  *
- * There is no sample text behind this section. The sources above both run on whatever the
- * price service has, so falling back to a fixed paragraph about a market that never happened
- * would be a worse answer than the plain one this composes.
+ * Note the asymmetry between 2 and 3, which is deliberate: the generated paragraph is never
+ * allowed to mention a figure, because it is stored for a day and a percentage is not true for
+ * a day. The composed one is built from figures and is fine, because it is rebuilt on every
+ * request and never stored, so its numbers are always the current ones.
+ *
+ * There is no sample text behind this section. Both paths run on live material, so falling back
+ * to a fixed paragraph about a market that never happened would be the worse answer.
  *
  * This function never throws. A section of a dashboard is not worth an error page.
  *
@@ -113,38 +119,34 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssetIds }
   const storedText = await readStoredInsight(userId, date)
   if (storedText) return buildResponse(userId, date, storedText, false)
 
-  // Both of these are documented never to throw, which is what lets the guarded region below
-  // be only the part that can, and lets the fallback always have real figures to work with.
-  const prices = await loadCoinPrices(watchedAssetIds)
+  if (isHuggingFaceConfigured) {
+    try {
+      const news = await loadMarketNews(watchedAssetIds)
+      const insightText = await generateChatCompletion(
+        buildInsightMessages(investorType, watchedAssetIds, news.articles)
+      )
 
-  if (!isHuggingFaceConfigured) {
-    return buildResponse(userId, date, composeFromPrices(investorType, prices.coins), true)
+      // A paragraph is only as true as the material it was written from, and this is the case
+      // that taught it: while CoinGecko was refusing this host, a model was handed the sample
+      // prices and wrote "Dogecoin's 5.07% rise outpaces Bitcoin's 1.84% gain, a spread of
+      // about 3.23 percentage points" — a computed, confident claim about a day that never
+      // happened. Prices are out of the prompt now, so only the feed can taint it, but the rule
+      // stands: an insight built on sample material is not cached, because this cache is keyed
+      // by the day and would hold the invented story for twenty-four hours.
+      if (!news.isFallback) await rememberTodaysInsight(userId, date, insightText)
+
+      return buildResponse(userId, date, insightText, news.isFallback)
+    } catch (generationError) {
+      console.warn('Composing the insight from prices instead:', generationError.message)
+    }
   }
 
-  try {
-    const news = await loadMarketNews(watchedAssetIds)
-    const insightText = await generateChatCompletion(
-      buildInsightMessages(investorType, prices.coins, news.articles)
-    )
+  // Only reached with no key or after every model failed, and it is the one path that needs
+  // prices — which is why they are fetched here rather than up front. `loadCoinPrices` is
+  // documented never to throw.
+  const { coins } = await loadCoinPrices(watchedAssetIds)
 
-    // A paragraph is only as true as the material it was written from, and this is the case
-    // that taught it: while CoinGecko was refusing this host, a model was handed the sample
-    // prices and wrote "Dogecoin's 5.07% rise outpaces Bitcoin's 1.84% gain, a spread of about
-    // 3.23 percentage points" — a computed, confident claim about a day that never happened,
-    // over a card reading "Written for you today". A stale price is a wrong number; prose built
-    // on one is an argument.
-    //
-    // So the flag is inherited, and such an insight is deliberately not stored: this cache is
-    // keyed by the day, and storing it would hold the invented market for a full twenty-four
-    // hours instead of letting the next request try again on real figures.
-    const wroteFromSampleMaterial = prices.isFallback || news.isFallback
-    if (!wroteFromSampleMaterial) await rememberTodaysInsight(userId, date, insightText)
-
-    return buildResponse(userId, date, insightText, wroteFromSampleMaterial)
-  } catch (generationError) {
-    console.warn('Composing the insight from prices instead:', generationError.message)
-    return buildResponse(userId, date, composeFromPrices(investorType, prices.coins), true)
-  }
+  return buildResponse(userId, date, composeFromPrices(investorType, coins), true)
 }
 
 /**
@@ -191,33 +193,45 @@ const rememberTodaysInsight = async (userId, insightDate, insightText) => {
  * require reaching into a private function or duplicating its wording somewhere else.
  *
  * @param {string} investorType - One of `INVESTOR_TYPES`
- * @param {Array<{ name: string, symbol: string, priceUsd: number, change24hPercent: number }>} coins
+ * @param {string[]} watchedAssetIds - CoinGecko ids, e.g. ['bitcoin', 'ethereum']
  * @param {Array<{ title: string }>} articles
  * @returns {Array<{ role: 'system' | 'user', content: string }>}
  */
-export const buildInsightMessages = (investorType, coins, articles) => [
+export const buildInsightMessages = (investorType, watchedAssetIds, articles) => [
   { role: 'system', content: INSIGHT_SYSTEM_PROMPT },
-  { role: 'user', content: buildBriefingMaterial(investorType, coins, articles) },
+  { role: 'user', content: buildBriefingMaterial(investorType, watchedAssetIds, articles) },
 ]
 
-/** Everything the model is given about today, as plain lines rather than JSON. */
-const buildBriefingMaterial = (investorType, coins, articles) =>
+/**
+ * Everything the model is given about today, as plain lines rather than JSON.
+ *
+ * The assets are named and nothing more — no price, no change, no direction. The model needs to
+ * know which coins matter so it can pick the headline that touches them; it does not need, and
+ * must not be given, a figure it would then quote into a paragraph that outlives the figure.
+ */
+const buildBriefingMaterial = (investorType, watchedAssetIds, articles) =>
   [
     `Reader's style: ${INVESTOR_TYPE_LABELS[investorType] ?? 'HODLer'}, who ` +
       `${ATTENTION_BY_INVESTOR_TYPE[investorType] ?? ATTENTION_BY_INVESTOR_TYPE.hodler}.`,
     '',
-    'Assets they follow, with the last 24 hours:',
-    ...coins.map((coin) => `- ${coin.name} (${coin.symbol}): ${formatQuote(coin)}`),
+    `Assets they follow: ${describeWatchedAssets(watchedAssetIds)}.`,
     '',
+    // Exactly the headlines the news section is showing, not a longer list fetched for the
+    // model's benefit. So the reader can always see the material the paragraph was written
+    // from, sitting in the card beside it — an insight whose source is on the same screen is
+    // one they can check.
     "Today's headlines, some of which may be irrelevant to the assets above:",
-    ...articles.slice(0, HEADLINES_IN_PROMPT).map((article) => `- ${article.title}`),
+    ...articles.map((article) => `- ${article.title}`),
   ].join('\n')
 
-// One decimal, matching what CoinGecko actually gives and what the interface shows. Handing the
-// model "-0.90%" invited it to compute with a precision nobody had: an early draft was given
-// two-decimal figures and produced "a spread of about 3.23 percentage points" from them.
-const formatQuote = ({ priceUsd, change24hPercent }) =>
-  `$${priceUsd.toLocaleString('en-US')}, ${formatSignedPercent(change24hPercent)} over 24h`
+const describeWatchedAssets = (watchedAssetIds) => {
+  const names = watchedAssetIds
+    .map((assetId) => ASSETS_BY_ID.get(assetId))
+    .filter((asset) => asset !== undefined)
+    .map((asset) => `${asset.name} (${asset.symbol})`)
+
+  return names.length > 0 ? names.join(', ') : 'none in particular'
+}
 
 /**
  * The paragraph when no model wrote one. Assembled from the same live prices the model would
