@@ -26,7 +26,8 @@ Work in progress, built milestone by milestone against
 | Live coin prices (CoinGecko)            | done  |
 | Live market news (publisher feeds)      | done  |
 | Meme of the day                         | done  |
-| AI insight of the day                   | next  |
+| AI insight of the day (Hugging Face)    | done  |
+| Polish, accessibility, smoke test       | next  |
 
 **Live: https://ai-crypto-advisor-client-pi.vercel.app** — press "Look around with a demo
 account" and you are on a populated dashboard. The API is at
@@ -34,9 +35,8 @@ account" and you are on a populated dashboard. The API is at
 it directly. Give the first request up to a minute — the free instance stops when nobody is
 using it.
 
-Prices, news and the meme are real; only the AI insight still shows sample copy, and says so.
-Each section is labelled with where its content came from, so the label is never a decoration.
-That is the last milestone of the four.
+All four sections now run on real content, and each is labelled with where its content came
+from — so the label is never a decoration, and a fallback is never mistaken for today's data.
 
 ## Running it locally
 
@@ -54,20 +54,24 @@ in-memory MongoDB and generates a session secret for that process, and says so i
 Everything works; nothing survives a restart. To keep your data, copy `server/.env.example` to
 `server/.env` and fill in a real `MONGODB_URI` and `JWT_SECRET`.
 
-| Variable            | Where  | Required      | Notes                                                  |
-| ------------------- | ------ | ------------- | ------------------------------------------------------ |
-| `NODE_ENV`          | server | no            | `development`, `test`, or `production`                 |
-| `PORT`              | server | no            | Defaults to 4000                                       |
-| `CLIENT_ORIGIN`     | server | no            | Exact browser origin, for CORS. No trailing slash      |
-| `MONGODB_URI`       | server | in production | Include the database name before the `?`               |
-| `JWT_SECRET`        | server | in production | At least 32 characters                                 |
-| `VITE_API_BASE_URL` | client | in production | Origin of the API. Defaults to `http://localhost:4000` |
-| `COINGECKO_API_KEY` | server | never         | Free demo key. Raises a per-IP allowance, nothing more |
+| Variable              | Where  | Required      | Notes                                                      |
+| --------------------- | ------ | ------------- | ---------------------------------------------------------- |
+| `NODE_ENV`            | server | no            | `development`, `test`, or `production`                     |
+| `PORT`                | server | no            | Defaults to 4000                                           |
+| `CLIENT_ORIGIN`       | server | no            | Exact browser origin, for CORS. No trailing slash          |
+| `MONGODB_URI`         | server | in production | Include the database name before the `?`                   |
+| `JWT_SECRET`          | server | in production | At least 32 characters                                     |
+| `VITE_API_BASE_URL`   | client | in production | Origin of the API. Defaults to `http://localhost:4000`     |
+| `COINGECKO_API_KEY`   | server | never         | Free demo key. Raises a per-IP allowance, nothing more     |
+| `HUGGINGFACE_API_KEY` | server | never         | Read token. Without it the insight is composed from prices |
 
-**No API key is required for anything.** Prices come from CoinGecko's public tier and news
-from the publishers' own RSS feeds, neither of which needs an account — so a fresh clone runs
-with real, live content and no signup. Every section states where its content came from, so a
-fallback is never mistaken for today's data.
+**No API key is required to run any of this.** Prices come from CoinGecko's public tier and news
+from the publishers' own RSS feeds, neither of which needs an account, and the meme is drawn in
+this repository. The one key that changes what you see is `HUGGINGFACE_API_KEY`: with it the
+insight is **written by a model** for the way you said you invest; without it the same card is
+**composed from the day's real prices** instead. Both are true statements about live data, and
+the card says which one you are reading — as every section does, so a fallback is never mistaken
+for today's content.
 
 Percent-encode special characters in the Mongo password: an unquoted `#` truncates the value
 where the `.env` parser treats it as a comment.
@@ -99,7 +103,7 @@ flowchart LR
     Browser["React 19 + Vite<br/>TanStack Query"]
     API["Express 5<br/>routes → controllers → services"]
     DB[("MongoDB Atlas<br/>users · votes · insights")]
-    Ext["CoinGecko · publisher RSS<br/>OpenRouter"]
+    Ext["CoinGecko · publisher RSS<br/>Hugging Face"]
 
     Browser -- "JWT in an httpOnly cookie" --> API
     API --> DB

@@ -45,8 +45,8 @@ mongodb-memory-server, Playwright.
 | M8 — Coin prices (CoinGecko)          | done   |
 | M9 — Market news (publisher RSS)      | done   |
 | M10 — Crypto meme (static, in-repo)   | done   |
-| M11 — AI insight (OpenRouter)         | next   |
-| M12 — Polish and smoke test           | todo   |
+| M11 — AI insight (Hugging Face)       | done   |
+| M12 — Polish and smoke test           | next   |
 | M13 — Docs and handover               | todo   |
 
 ---
@@ -547,21 +547,31 @@ party behind it, so it is also the one whose `isFallback` is a constant `false`.
 - Produces: `generateInsight({ investorType, watchedAssetIds, coins })`,
   `loadDailyInsight(userId)`.
 
-- [ ] **Step 1:** `DailyAiInsight.js` — exactly `{ userId, insightDate, insightText }` with
+- [x] **Step 1:** `DailyAiInsight.js` — exactly `{ userId, insightDate, insightText }` with
       a unique compound index on `{ userId, insightDate }`. Nothing else: unused fields were
       deliberately cut.
-- [ ] **Step 2:** `openRouterClient.js` — an ordered list of free model ids, tried in turn
-      until one responds. Free model availability changes without notice, so a single
-      hard-coded model is a liability.
-- [ ] **Step 3:** Prompt built from the investor type, the watched assets, and today's real
-      prices, asking for three or four sentences.
-- [ ] **Step 4:** `aiInsightService.js` — look up today's document first and return it if
-      present; otherwise generate, store, and return. One model call per user per day.
-- [ ] **Step 5:** A deterministic templated insight built from live price data as the last
-      resort, so the section is never empty even with no key and every model failing.
-- [ ] **Step 6:** Verify: the first load calls the model, a reload serves from the database
-      with no call, and exactly one document exists per user per day.
-- [ ] **Step 7:** Lint, format, test, commit, open the PR, deploy.
+- [x] **Step 2:** ~~`openRouterClient.js`.~~ `huggingFaceClient.js` — the human chose Hugging
+      Face, which the brief offers as an alternative. The ordered chain survived the change and
+      earned itself twice over: `api-inference.huggingface.co` is gone entirely, and **no model
+      on the current router is free** — all 205 live provider entries bill per token against a
+      monthly credit. At $0.000014 to $0.000063 an insight, the chain is ordered by quality.
+- [x] **Step 3:** Prompt built from the investor type, the watched assets, today's real prices
+      **and today's headlines**, asking for three sentences. Took three rounds against real
+      output; the failures are recorded in `docs/decisions.md` because each was instructive.
+- [x] **Step 4:** `aiInsightService.js` — today's document first, otherwise generate, store,
+      return. One model call per person per day, verified at 2s cold and 0s warm.
+- [x] **Step 5:** Composed from live prices as the last resort — and `MOCK_INSIGHTS_BY_INVESTOR_TYPE`
+      **deleted**, because a fixed paragraph about a market that never happened is a worse
+      answer than a plain sentence about the real one.
+- [x] **Step 6:** Verified: cold call generates, reload serves from Mongo with identical text,
+      the unique index holds, and the no-key path composes from real figures. Also verified with
+      no database at all, which is how two swallowing bugs were found.
+- [x] **Step 7:** Lint, format, test, commit, open the PR, deploy.
+
+**Deviations, recorded in full in `docs/decisions.md`:** Hugging Face rather than OpenRouter, at
+the human's choice; no free models exist on it, which turned out not to matter; and the model is
+explicitly forbidden to recommend, predict or instruct, with an "Observations, not advice" line
+on the card.
 
 ---
 
