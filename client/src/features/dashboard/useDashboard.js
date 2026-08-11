@@ -15,9 +15,12 @@ const DAILY_STALE_TIME_MS = 60 * 60 * 1000
  * Four independent queries rather than one, matching the four endpoints. Each section
  * subscribes only to its own, so one failure leaves the other three untouched.
  *
- * The stale times mirror how often each source actually changes, which is also what the
- * server-side caches will use from M8 onward: refetching prices is worth it, refetching a
- * meme chosen once a day is not.
+ * The stale times mirror how often each source actually changes: refetching prices is worth
+ * it, refetching a meme chosen once a day is not. They match the server-side cache for the
+ * same section, so a refetch that beats the cache would only return identical bytes.
+ *
+ * Only prices poll. The other three change at most once a day, so an interval on them would
+ * be a request that is guaranteed to return what the page already has.
  */
 
 export const useCoinPrices = () =>
@@ -25,6 +28,11 @@ export const useCoinPrices = () =>
     queryKey: ['dashboard', 'prices'],
     queryFn: fetchCoinPrices,
     staleTime: PRICES_STALE_TIME_MS,
+    // A price dashboard left open and not moving reads as broken. Deliberately the same
+    // number as the stale time and as the server's own cache: polling faster would spend
+    // requests to be handed the same cached response, and CoinGecko's own figure lags two to
+    // three minutes behind anyway. Background polling stays off — a hidden tab has no reader.
+    refetchInterval: PRICES_STALE_TIME_MS,
   })
 
 export const useMarketNews = () =>

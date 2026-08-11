@@ -213,8 +213,11 @@ const buildBriefingMaterial = (investorType, coins, articles) =>
     ...articles.slice(0, HEADLINES_IN_PROMPT).map((article) => `- ${article.title}`),
   ].join('\n')
 
+// One decimal, matching what CoinGecko actually gives and what the interface shows. Handing the
+// model "-0.90%" invited it to compute with a precision nobody had: an early draft was given
+// two-decimal figures and produced "a spread of about 3.23 percentage points" from them.
 const formatQuote = ({ priceUsd, change24hPercent }) =>
-  `$${priceUsd.toLocaleString('en-US')}, ${change24hPercent >= 0 ? '+' : ''}${change24hPercent.toFixed(2)}% over 24h`
+  `$${priceUsd.toLocaleString('en-US')}, ${formatSignedPercent(change24hPercent)} over 24h`
 
 /**
  * The paragraph when no model wrote one. Assembled from the same live prices the model would
@@ -260,7 +263,7 @@ const CLOSING_LINE_BY_INVESTOR_TYPE = {
 }
 
 const formatSignedPercent = (changePercent) =>
-  `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`
+  `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%`
 
 const buildResponse = (userId, date, text, isFallback) => {
   const insight = { id: `${userId}:${date}`, text, date }
