@@ -315,6 +315,64 @@ with strangers — so the key changes nothing about how the code runs and everyt
 often it is turned away. Optional in every environment, because a fresh clone has to run
 without signing up for anything.
 
+### M9 — Live market news
+
+The milestone where the human's questions were worth more than the code, and where a
+requirement turned out to have been invented rather than read.
+
+**The source was probed before a line was written, which is the only part of this that went to
+plan.** CryptoPanic answered a plain request with a Cloudflare challenge page and answered the
+documented developer endpoint with the website's own HTML. That was reported with a
+recommendation to switch to RSS; the human chose to stay with CryptoPanic, which was
+reasonable on the information available, and the no-key path was built and committed against
+the contract M5 had frozen.
+
+Then the human opened CryptoPanic's own page and found the notice: **the free Developer plan
+was discontinued and removed on 1 April 2026.** The premise the choice rested on was four
+months gone.
+
+**Two questions followed, and each one improved the result.** The first — "is there another
+free API?" — produced a survey of eleven, and the finding that mattered was not that they all
+now need a key. It was that the one capability justifying a key at all, per-coin tagging,
+no longer exists on any free tier either; Finnhub's crypto endpoint is a general feed. A key
+would have bought a single point of failure and no personalisation.
+
+The second question was the sharper one: **"is filtering by coin even required?"** It was not.
+The requirement came from the implementation plan — written by this assistant — and had been
+treated as given ever since.
+
+**That question also exposed that the brief had never been read as text.** It is a scanned PDF
+with no text layer; nine milestones had been built against a summary of it. `pdftotext`
+extracted it in one command. Two lines changed the milestone:
+
+> Market News (CryptoPanic API **or static fallback**)
+>
+> Use only **free** public APIs and free-tier AI tools
+
+CryptoPanic on a paid plan would have broken the second instruction while satisfying a
+suggestion. The brief also asks only that the four **sections** follow the quiz — nothing about
+the contents of one being filtered by the assets someone follows.
+
+So filtering became **ranking**: headlines naming a followed asset first, the rest by recency,
+always five. Matching a headline to a coin is a guess, and a guess that only reorders can
+never cost a reader an article it got wrong. Verified against 108 live articles — a reader
+following Solana and Cardano gets three relevant headlines lifted from well outside the top
+eight, and a reader following Dogecoin, about which nothing was published, still gets a full
+card instead of an empty one.
+
+**One bug that only real data could produce.** The Block sends curly apostrophes as `&#8217;`,
+a numeric character reference the XML parser leaves alone unless asked, so "Revolut's" would
+have reached the browser as `Revolut&#8217;s`. Invisible in every schema and every test;
+obvious the moment actual headlines were printed.
+
+A side finding for the next milestone: Reddit answered a plain request with 403. The brief
+permits "Reddit scraping **or static JSON**" for memes, so M10 has an explicit way out.
+
+The process lesson is the one worth keeping. The plan was detailed and confident, and it
+specified an integration around a constraint nobody had asked for, sourced from a summary of a
+document that was sitting in the repository unread. Neither the detail nor the confidence
+caught it. A human asking "why do we need that?" did, twice.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit

@@ -8,8 +8,8 @@ The brief leaves the language open. TypeScript would have given the reader type 
 same job is done here by Zod at the three places untrusted data enters — request bodies,
 `process.env`, and external API responses — plus JSDoc on exported service functions.
 
-Zod earns its place regardless, because it validates at runtime where TypeScript cannot: a
-CryptoPanic response that changed shape overnight is caught by the schema, not by the compiler.
+Zod earns its place regardless, because it validates at runtime where TypeScript cannot: a news
+feed that changed shape overnight is caught by the schema, not by the compiler.
 
 ## Preferences embedded in the user document
 
@@ -134,6 +134,60 @@ across rows nobody could group again.
 The unique index is on `{ userId, sectionType, contentId }` rather than on `contentId` alone,
 so two people can disagree about the same meme and both opinions survive. That is the entire
 value of the data.
+
+## News comes from the publishers' RSS feeds, not from CryptoPanic
+
+The brief suggests CryptoPanic and also says **"use only free public APIs"**. Those two
+instructions stopped being compatible: CryptoPanic's free Developer plan was discontinued and
+removed on 1 April 2026, so the suggested source now requires a paid plan. Eleven alternatives
+were checked before choosing; every remaining crypto news API needs a key, and the ones that
+died did so recently — Messari's news endpoint returns 404, CoinStats and CoinDesk Data now
+answer 401, CoinGecko's is PRO-only.
+
+So the section reads four publisher RSS feeds directly — CoinDesk, Cointelegraph, Decrypt and
+The Block. RSS needs no account and no token, which keeps the promise that a fresh clone of this
+repository runs with real content and no signup.
+
+Three consequences, and the second is the one that made the decision easy:
+
+- **Four sources instead of one.** A feed that is down or slow costs a quarter of the headlines,
+  not the section. `fetchLatestArticles` only fails when all four do.
+- **Nothing was actually lost.** The one thing CryptoPanic offered that a feed does not is
+  per-coin tagging — and no surviving free tier has it either, Finnhub's crypto endpoint
+  included. A key would have bought a single point of failure and no personalisation.
+- **One request serves everyone.** The feeds are identical for every reader, so the cache holds
+  one entry and the publishers see one request per ten minutes regardless of how many people are
+  looking. Filtering upstream would have meant a separate request per combination of assets.
+
+## Headlines are ranked for the reader, not filtered
+
+The brief requires the four sections to be chosen by the quiz; it does not ask for the news
+inside one to be filtered by the assets someone follows. That was an invention of the
+implementation plan, and it was worth removing.
+
+Matching a headline to a coin is a guess: "the largest cryptocurrency just recovered" is about
+Bitcoin and never says so. Used as a filter, that guess silently costs the reader an article.
+Used as a **ranking** — headlines naming your assets first, the rest by recency — it can only
+reorder, the section always has five items, and there is no thin-card edge case to handle.
+
+Names are matched case-insensitively and tickers are not: `DOT` is Polkadot, `dot` is
+punctuation, and `\bATOM\b` matched case-insensitively would claim every headline containing
+the word "atom".
+
+## Only the production frontend can sign in, and Vercel preview URLs cannot
+
+`CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —
+`ai-crypto-advisor-client-<hash>-<account>.vercel.app` — and none of those match it, so a
+browser on a preview URL is refused by CORS and cannot log in. This looked like a bug the first
+time it happened; it is the policy working.
+
+The alternative was a regular expression matching `*.vercel.app`. That would accept requests
+from **any** account's deployment on that shared domain, and the cookie carrying the session is
+`SameSite=None`, so widening the origin widens exactly the thing the cookie relies on. A preview
+build is a convenience; an origin allowlist that admits a whole public suffix is not worth it.
+
+The consequence to know: after a deploy, test on the production domain. If a preview URL is ever
+genuinely needed, add that one origin explicitly.
 
 ## The test suite is capped
 

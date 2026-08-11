@@ -43,8 +43,8 @@ mongodb-memory-server, Playwright.
 | M6 — Feedback voting                  | done   |
 | M7 — First deploy                     | done   |
 | M8 — Coin prices (CoinGecko)          | done   |
-| M9 — Market news (CryptoPanic)        | next   |
-| M10 — Crypto meme (Reddit)            | todo   |
+| M9 — Market news (publisher RSS)      | done   |
+| M10 — Crypto meme (Reddit)            | next   |
 | M11 — AI insight (OpenRouter)         | todo   |
 | M12 — Polish and smoke test           | todo   |
 | M13 — Docs and handover               | todo   |
@@ -472,27 +472,35 @@ missing figure would have read as a gain.
 
 ---
 
-### Task M9: Market news (CryptoPanic)
+### Task M9: Market news (publisher RSS)
 
 **Files:**
 
-- Create: `server/src/clients/cryptoPanicClient.js`, `server/src/services/newsService.js`,
-  `server/src/data/fallbackNews.json`
-- Modify: `server/src/config/env.js` (optional `CRYPTOPANIC_API_KEY`), dashboard controller
+- Create: `server/src/clients/newsFeedClient.js`
+- Modify: `server/src/services/newsService.js`, dashboard controller
 
-- [ ] **Step 1:** Add `CRYPTOPANIC_API_KEY` as **optional** in the env schema. The app must
-      run for anyone who clones the repository without a key.
-- [ ] **Step 2:** `fallbackNews.json` — 12 to 15 real, hand-picked articles with working
-      URLs, so the fallback does not look broken.
-- [ ] **Step 3:** `cryptoPanicClient.js` — fetch posts filtered by the user's assets, Zod
-      parse, map to the frozen shape.
-- [ ] **Step 4:** `newsService.js` — 5-minute TTL; no key or any failure serves the
-      fallback file with `isFallback: true`.
-- [ ] **Step 5:** Show the fallback badge in `DashboardSectionCard` when `isFallback` is
-      true, worded as information rather than an error.
-- [ ] **Step 6:** Verify both paths: with the key unset the fallback renders with the
-      badge; with the key set, live headlines appear.
-- [ ] **Step 7:** Lint, format, test, commit, open the PR, deploy.
+- [x] **Step 1:** ~~Add `CRYPTOPANIC_API_KEY` as optional in the env schema.~~ **Dropped.**
+      There is no key. RSS needs no account, so no environment variable was added — dead
+      configuration is worse than none.
+- [x] **Step 2:** ~~`fallbackNews.json` — 12 to 15 hand-picked articles.~~ **Dropped.**
+      `MOCK_NEWS_ARTICLES` in `data/mockDashboard.js` already holds sample headlines with
+      working URLs and is what M8 reused for prices. A second file in a second format would
+      have duplicated it.
+- [x] **Step 3:** ~~`cryptoPanicClient.js`.~~ `newsFeedClient.js` — four publisher feeds read
+      in parallel, Zod-parsed, merged newest first. Fails only when all four fail.
+- [x] **Step 4:** `newsService.js` — 10-minute TTL, not 5. The feeds are identical for every
+      reader, so the cache holds **one** entry and personalisation happens after it.
+- [x] **Step 5:** No client change was needed. The M5 contract held, and `DashboardSectionCard`
+      already renders the source label from `isFallback`; only its wording changed, to
+      "Live headlines", because this section merges four publishers rather than naming one.
+- [x] **Step 6:** Both paths verified — the fallback by running with the feeds unreachable,
+      the live path against 108 real articles, in the browser as well as at the endpoint.
+- [x] **Step 7:** Lint, format, test, commit, open the PR, deploy.
+
+**Deviation, recorded in full in `docs/decisions.md`:** CryptoPanic's free plan was discontinued
+on 1 April 2026, and the brief requires free public APIs, so the suggested source became
+non-compliant. The plan's per-asset filtering requirement was also not in the brief — this
+assistant invented it — and became ranking instead.
 
 ---
 
