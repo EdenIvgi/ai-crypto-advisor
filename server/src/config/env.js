@@ -42,12 +42,6 @@ const environmentSchema = z.object({
   // per IP address and a cloud host shares its address with strangers. Anyone cloning this
   // repository has to be able to run it without signing up for anything.
   COINGECKO_API_KEY: z.string().min(1).optional(),
-
-  // Also optional, but it buys more than the CoinGecko one does: CryptoPanic has no
-  // anonymous tier at all, so without this the news section serves sample headlines and
-  // says so. Optional anyway, because a clone of this repository has to run without anyone
-  // signing up for anything — a section that degrades honestly is better than a boot failure.
-  CRYPTOPANIC_API_KEY: z.string().min(1).optional(),
 })
 
 const exitWithConfigurationProblems = (problems) => {

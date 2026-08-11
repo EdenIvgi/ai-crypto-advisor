@@ -1,10 +1,10 @@
 import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
 import { MOCK_NEWS_ARTICLES } from '../data/mockDashboard.js'
-import { fetchLatestPosts, isCryptoPanicConfigured } from '../clients/cryptoPanicClient.js'
+import { fetchLatestArticles } from '../clients/newsFeedClient.js'
 import { createTtlCache } from '../lib/inMemoryCache.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
 
-const SYMBOLS_BY_ASSET_ID = new Map(SUPPORTED_ASSETS.map((asset) => [asset.id, asset.symbol]))
+const ASSETS_BY_ID = new Map(SUPPORTED_ASSETS.map((asset) => [asset.id, asset]))
 
 const ARTICLE_COUNT = 5
 
@@ -12,10 +12,21 @@ const ARTICLE_COUNT = 5
 // between two glances at the screen; a story published four minutes ago is still the news.
 const MARKET_NEWS_CACHE_TTL_MS = 10 * 60 * 1000
 
+// One entry, not one per reader: every dashboard reads the same four feeds, and who follows
+// what is applied below, after the cache. So the publishers see one request per ten minutes
+// no matter how many people are looking.
+const SHARED_FEED_CACHE_KEY = 'all-feeds'
+
 const marketNewsCache = createTtlCache({ ttlMs: MARKET_NEWS_CACHE_TTL_MS })
 
 /**
- * Headlines about the assets this user follows, newest first.
+ * Headlines for the dashboard's news section: five of them, the ones naming an asset this
+ * reader follows first, the rest by recency.
+ *
+ * Ranked rather than filtered, deliberately. A headline is matched by looking for the coin's
+ * name in it, which is a guess — "the largest cryptocurrency has recovered" is about Bitcoin
+ * and says nothing of the sort. Ranking lets that guess order the list without ever costing
+ * anyone an article it got wrong, and the section can never come up short.
  *
  * Same three sources as every other section, in the same order: live, last good response,
  * bundled sample. The last two both report `isFallback: true`, so the interface never
@@ -27,28 +38,59 @@ const marketNewsCache = createTtlCache({ ttlMs: MARKET_NEWS_CACHE_TTL_MS })
  * @returns {Promise<{ contentId: string, articles: Array<{ id: string, title: string, url: string, source: string, publishedAt: string }>, isFallback: boolean }>}
  */
 export const loadMarketNews = async (watchedAssetIds) => {
-  const watchedSymbols = watchedAssetIds
-    .map((assetId) => SYMBOLS_BY_ASSET_ID.get(assetId))
-    .filter((symbol) => symbol !== undefined)
-
-  // A configuration fact, not a failure, so it is answered before anything is attempted
-  // rather than by letting the client throw once per request into an empty cache.
-  if (!isCryptoPanicConfigured) return buildResponse(buildSampleArticles(), true)
-
   try {
-    // Keyed by the sorted symbols, so everyone following the same assets shares one upstream
-    // request no matter what order they picked them in.
     const { value: articles, isStale } = await marketNewsCache.getOrFetch(
-      [...watchedSymbols].sort().join(','),
-      () => fetchLatestPosts(watchedSymbols)
+      SHARED_FEED_CACHE_KEY,
+      fetchLatestArticles
     )
 
-    return buildResponse(articles.slice(0, ARTICLE_COUNT), isStale)
+    return buildResponse(
+      rankForReader(articles, watchedAssetIds).slice(0, ARTICLE_COUNT),
+      isStale
+    )
   } catch (newsLookupError) {
     console.warn('Falling back to sample headlines:', newsLookupError.message)
     return buildResponse(buildSampleArticles(), true)
   }
 }
+
+/**
+ * Lifts the headlines naming one of the reader's assets to the top. The list arrives newest
+ * first and both groups are built by walking it in order, so recency survives inside each.
+ */
+const rankForReader = (articles, watchedAssetIds) => {
+  const headlineMatchers = buildHeadlineMatchers(watchedAssetIds)
+  if (headlineMatchers.length === 0) return articles
+
+  const articlesNamingWatchedAssets = []
+  const otherArticles = []
+
+  for (const article of articles) {
+    const matchesReader = headlineMatchers.some((matcher) => matcher.test(article.title))
+    if (matchesReader) {
+      articlesNamingWatchedAssets.push(article)
+    } else {
+      otherArticles.push(article)
+    }
+  }
+
+  return [...articlesNamingWatchedAssets, ...otherArticles]
+}
+
+/**
+ * Two patterns per asset, and the difference between them is the point. A name can be written
+ * however a sub-editor felt that morning, so it is matched case-insensitively. A ticker cannot
+ * be: `DOT` is Polkadot and `dot` is punctuation, and `\bATOM\b` without that rule would claim
+ * every headline containing the word "atom".
+ */
+const buildHeadlineMatchers = (watchedAssetIds) =>
+  watchedAssetIds
+    .map((assetId) => ASSETS_BY_ID.get(assetId))
+    .filter((asset) => asset !== undefined)
+    .flatMap((asset) => [
+      new RegExp(`\\b${asset.name}\\b`, 'i'),
+      new RegExp(`\\b${asset.symbol}\\b`),
+    ])
 
 /**
  * `hoursAgo` becomes a timestamp at the moment the request is served, so the sample feed
