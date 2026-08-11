@@ -17,11 +17,10 @@ export const getMarketNews = async (request, response) => {
 }
 
 export const getAiInsight = async (request, response) => {
+  const { investorType, watchedAssetIds } = request.currentUser.preferences
+
   response.json(
-    await loadDailyInsight({
-      userId: request.userId,
-      investorType: request.currentUser.preferences.investorType,
-    })
+    await loadDailyInsight({ userId: request.userId, investorType, watchedAssetIds })
   )
 }
 

@@ -42,6 +42,11 @@ const environmentSchema = z.object({
   // per IP address and a cloud host shares its address with strangers. Anyone cloning this
   // repository has to be able to run it without signing up for anything.
   COINGECKO_API_KEY: z.string().min(1).optional(),
+
+  // Optional like the other one, and for the same reason: a clone of this repository has to
+  // run without anyone signing up for anything. Without it the insight section is composed
+  // from the day's real prices instead of written by a model, and says which it was.
+  HUGGINGFACE_API_KEY: z.string().min(1).optional(),
 })
 
 const exitWithConfigurationProblems = (problems) => {

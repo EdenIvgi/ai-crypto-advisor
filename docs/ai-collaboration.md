@@ -403,6 +403,51 @@ in "My exit strategy" stopped forty pixels short of the frame. The entire joke i
 never ends, and at that length it simply looked like a line. Extending it to the edge is a
 one-character change that no test would ever have asked for.
 
+### M11 — Insight of the day
+
+The last of the four sections, and the only one where the work was not the code. The
+infrastructure — a client, a model, a service, a cached document — was straightforward and
+worked on the first call. **Getting the model to write something worth reading took three rounds
+against real output**, and each failure was worth more than the fix.
+
+Two corrections came before any code, from checking the API rather than assuming it:
+`api-inference.huggingface.co` is gone — it does not answer at all — and of the 130 models the
+current router lists, **none is free.** All 205 live provider entries bill per token against a
+monthly credit. That sounds like a constraint and is not: one insight costs between $0.000014
+and $0.000063, so with one call per person per day the model chain could be ordered by quality
+instead of price. Checking the prices is what turned a worry into a non-issue.
+
+**Round one produced a competent news digest** — every asset, every headline — which is exactly
+what the two cards either side of it already show. The fix was to tell the model what the reader
+can already see, and to make one point rather than a tour.
+
+**Round two invented a statistic**: a twenty per cent rise in Ethereum fees, attributed to
+"data". The prompt had explicitly forbidden inventing figures, and the model did it anyway —
+because the prompt had also told the collector persona to care about fees and congestion, which
+this application never supplies. **Asking a model to pay attention to a figure you do not give it
+is a request to make one up.** That was our bug wearing a model's clothes.
+
+**Round three instructed the reader** — "keep an eye on the fork's progress". Soft, and still an
+instruction from a page that is not an adviser, so those phrasings are now banned by name and the
+card carries a small "Observations, not advice" line.
+
+The change that did the most was not a rule. Passing each investing style **what it actually
+looks at** rather than only its label — a holder watches for structural change, an intraday
+trader watches the spread between assets — is what finally produced three genuinely different
+paragraphs from one day's figures. Before that, "HODLer" was read as an instruction about tone.
+
+Two bugs found while trying to test rather than by testing. `DailyAiInsight.findOne` sat outside
+the `try`, so the doc comment's promise that the function never throws was false: one Mongo
+hiccup would have turned a dashboard card into a 500. And a failed _write_ discarded a perfectly
+good generated paragraph in favour of the composed one — losing the cache is a much smaller loss
+than losing the text. Both were found by asking how to exercise the fallback, not by exercising it.
+
+Finally, a flaky suite was fixed rather than tolerated. `mongodb-memory-server` gives a launching
+`mongod` ten seconds and enforces that itself, which vitest's `hookTimeout` does not reach; with
+a dev server running, whichever test file started first would fail, alternating run to run.
+Raising that one timeout made three consecutive runs green. A test that fails for reasons
+unrelated to the code teaches people to re-run instead of to read.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit

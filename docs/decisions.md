@@ -200,6 +200,71 @@ list is part-way through, so on 1 January the rotation would jump backwards and 
 
 If real memes are ever wanted instead, `server/src/data/dailyMemes.js` is the only file to edit.
 
+## The insight comes from Hugging Face, and there is no free model on it
+
+The brief offers "a free LLM like OpenRouter or Hugging Face". Hugging Face was chosen, and the
+first thing checking it produced was a correction: **`api-inference.huggingface.co` is gone** —
+it does not answer at all, not even with a 401. The live surface is
+`router.huggingface.co/v1/chat/completions`, which is OpenAI-shaped.
+
+The second correction matters more. Of the 130 models the router lists, **none is marked free**;
+all 205 live provider entries bill per token against a monthly account credit. "Free tier" here
+means a small budget, not free models.
+
+That turned out not to constrain anything, because the numbers are small enough to check rather
+than fear. At roughly 700 tokens in and 220 out, one insight costs between $0.000014 and
+$0.000063 across the plausible models — and with one call per person per day, the credit is
+irrelevant. So the model chain is ordered by **quality**, not price:
+`openai/gpt-oss-120b` → `gpt-oss-20b` → `meta-llama/Llama-3.1-8B-Instruct`. The provider is
+deliberately not pinned, so Hugging Face can route around one that is down.
+
+## The insight is cached in MongoDB, and it is the only cache that is
+
+Prices and news use an in-memory TTL cache; this one gets a collection and a unique index on
+`{ userId, insightDate }`. Three reasons, and the second is the real one:
+
+- Refetching a price is one free HTTP call. Regenerating an insight spends a model call.
+- **It would hand the reader a different paragraph than the one they read an hour ago.** A daily
+  briefing that rewrites itself on every refresh is not a daily briefing.
+- The free host stops when nobody is using it, so an in-memory cache would miss most of the time.
+
+The index does real work: two dashboard loads racing on a cold cache both generate, and it
+rejects the second write. That rejection is treated as success — somebody else just stored
+today's — and every other write error is swallowed too, because losing the cache is a much
+smaller loss than discarding a paragraph the model already wrote.
+
+## This section has no sample text, unlike the others
+
+Prices and news fall back to fixed sample content, because when a source refuses there is
+nothing else to show. The insight has a better option: it is **composed from the day's real
+prices** — which asset is strongest, which weakest, how many are up — with one closing line
+chosen by investing style.
+
+`MOCK_INSIGHTS_BY_INVESTOR_TYPE` was written in M5 and deleted here. A fixed paragraph about a
+market that never happened is a worse answer than a plain sentence about the real one, and the
+label says which the reader is looking at: **Written for you today** or **From today's prices**.
+
+## The model is told what not to do, and it needed telling three times
+
+This is the one section where a machine writes about somebody's own holdings, so the prompt
+forbids recommending, predicting, and instructing, and the card carries a small
+**Observations, not advice** line. Getting there took three rounds against real output, and each
+failure was informative:
+
+1. **It wrote a news digest.** Competent, and a duplicate of the two cards either side of it. Fixed
+   by telling the model what the reader can already see, and to make one point rather than a tour.
+2. **It invented a statistic** — a twenty per cent rise in Ethereum fees, "according to data". That
+   one was our fault: the prompt told the collector to care about fees and congestion, which this
+   application never supplies. **Asking for attention to a figure you do not provide is a request
+   to make one up.** Every style hint now names only things in the material.
+3. **It instructed the reader** — "keep an eye on the fork's progress". Soft, and still an
+   instruction, so those phrasings are now banned by name.
+
+What remains is honest to record: a model can still overreach on a day when the material offers
+its style nothing, and no prompt makes that impossible. Passing each investing style what it
+actually _looks at_, rather than only its label, did more than any rule — a paragraph is only
+genuinely different when the thing being examined is different.
+
 ## Only the production frontend can sign in, and Vercel preview URLs cannot
 
 `CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —

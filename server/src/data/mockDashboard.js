@@ -9,8 +9,10 @@
  * refuses, which on free public APIs is an ordinary Tuesday — so this is what a reader sees on
  * a bad day, and it goes out with `isFallback: true` so the interface says so.
  *
- * The meme section has no entry here. It has no third party to fall back from; see
- * `data/dailyMemes.js`.
+ * Two sections have no entry here, for opposite reasons. The meme has no third party to fall
+ * back from (`data/dailyMemes.js`). The insight has one, but its fallback is composed from the
+ * day's live prices instead — a fixed paragraph about a market that never happened would be a
+ * worse answer than a plain sentence about the real one.
  */
 
 /**
@@ -82,28 +84,3 @@ export const MOCK_NEWS_ARTICLES = [
     hoursAgo: 27,
   },
 ]
-
-/**
- * One sample insight per investor type. The three differ in what they pay attention to
- * rather than only in tone, because the whole promise of this section is that the answer to
- * "how do you invest" changes what you are told — a sample that ignored it would make the
- * feature look decorative.
- */
-export const MOCK_INSIGHTS_BY_INVESTOR_TYPE = {
-  hodler:
-    'Nothing in the last day changes a long-term position. Bitcoin is up under two percent ' +
-    'and the majors are moving together, which is the market breathing rather than the ' +
-    'market deciding something. The one number worth a glance this week is ETF inflow: it ' +
-    'has been positive for three weeks, and sustained inflow is the kind of slow signal that ' +
-    'actually matters on your horizon.',
-  day_trader:
-    'Volatility is concentrated in the smaller caps today — Dogecoin is up five percent while ' +
-    'Bitcoin barely moved, so the majors are giving you range rather than direction. Solana ' +
-    'is the one worth watching: it is up three percent on a validator fee change, and news ' +
-    'that alters transaction economics tends to keep moving a chart for more than one session.',
-  nft_collector:
-    'The Solana fee change approved this week is the item that touches you most directly: it ' +
-    'targets congestion during mints, which is exactly where collectors have been paying for ' +
-    'failed transactions. Floor prices have not reacted yet. Ethereum activity continuing to ' +
-    'move to layer twos is the slower story, and it is where most new collections are landing.',
-}
