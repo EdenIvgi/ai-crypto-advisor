@@ -1,6 +1,6 @@
 import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
 import { MOCK_COIN_PRICES } from '../data/mockDashboard.js'
-import { fetchCoinMarkets } from '../clients/coinGeckoClient.js'
+import { fetchCoinQuotes } from '../clients/coinGeckoClient.js'
 import { createTtlCache } from '../lib/inMemoryCache.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
 
@@ -30,13 +30,15 @@ export const loadCoinPrices = async (watchedAssetIds) => {
 
   try {
     // Keyed by the sorted ids so that two people following the same assets in a different
-    // order share one cached response rather than each paying for their own.
-    const { value: coins, isStale } = await coinPricesCache.getOrFetch(
+    // order share one cached response rather than each paying for their own. The client
+    // returns them in the order asked, so the cache holds one person's order — which is why
+    // the naming happens below, over the ids this caller actually asked about.
+    const { value: quotes, isStale } = await coinPricesCache.getOrFetch(
       [...knownAssetIds].sort().join(','),
-      () => fetchCoinMarkets(knownAssetIds)
+      () => fetchCoinQuotes([...knownAssetIds].sort())
     )
 
-    return buildResponse(sortAsChosen(coins, knownAssetIds), isStale)
+    return buildResponse(nameQuotesInChosenOrder(quotes, knownAssetIds), isStale)
   } catch (priceLookupError) {
     console.warn('Falling back to sample prices:', priceLookupError.message)
     return buildResponse(buildSampleCoins(knownAssetIds), true)
@@ -44,13 +46,24 @@ export const loadCoinPrices = async (watchedAssetIds) => {
 }
 
 /**
- * CoinGecko answers in market-capitalisation order, which is not the order anyone chose. A
- * list that reshuffles itself relative to the quiz is harder to read at a glance.
+ * Joins each quote to the asset's display name and ticker, in the order this reader chose.
+ *
+ * The names come from `data/supportedAssets.js` rather than from CoinGecko, which is why the
+ * client does not return them: they are ours, they never change between requests, and there is
+ * no reason to cache twelve copies of the word "Bitcoin".
  */
-const sortAsChosen = (coins, watchedAssetIds) =>
-  watchedAssetIds
-    .map((assetId) => coins.find((coin) => coin.id === assetId))
-    .filter((coin) => coin !== undefined)
+const nameQuotesInChosenOrder = (quotes, watchedAssetIds) => {
+  const quotesById = new Map(quotes.map((quote) => [quote.id, quote]))
+
+  return watchedAssetIds
+    .filter((assetId) => quotesById.has(assetId))
+    .map((assetId) => {
+      const { symbol, name } = ASSETS_BY_ID.get(assetId)
+      const { priceUsd, change24hPercent } = quotesById.get(assetId)
+
+      return { id: assetId, symbol, name, priceUsd, change24hPercent }
+    })
+}
 
 const buildSampleCoins = (watchedAssetIds) =>
   watchedAssetIds
