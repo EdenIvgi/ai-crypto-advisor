@@ -174,6 +174,32 @@ Names are matched case-insensitively and tickers are not: `DOT` is Polkadot, `do
 punctuation, and `\bATOM\b` matched case-insensitively would claim every headline containing
 the word "atom".
 
+## The memes are drawn for this app, and rotate by the day
+
+The brief offers "Reddit scraping **or static JSON**", and this is the second — for a reason
+that showed up while testing the news source: **Reddit answers a plain server request with 403.** It blocks non-browser clients, and does so harder from cloud address ranges, so the live
+route would have spent most of its life serving the fallback anyway. A "live" integration whose
+normal state is fallback is worse than an honest static one, because it also carries the code
+to fail.
+
+The static list holds seven original SVGs in `client/public/memes/`, not links to other
+people's uploads. Two reasons, and the first is the same one behind hosting them at all:
+
+- **A hotlinked image breaks the day its host expires the URL**, which defeats the point of
+  going static.
+- **Nothing in this repository is then someone else's artwork.** Reddit memes are user-generated
+  content with unclear rights, and a public repository is not the place to guess.
+
+`sourceUrl` points at the file on GitHub, because that is honestly where it came from.
+
+Two consequences worth knowing. This is the only section whose `isFallback` is a constant — it
+is always `false`, because these memes **are** the source rather than a stand-in for one, and a
+"sample" badge would describe a fallback this section does not have. And the rotation counts
+whole days since the epoch rather than the day of the year: day-of-year restarts at 1 while the
+list is part-way through, so on 1 January the rotation would jump backwards and repeat.
+
+If real memes are ever wanted instead, `server/src/data/dailyMemes.js` is the only file to edit.
+
 ## Only the production frontend can sign in, and Vercel preview URLs cannot
 
 `CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —

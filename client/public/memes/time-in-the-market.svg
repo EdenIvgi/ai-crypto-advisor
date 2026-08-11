@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="A calm rising line beside a frantic zigzag that ends lower, captioned time in the market beats timing it">
+  <rect width="640" height="400" fill="#0e1220" />
+
+  <text x="320" y="70" text-anchor="middle" fill="#ffffff" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="30" font-weight="700" letter-spacing="3">
+    TIME IN THE MARKET
+  </text>
+
+  <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1">
+    <line x1="48" y1="150" x2="592" y2="150" />
+    <line x1="48" y1="220" x2="592" y2="220" />
+    <line x1="48" y1="290" x2="592" y2="290" />
+  </g>
+
+  <polyline points="48,300 116,286 184,272 252,254 320,232 388,212 456,186 524,158 560,146" fill="none" stroke="#3ecf8e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <circle cx="560" cy="146" r="5.5" fill="#3ecf8e" />
+
+  <polyline points="48,300 82,238 116,304 150,232 184,312 218,244 252,320 286,258 320,326 354,272 388,330 422,286 456,332 490,300 524,336 560,318" fill="none" stroke="#e2585d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9" />
+  <circle cx="560" cy="318" r="5.5" fill="#e2585d" />
+
+  <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" letter-spacing="2">
+    <text x="576" y="140" text-anchor="end" fill="#3ecf8e" fill-opacity="0.85">DID NOTHING</text>
+    <text x="576" y="358" text-anchor="end" fill="#e2585d" fill-opacity="0.85">TRIED HARDER</text>
+  </g>
+</svg>

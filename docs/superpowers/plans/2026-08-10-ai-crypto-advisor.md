@@ -44,8 +44,8 @@ mongodb-memory-server, Playwright.
 | M7 — First deploy                     | done   |
 | M8 — Coin prices (CoinGecko)          | done   |
 | M9 — Market news (publisher RSS)      | done   |
-| M10 — Crypto meme (Reddit)            | next   |
-| M11 — AI insight (OpenRouter)         | todo   |
+| M10 — Crypto meme (static, in-repo)   | done   |
+| M11 — AI insight (OpenRouter)         | next   |
 | M12 — Polish and smoke test           | todo   |
 | M13 — Docs and handover               | todo   |
 
@@ -504,24 +504,32 @@ assistant invented it — and became ranking instead.
 
 ---
 
-### Task M10: Crypto meme (Reddit)
+### Task M10: Crypto meme (static, drawn in-repo)
 
 **Files:**
 
-- Create: `server/src/clients/redditMemeClient.js`, `server/src/services/memeService.js`,
-  `server/src/data/fallbackMemes.json`
-- Modify: dashboard controller
+- Create: `server/src/data/dailyMemes.js`, six SVGs in `client/public/memes/`
+- Modify: `server/src/services/memeService.js`, `CryptoMemeSection.jsx`
 
-- [ ] **Step 1:** `redditMemeClient.js` — `GET r/cryptocurrencymemes/top.json?t=day&limit=25`
-      with a descriptive `User-Agent`. Reddit returns 403 to default agents, and it also
-      blocks many cloud IP ranges, which is exactly why the fallback below is not optional.
-- [ ] **Step 2:** Keep only posts whose URL ends in `.jpg`, `.png`, or `.gif`.
-- [ ] **Step 3:** `fallbackMemes.json` — 12 to 15 stable image URLs.
-- [ ] **Step 4:** `memeService.js` — 30-minute TTL, and pick by day-of-year modulo the list
-      length so the meme changes daily rather than randomly per request.
-- [ ] **Step 5:** Verify: the section renders on Render (where Reddit may well be blocked)
-      by falling back cleanly, and the image has meaningful alt text.
-- [ ] **Step 6:** Lint, format, test, commit, open the PR, deploy.
+- [x] **Step 1:** ~~`redditMemeClient.js`.~~ **Dropped.** Reddit answered a plain server
+      request with 403 during M9's research — it blocks non-browser clients and does so
+      harder from cloud ranges. The brief allows "Reddit scraping **or static JSON**", and a
+      live integration whose normal state is the fallback is worse than an honest static one.
+- [x] **Step 2:** ~~Filter posts to image extensions.~~ Not applicable.
+- [x] **Step 3:** ~~`fallbackMemes.json` — 12 to 15 stable image URLs.~~ Seven original SVGs
+      in `client/public/memes/` instead. A hotlinked URL breaks the day its host expires it,
+      which defeats going static; and copying Reddit uploads would put other people's content,
+      with unclear rights, into a public repository.
+- [x] **Step 4:** `memeService.js` — no cache needed, there is nothing to fetch. Rotation is
+      by **whole days since the epoch**, not day-of-year: day-of-year restarts at 1 while a
+      seven-item list is part-way through and would jump the rotation backwards each January.
+- [x] **Step 5:** Verified — the endpoint, the image serving, the rotation across sixteen
+      consecutive days and across New Year, every file present on disk, and each SVG rendered
+      in a browser. The caption is the alt text, because the caption is the joke.
+- [x] **Step 6:** Lint, format, test, commit, open the PR, deploy.
+
+**Deviation, recorded in full in `docs/decisions.md`:** this is the one section with no third
+party behind it, so it is also the one whose `isFallback` is a constant `false`.
 
 ---
 

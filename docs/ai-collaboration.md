@@ -373,6 +373,36 @@ specified an integration around a constraint nobody had asked for, sourced from 
 document that was sitting in the repository unread. Neither the detail nor the confidence
 caught it. A human asking "why do we need that?" did, twice.
 
+### M10 — Meme of the day
+
+The shortest milestone, and the only one with no network call in it at all.
+
+The 403 that Reddit returned while M9's alternatives were being probed decided this one before
+it started. The brief allows "Reddit scraping **or static JSON**", and a live integration whose
+normal state is the fallback is worse than an honest static source, because it also carries the
+code to fail. The human chose static directly.
+
+**The part that took judgement was what goes in the list.** Linking to real memes on Reddit or
+an image host reintroduces exactly the breakage static was chosen to avoid, and copying them
+into the repository puts other people's user-generated content, with unclear rights, into a
+public one. So the seven memes are drawn for this application as SVGs, in the visual language
+the M5 sample already established, and `sourceUrl` points at the file on GitHub because that is
+honestly where it came from. Swapping in real images later means editing one file.
+
+Two details that only look small. `isFallback` is a constant `false` here — these memes are the
+source, not a stand-in for one, and a "sample" badge would be describing a fallback this section
+does not have; the field stays so every dashboard response keeps the same envelope. And the
+rotation counts whole days since the epoch rather than the day of the year, because day-of-year
+restarts at 1 while a seven-item list is part-way through, which would jump the rotation
+backwards every 1 January.
+
+**Drawing six images without being able to see them is the interesting failure mode**, and it
+produced one. Verification was geometric rather than visual for the last of them, once the
+browser pane stopped compositing: reading each element's bounding box showed that the flat line
+in "My exit strategy" stopped forty pixels short of the frame. The entire joke is that the line
+never ends, and at that length it simply looked like a line. Extending it to the edge is a
+one-character change that no test would ever have asked for.
+
 ### Documentation audit
 
 At the human's request, the repository was audited against the brief before continuing. The audit
