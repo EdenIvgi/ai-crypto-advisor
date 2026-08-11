@@ -24,7 +24,8 @@ Work in progress, built milestone by milestone against
 | Feedback voting                         | done  |
 | First public deploy                     | done  |
 | Live coin prices (CoinGecko)            | done  |
-| News, memes, and the AI insight         | next  |
+| Live market news (publisher feeds)      | done  |
+| Memes and the AI insight                | next  |
 
 **Live: https://ai-crypto-advisor-client-pi.vercel.app** — press "Look around with a demo
 account" and you are on a populated dashboard. The API is at
@@ -32,9 +33,9 @@ account" and you are on a populated dashboard. The API is at
 it directly. Give the first request up to a minute — the free instance stops when nobody is
 using it.
 
-Coin prices are live. The other three sections still show sample data and say so — each
-section is labelled with where its content came from, so the label is never a decoration.
-Replacing the remaining three is the next three milestones, one at a time.
+Coin prices and market news are live. The other two sections still show sample data and say
+so — each section is labelled with where its content came from, so the label is never a
+decoration. Replacing the remaining two is the next two milestones, one at a time.
 
 ## Running it locally
 
@@ -52,22 +53,20 @@ in-memory MongoDB and generates a session secret for that process, and says so i
 Everything works; nothing survives a restart. To keep your data, copy `server/.env.example` to
 `server/.env` and fill in a real `MONGODB_URI` and `JWT_SECRET`.
 
-| Variable              | Where  | Required      | Notes                                                   |
-| --------------------- | ------ | ------------- | ------------------------------------------------------- |
-| `NODE_ENV`            | server | no            | `development`, `test`, or `production`                  |
-| `PORT`                | server | no            | Defaults to 4000                                        |
-| `CLIENT_ORIGIN`       | server | no            | Exact browser origin, for CORS. No trailing slash       |
-| `MONGODB_URI`         | server | in production | Include the database name before the `?`                |
-| `JWT_SECRET`          | server | in production | At least 32 characters                                  |
-| `VITE_API_BASE_URL`   | client | in production | Origin of the API. Defaults to `http://localhost:4000`  |
-| `COINGECKO_API_KEY`   | server | never         | Free demo key. Raises a per-IP allowance, nothing more  |
-| `CRYPTOPANIC_API_KEY` | server | never         | Free key. Without it the news section shows sample copy |
+| Variable            | Where  | Required      | Notes                                                  |
+| ------------------- | ------ | ------------- | ------------------------------------------------------ |
+| `NODE_ENV`          | server | no            | `development`, `test`, or `production`                 |
+| `PORT`              | server | no            | Defaults to 4000                                       |
+| `CLIENT_ORIGIN`     | server | no            | Exact browser origin, for CORS. No trailing slash      |
+| `MONGODB_URI`       | server | in production | Include the database name before the `?`               |
+| `JWT_SECRET`        | server | in production | At least 32 characters                                 |
+| `VITE_API_BASE_URL` | client | in production | Origin of the API. Defaults to `http://localhost:4000` |
+| `COINGECKO_API_KEY` | server | never         | Free demo key. Raises a per-IP allowance, nothing more |
 
-Neither API key is required to run anything. The difference is what the dashboard tells you:
-CoinGecko serves prices with or without one, so that key only widens an allowance, while
-CryptoPanic has no anonymous tier at all — without its key the news section renders the
-bundled sample headlines and labels them **Sample headlines** rather than **CryptoPanic ·
-live**. Every section states its own source, so a fallback is never mistaken for today's data.
+**No API key is required for anything.** Prices come from CoinGecko's public tier and news
+from the publishers' own RSS feeds, neither of which needs an account — so a fresh clone runs
+with real, live content and no signup. Every section states where its content came from, so a
+fallback is never mistaken for today's data.
 
 Percent-encode special characters in the Mongo password: an unquoted `#` truncates the value
 where the `.env` parser treats it as a comment.
@@ -99,7 +98,7 @@ flowchart LR
     Browser["React 19 + Vite<br/>TanStack Query"]
     API["Express 5<br/>routes → controllers → services"]
     DB[("MongoDB Atlas<br/>users · votes · insights")]
-    Ext["CoinGecko · CryptoPanic<br/>Reddit · OpenRouter"]
+    Ext["CoinGecko · publisher RSS<br/>Reddit · OpenRouter"]
 
     Browser -- "JWT in an httpOnly cookie" --> API
     API --> DB
