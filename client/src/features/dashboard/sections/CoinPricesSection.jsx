@@ -15,8 +15,13 @@ export const CoinPricesSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
+      /*
+       * "Saved" rather than "sample": a fallback here is either the last CoinGecko response
+       * that worked or the bundled sample, and the only distinction a reader needs is the
+       * one this makes — these numbers are what the market is quoting, or they are not.
+       */
       sourceLabel={
-        prices.data && (prices.data.isFallback ? 'Sample prices' : 'CoinGecko · live')
+        prices.data && (prices.data.isFallback ? 'Saved prices' : 'CoinGecko · live')
       }
       isPending={prices.isPending}
       error={prices.error}
@@ -47,6 +52,16 @@ export const CoinPricesSection = ({ className }) => {
   )
 }
 
+/**
+ * Exactly zero is not a gain, and it is also what the API reports when it has no 24-hour
+ * figure for an asset. Colouring it green would turn both of those into good news.
+ */
+const getMovementClassName = (changePercent) => {
+  if (changePercent > 0) return 'text-market-up'
+  if (changePercent < 0) return 'text-market-down'
+  return 'text-muted-foreground'
+}
+
 const CoinPriceRow = ({ coin }) => (
   <li className="flex items-baseline justify-between gap-4 border-t border-rule py-3.5">
     <div className="min-w-0">
@@ -59,10 +74,7 @@ const CoinPriceRow = ({ coin }) => (
         {formatPriceUsd(coin.priceUsd)}
       </p>
       <p
-        className={cn(
-          'font-mono text-xs',
-          coin.change24hPercent >= 0 ? 'text-market-up' : 'text-market-down'
-        )}
+        className={cn('font-mono text-xs', getMovementClassName(coin.change24hPercent))}
         data-numeric
       >
         {formatChangePercent(coin.change24hPercent)}
