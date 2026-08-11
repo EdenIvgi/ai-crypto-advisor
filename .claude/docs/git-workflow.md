@@ -53,6 +53,11 @@ Rules:
   is not finished yet. M9 shipped `cryptoPanicClient.js` added by one commit and deleted by
   the next, both permanent, because this rule was not written down.
 - Never commit a broken state — `npm run lint && npm test` must pass first.
+- **Format as its own step, then check it.** Run `npm run format`, then `npm run format:check`,
+  and only then stage — never folded into the same command as the commit. CI runs `format:check`
+  and it has failed twice here on markdown, because prettier is not reliably idempotent on
+  indented continuation paragraphs: the run that rewrites a file is not evidence that the next
+  check passes. One of those failures then cost two more commits to undo.
 - Never commit `.env`, keys, tokens, or `node_modules`.
 - Write the body only when the _why_ is not obvious from the subject. Wrap at 72.
 
