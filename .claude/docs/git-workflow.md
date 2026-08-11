@@ -46,6 +46,12 @@ Scopes in use: `auth`, `onboarding`, `dashboard`, `feedback`, `server`, `client`
 Rules:
 
 - One logical change per commit. If the subject needs an "and", split it.
+- **Do not commit anything you expect to change before the PR opens.** Merges here are
+  `--merge`, never squash, so every commit on a branch reaches `main` and stays there — a
+  branch is not scratch space, and there is no later step that tidies it. Being blocked on a
+  key, an answer, or a verification is not a reason to checkpoint; it means the unit of work
+  is not finished yet. M9 shipped `cryptoPanicClient.js` added by one commit and deleted by
+  the next, both permanent, because this rule was not written down.
 - Never commit a broken state — `npm run lint && npm test` must pass first.
 - Never commit `.env`, keys, tokens, or `node_modules`.
 - Write the body only when the _why_ is not obvious from the subject. Wrap at 72.
