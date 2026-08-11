@@ -194,3 +194,28 @@
     @apply animate-pulse rounded bg-muted;
   }
 }
+
+/*
+ * Motion, for somebody who has asked their system for less of it. Deliberately not the blanket
+ * `animation: none on everything` recipe, because this interface animates three things and they are
+ * not equivalent:
+ *
+ * - **Placeholder pulses stop.** A dozen blocks breathing in unison is the loudest movement on the
+ *   screen and it carries no information the static block does not.
+ * - **Colour transitions stop.** They exist so a hover feels attached to the pointer; losing them
+ *   costs nothing but polish.
+ * - **The session spinner keeps spinning**, and that is the considered exception. It is the only
+ *   sign that a cold free-tier server is being waited on, which can take the better part of a
+ *   minute — and a spinner that has stopped reads as a page that has given up.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
