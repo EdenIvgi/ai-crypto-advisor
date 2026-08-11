@@ -26,9 +26,13 @@ const ACTIVE_DOWN_CLASSES =
  * @param {string} [props.contentId] - What the section is currently showing.
  * @param {string} props.sectionLabel - Names the section in the buttons' accessible labels,
  *   so four identical pairs of thumbs do not all announce themselves as "useful".
+ *
+ * Each thumb is a toggle: pressing the pressed one withdraws the vote. The labels stay fixed and
+ * `aria-pressed` carries the state, which is what a screen reader expects from a toggle — a label
+ * that flipped to "remove" would announce the action twice and the state not at all.
  */
 export const FeedbackVoteButtons = ({ sectionType, contentId, sectionLabel }) => {
-  const { currentVote, castVote, hasFailed } = useFeedbackVote({ sectionType, contentId })
+  const { currentVote, toggleVote, hasFailed } = useFeedbackVote({ sectionType, contentId })
 
   return (
     <div className="flex flex-col items-end gap-1">
@@ -38,14 +42,14 @@ export const FeedbackVoteButtons = ({ sectionType, contentId, sectionLabel }) =>
           label={`${sectionLabel}: useful`}
           isActive={currentVote === 'up'}
           activeClassName={ACTIVE_UP_CLASSES}
-          onClick={() => castVote('up')}
+          onClick={() => toggleVote('up')}
         />
         <VoteButton
           Icon={ThumbsDown}
           label={`${sectionLabel}: not useful`}
           isActive={currentVote === 'down'}
           activeClassName={ACTIVE_DOWN_CLASSES}
-          onClick={() => castVote('down')}
+          onClick={() => toggleVote('down')}
         />
       </div>
 

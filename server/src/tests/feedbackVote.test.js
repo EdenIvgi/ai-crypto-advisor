@@ -24,6 +24,9 @@ const castVote = (authCookie, vote) =>
     .set('Cookie', authCookie)
     .send({ ...VOTED_CONTENT, vote })
 
+const withdrawVote = (authCookie) =>
+  request(app).delete('/api/feedback').query(VOTED_CONTENT).set('Cookie', authCookie)
+
 /**
  * Integration test #2 of the capped suite (see .claude/docs/testing-policy.md). It exists for
  * one assertion: that changing your mind updates a vote instead of adding a second one. That
@@ -61,6 +64,31 @@ describe('feedback voting', () => {
     const storedVotes = await FeedbackVote.find({})
     expect(storedVotes).toHaveLength(1)
     expect(storedVotes[0].vote).toBe('down')
+  })
+
+  /**
+   * Withdrawing is the one operation whose failure is invisible from the interface: the thumb is
+   * cleared optimistically, so a delete that answers 204 without removing anything looks perfect
+   * until a reload brings the vote back. Hence both halves — the row, and what `/mine` reports.
+   */
+  it('removes the vote when it is withdrawn, and stays removed', async () => {
+    const authCookie = await signUpAndGetCookie('grace@example.com')
+    await castVote(authCookie, 'up')
+
+    const withdrawalResponse = await withdrawVote(authCookie)
+
+    expect(withdrawalResponse.status).toBe(204)
+    expect(await FeedbackVote.countDocuments({})).toBe(0)
+
+    const myVotesResponse = await request(app)
+      .get('/api/feedback/mine')
+      .set('Cookie', authCookie)
+
+    expect(myVotesResponse.body.votes).toEqual([])
+
+    // Withdrawing an opinion nobody holds is not an error. A second click, or a retry after a
+    // dropped response, has to leave the same state rather than reporting a failure.
+    expect((await withdrawVote(authCookie)).status).toBe(204)
   })
 
   it('lets the database refuse a duplicate, not just the upsert', async () => {

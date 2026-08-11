@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { postVote, fetchMyVotes } from './feedbackApi.js'
+import { postVote, deleteVote, fetchMyVotes } from './feedbackApi.js'
 
 const MY_VOTES_QUERY_KEY = ['feedback', 'mine']
 
@@ -8,14 +8,18 @@ const isSameContent = (vote, sectionType, contentId) =>
   vote.sectionType === sectionType && vote.contentId === contentId
 
 /**
- * Replaces this piece of content's vote, or adds it if there is not one yet. Pure, and
- * mirrors what the server's upsert does — the optimistic state has to match what comes back
- * or the thumb would jump when the request settles.
+ * This content's vote after the change: replaced, added, or — when `vote` is null — taken away.
+ *
+ * Pure, and it mirrors what the server does with each of the two requests, because the optimistic
+ * state has to match what comes back or the thumb would visibly jump when the request settles.
  */
-const withVoteApplied = (votes, castVote) => [
-  ...votes.filter((vote) => !isSameContent(vote, castVote.sectionType, castVote.contentId)),
-  castVote,
-]
+const withVoteApplied = (votes, { sectionType, contentId, vote }) => {
+  const otherVotes = votes.filter(
+    (existing) => !isSameContent(existing, sectionType, contentId)
+  )
+
+  return vote ? [...otherVotes, { sectionType, contentId, vote }] : otherVotes
+}
 
 /**
  * Every vote this person has cast, fetched once for the whole dashboard rather than per
@@ -37,7 +41,7 @@ export const useMyVotes = () =>
  * previous state is put back and the interface says so.
  *
  * @param {{ sectionType: string, contentId: string | undefined }} target
- * @returns {{ currentVote: 'up' | 'down' | null, castVote: (vote: 'up' | 'down') => void, hasFailed: boolean }}
+ * @returns {{ currentVote: 'up' | 'down' | null, toggleVote: (vote: 'up' | 'down') => void, hasFailed: boolean }}
  */
 export const useFeedbackVote = ({ sectionType, contentId }) => {
   const queryClient = useQueryClient()
@@ -48,9 +52,14 @@ export const useFeedbackVote = ({ sectionType, contentId }) => {
     null
 
   const voteMutation = useMutation({
-    mutationFn: (vote) => postVote({ sectionType, contentId, vote }),
+    // One mutation for both directions, because to a reader they are one gesture: the thumb is
+    // pressed or it is not. `null` is the request to withdraw.
+    mutationFn: (nextVote) =>
+      nextVote
+        ? postVote({ sectionType, contentId, vote: nextVote })
+        : deleteVote({ sectionType, contentId }),
 
-    onMutate: async (vote) => {
+    onMutate: async (nextVote) => {
       // Any refetch already in flight would land after this and undo it.
       await queryClient.cancelQueries({ queryKey: MY_VOTES_QUERY_KEY })
 
@@ -58,26 +67,35 @@ export const useFeedbackVote = ({ sectionType, contentId }) => {
 
       queryClient.setQueryData(MY_VOTES_QUERY_KEY, (current) =>
         current
-          ? { votes: withVoteApplied(current.votes, { sectionType, contentId, vote }) }
+          ? {
+              votes: withVoteApplied(current.votes, { sectionType, contentId, vote: nextVote }),
+            }
           : current
       )
 
       return { previousVotes }
     },
 
-    onError: (_error, _vote, context) => {
+    onError: (_error, _nextVote, context) => {
       queryClient.setQueryData(MY_VOTES_QUERY_KEY, context.previousVotes)
     },
 
     onSettled: () => queryClient.invalidateQueries({ queryKey: MY_VOTES_QUERY_KEY }),
   })
 
-  const castVote = (vote) => {
-    // Pressing the thumb that is already pressed asks for nothing, so it sends nothing.
-    // There is no un-vote: an opinion, once given, is either kept or reversed.
-    if (!contentId || vote === currentVote) return
-    voteMutation.mutate(vote)
+  /**
+   * Pressing an unpressed thumb records that opinion; pressing the pressed one takes it back.
+   *
+   * Withdrawing matters because the alternative is a trap: with only "up" and "down" available,
+   * a mis-click can be reversed but never undone, so somebody who did not mean to say anything
+   * is forced to leave an opinion they do not hold in the data. An empty state has to be
+   * reachable from a filled one.
+   */
+  const toggleVote = (vote) => {
+    if (!contentId) return
+
+    voteMutation.mutate(vote === currentVote ? null : vote)
   }
 
-  return { currentVote, castVote, hasFailed: voteMutation.isError }
+  return { currentVote, toggleVote, hasFailed: voteMutation.isError }
 }
