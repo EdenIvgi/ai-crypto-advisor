@@ -61,6 +61,11 @@ something is needed, and it turns out it isn't.
 - **A flaky suite fixed instead of tolerated.** `mongodb-memory-server` enforces its own ten
   second launch timeout, out of reach of vitest's, so whichever test file started first would
   fail. A suite that fails for unrelated reasons teaches people to re-run instead of to read.
+- **A latent bug in shared middleware, found by checking before building on it.** The request
+  validator's documented support for query parameters had never worked — Express 5 exposes
+  `req.query` through a getter with no setter, so writing the parsed value back threw. No route
+  had needed it, so nothing had ever failed. It was proven with a throwaway script rather than
+  reasoned about, and the same script proved the fix.
 
 ## Where it was wrong, and how that showed up
 

@@ -628,9 +628,47 @@ on the card.
       (`investorType`, `sectionType`, content source, time of day), a cold-start-safe
       ranking approach, how to evaluate it offline, and the fairness and feedback-loop
       risks of training on self-selected data.
-- [ ] **Step 4:** Finish `docs/ai-collaboration.md` with an entry per milestone.
+- [x] **Step 4:** ~~Finish `docs/ai-collaboration.md` with an entry per milestone.~~ **Rewritten
+      instead.** The brief asks for a summary of interactions, and a per-milestone journal had
+      grown past the point where the useful parts could be found. It now groups interactions by
+      what they did rather than by when they happened.
 - [ ] **Step 5:** Create a read-only Atlas database user for the reviewers and document how
       to connect.
 - [ ] **Step 6:** Final check: clone into an empty directory and follow the README start to
       finish, with nothing but what it says.
 - [ ] **Step 7:** Commit, open the PR, and merge to `main`.
+
+---
+
+### Unplanned: editable preferences and withdrawable votes
+
+Requested after M11, and not in the original plan. Two independent features in one branch,
+because the first one needs the second one's service function to clean up after itself.
+
+- [x] **Step 1:** `validateRequest` — replace assignment with `defineProperty`. Its documented
+      `query` support had never worked, because Express 5 exposes `req.query` through a getter
+      with no setter. Proven broken and then proven fixed with a throwaway Express app.
+- [x] **Step 2:** `DELETE /api/feedback` with the target in the query string. `voteTargetSchema`
+      is shared with the POST body schema so the two cannot disagree. `removeVote` deletes the
+      row and resolves whether or not one existed; the controller answers 204 either way.
+- [x] **Step 3:** `forgetTodaysInsight` in `aiInsightService`, called from `savePreferences` only
+      when the investing style or the asset set actually changed — the prompt is built from those
+      and nothing else, so a section toggle is not worth a model call. The thumb on the discarded
+      paragraph is withdrawn with it.
+- [x] **Step 4:** The dashboard thumbs toggle off. One mutation for both directions, with the
+      optimistic update handling removal as well as replacement.
+- [x] **Step 5:** `features/onboarding/` → `features/preferences/`, `steps/` → `questions/`, and
+      `SettingsPage.jsx` — the same three questions at once, prefilled, behind one Save button.
+      Reached from the profile link in the header; routed at `/settings` behind the onboarding
+      guard.
+- [x] **Step 6:** One test case for withdrawal, approved against the capped-suite policy.
+      Confirmed to fail with the delete stubbed out.
+- [x] **Step 7:** Verified end to end against the dev API and the real database: withdrawal
+      removes only its own row, a bad section in the query string is a 400, a section change
+      leaves the insight byte-identical, and a style change rewrites it and drops its vote. The
+      demo account was restored to its starting state afterwards.
+- [ ] **Step 8:** Browser pass over both features. Blocked on `PORT` in `server/.env`, which is
+      set to 5173 and collides with Vite — the API and the dev server fight over one port, and
+      the client looks for the API on 4000. One line, in a file only the human can edit.
+- [x] **Step 9:** `docs/decisions.md`, the testing policy, the README, and this file.
+- [ ] **Step 10:** Commit, open the PR, and merge once CI is green.

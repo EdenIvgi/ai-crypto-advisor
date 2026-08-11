@@ -19,8 +19,13 @@ renders.
   than from figures that expire by the afternoon.
 - **A meme**, rotating daily.
 
+All three answers are editable later from the profile link in the header, and the dashboard is
+rebuilt from the new ones — including the insight, which is rewritten on the spot if you changed
+how you invest.
+
 Every section takes a thumbs up or down, and each vote is stored against the exact content it was
-cast on, so the feedback is usable as a training signal rather than as a counter.
+cast on, so the feedback is usable as a training signal rather than as a counter. Pressing a
+pressed thumb withdraws it, so "no opinion" stays reachable after a mis-click.
 
 Every card also states where its content came from. When a source is unreachable the section
 falls back — to the last good response, or to fixed content — and the label changes with it, so a
