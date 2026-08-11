@@ -32,22 +32,22 @@ mongodb-memory-server, Playwright.
 
 ## Progress
 
-| Milestone                             | Status      |
-| ------------------------------------- | ----------- |
-| M0 — Workspace and conventions        | done        |
-| M1 — Scaffold and middleware skeleton | done        |
-| M2 — Database and JWT auth            | done        |
-| M3 — Frontend auth and Demo Mode      | done        |
-| M4 — Onboarding quiz                  | done        |
-| M5 — Dashboard UI on mock data        | done        |
-| M6 — Feedback voting                  | done        |
-| M7 — First deploy                     | done        |
-| M8 — Coin prices (CoinGecko)          | done        |
-| M9 — Market news (publisher RSS)      | done        |
-| M10 — Crypto meme (static, in-repo)   | done        |
-| M11 — AI insight (Hugging Face)       | done        |
-| M12 — Polish and smoke test           | done        |
-| M13 — Docs and handover               | in progress |
+| Milestone                             | Status                   |
+| ------------------------------------- | ------------------------ |
+| M0 — Workspace and conventions        | done                     |
+| M1 — Scaffold and middleware skeleton | done                     |
+| M2 — Database and JWT auth            | done                     |
+| M3 — Frontend auth and Demo Mode      | done                     |
+| M4 — Onboarding quiz                  | done                     |
+| M5 — Dashboard UI on mock data        | done                     |
+| M6 — Feedback voting                  | done                     |
+| M7 — First deploy                     | done                     |
+| M8 — Coin prices (CoinGecko)          | done                     |
+| M9 — Market news (publisher RSS)      | done                     |
+| M10 — Crypto meme (static, in-repo)   | done                     |
+| M11 — AI insight (Hugging Face)       | done                     |
+| M12 — Polish and smoke test           | done                     |
+| M13 — Docs and handover               | done, bar the Atlas user |
 
 ---
 
@@ -661,7 +661,9 @@ on the card.
       and passed only while the news was slower than the prices. Matched on the exact ticker now.
 - [x] **Step 6c:** `format:check` added to the pre-commit rule in the git doc. It is what failed
       CI twice, and it was the one check the rule never named.
-- [ ] **Step 7:** Commit, open the PR, and merge to `main`.
+- [x] **Step 7:** Commit, open the PR, and merge to `main`. Four commits in PR #28, which is the
+      last one. Every milestone in this plan arrived through its own pull request, and none of them
+      was squashed.
 
 ---
 
