@@ -12,8 +12,8 @@ export const getCoinPrices = async (request, response) => {
   response.json(await loadCoinPrices(request.currentUser.preferences.watchedAssetIds))
 }
 
-export const getMarketNews = async (_request, response) => {
-  response.json(await loadMarketNews())
+export const getMarketNews = async (request, response) => {
+  response.json(await loadMarketNews(request.currentUser.preferences.watchedAssetIds))
 }
 
 export const getAiInsight = async (request, response) => {

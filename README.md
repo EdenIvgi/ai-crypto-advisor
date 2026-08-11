@@ -52,15 +52,22 @@ in-memory MongoDB and generates a session secret for that process, and says so i
 Everything works; nothing survives a restart. To keep your data, copy `server/.env.example` to
 `server/.env` and fill in a real `MONGODB_URI` and `JWT_SECRET`.
 
-| Variable            | Where  | Required      | Notes                                                  |
-| ------------------- | ------ | ------------- | ------------------------------------------------------ |
-| `NODE_ENV`          | server | no            | `development`, `test`, or `production`                 |
-| `PORT`              | server | no            | Defaults to 4000                                       |
-| `CLIENT_ORIGIN`     | server | no            | Exact browser origin, for CORS. No trailing slash      |
-| `MONGODB_URI`       | server | in production | Include the database name before the `?`               |
-| `JWT_SECRET`        | server | in production | At least 32 characters                                 |
-| `VITE_API_BASE_URL` | client | in production | Origin of the API. Defaults to `http://localhost:4000` |
-| `COINGECKO_API_KEY` | server | never         | Free demo key. Raises a per-IP allowance, nothing more |
+| Variable              | Where  | Required      | Notes                                                   |
+| --------------------- | ------ | ------------- | ------------------------------------------------------- |
+| `NODE_ENV`            | server | no            | `development`, `test`, or `production`                  |
+| `PORT`                | server | no            | Defaults to 4000                                        |
+| `CLIENT_ORIGIN`       | server | no            | Exact browser origin, for CORS. No trailing slash       |
+| `MONGODB_URI`         | server | in production | Include the database name before the `?`                |
+| `JWT_SECRET`          | server | in production | At least 32 characters                                  |
+| `VITE_API_BASE_URL`   | client | in production | Origin of the API. Defaults to `http://localhost:4000`  |
+| `COINGECKO_API_KEY`   | server | never         | Free demo key. Raises a per-IP allowance, nothing more  |
+| `CRYPTOPANIC_API_KEY` | server | never         | Free key. Without it the news section shows sample copy |
+
+Neither API key is required to run anything. The difference is what the dashboard tells you:
+CoinGecko serves prices with or without one, so that key only widens an allowance, while
+CryptoPanic has no anonymous tier at all — without its key the news section renders the
+bundled sample headlines and labels them **Sample headlines** rather than **CryptoPanic ·
+live**. Every section states its own source, so a fallback is never mistaken for today's data.
 
 Percent-encode special characters in the Mongo password: an unquoted `#` truncates the value
 where the `.env` parser treats it as a comment.

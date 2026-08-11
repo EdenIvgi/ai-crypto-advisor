@@ -135,6 +135,21 @@ The unique index is on `{ userId, sectionType, contentId }` rather than on `cont
 so two people can disagree about the same meme and both opinions survive. That is the entire
 value of the data.
 
+## Only the production frontend can sign in, and Vercel preview URLs cannot
+
+`CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —
+`ai-crypto-advisor-client-<hash>-<account>.vercel.app` — and none of those match it, so a
+browser on a preview URL is refused by CORS and cannot log in. This looked like a bug the first
+time it happened; it is the policy working.
+
+The alternative was a regular expression matching `*.vercel.app`. That would accept requests
+from **any** account's deployment on that shared domain, and the cookie carrying the session is
+`SameSite=None`, so widening the origin widens exactly the thing the cookie relies on. A preview
+build is a convenience; an origin allowlist that admits a whole public suffix is not worth it.
+
+The consequence to know: after a deploy, test on the production domain. If a preview URL is ever
+genuinely needed, add that one origin explicitly.
+
 ## The test suite is capped
 
 Two integration tests, one unit test, one smoke test, and a written rule against adding more
