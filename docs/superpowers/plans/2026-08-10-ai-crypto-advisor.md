@@ -46,8 +46,8 @@ mongodb-memory-server, Playwright.
 | M9 — Market news (publisher RSS)      | done   |
 | M10 — Crypto meme (static, in-repo)   | done   |
 | M11 — AI insight (Hugging Face)       | done   |
-| M12 — Polish and smoke test           | next   |
-| M13 — Docs and handover               | todo   |
+| M12 — Polish and smoke test           | done   |
+| M13 — Docs and handover               | next   |
 
 ---
 
@@ -592,16 +592,27 @@ on the card.
 - Create: `e2e/smoke.spec.js`, `playwright.config.js`
 - Modify: section components, `DashboardSectionCard`, `AppHeader`
 
-- [ ] **Step 1:** Loading skeletons that match the real content's shape, so the layout does
-      not jump when data arrives.
-- [ ] **Step 2:** Empty and error states with a retry action, written in plain language.
-- [ ] **Step 3:** A dark mode toggle in `AppHeader`, persisted to `localStorage`.
-- [ ] **Step 4:** Responsive pass at 375, 768, and 1440 pixels.
-- [ ] **Step 5:** Accessibility pass: `aria-label` on every icon-only button, visible focus
-      rings, the whole quiz operable from the keyboard.
-- [ ] **Step 6:** `e2e/smoke.spec.js` — demo login, all selected sections render, cast a
-      vote, reload and confirm the vote persisted.
-- [ ] **Step 7:** Run `npx playwright test` against the local stack and get it green.
+- [x] **Step 1:** ~~Loading skeletons.~~ Already done in M5: `DashboardSectionCard` takes a
+      `skeleton` shaped like the section's real content, and the provenance eyebrow has its own.
+- [x] **Step 2:** ~~Empty and error states.~~ Also already done in M5, worded as a state of the
+      section rather than an apology, and always paired with Try again.
+- [x] **Step 3:** A theme toggle in `AppHeader`, stored in `localStorage`, with a classic script in
+      `index.html` applying the class before first paint so a dark reader never gets a white flash.
+      The system preference is the starting point only; a stored choice beats it from then on.
+- [x] **Step 4:** Responsive pass at 375, 768 and 1440. No horizontal overflow at any of them. At
+      375 the header drops the name and keeps the initial, so settings stays reachable on a phone.
+- [x] **Step 5:** Accessibility pass. Both icon-only controls carry labels; focus rings verified
+      visible under a real Tab, and the ring offset moved off Tailwind's default white onto the
+      background token. A quiz option's accessible name was the title and its whole explanation run
+      together — now `aria-labelledby` for the answer and `aria-describedby` for the sentence. Added
+      `prefers-reduced-motion`, selectively: pulses and transitions stop, the session spinner does
+      not, because it is the only sign a cold server is being waited on.
+- [x] **Step 6:** `e2e/smoke.spec.js` — three tests rather than one. The plan's pass, plus the theme
+      choice outliving a reload against an opposite system preference, plus a quiz answer changed by
+      Space and by Enter. The vote is withdrawn at the end, so the shared demo account is unchanged.
+- [x] **Step 7:** Green, via `npm run test:e2e`. Confirmed able to fail by stubbing out
+      `rememberTheme`. Not wired into CI — no database or seeded account there — and the testing
+      policy records why.
 - [ ] **Step 8:** Lint, format, test, commit, open the PR.
 
 ---
