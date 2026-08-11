@@ -292,42 +292,54 @@ Naming all three would mean widening a response contract that four sections shar
 that only occurs while a third party is down, and the prices card beside it already reads
 **Saved prices** whenever it happens. Left as is, deliberately.
 
-## The 24-hour change is shown to one decimal, and not derived
+## Prices come from `/simple/price`, not `/coins/markets`
 
-Reported as "the percentages are wrong", and the investigation went somewhere unexpected.
+Reported as "the percentages are wrong". They were, and it took three rounds to find out why —
+including one wrong conclusion of mine that the human's evidence killed, and one right answer
+that only appeared because they asked again.
 
-Our value turned out to be a faithful copy of `price_change_percentage_24h` — no arithmetic
-anywhere, and all twelve assets matched CoinGecko field-for-field. But **that field arrives
-rounded to a tenth of a per cent**: twelve assets sampled together came back as exact multiples
-of 0.1. Rendering it as `-0.90%` claimed a hundredth nobody had given us, and made a coarse
-number look stuck rather than coarse.
+**Round one: we were faithful, and the field was bad.** Our value was a plain copy of
+`price_change_percentage_24h`, no arithmetic, matching CoinGecko field-for-field on all twelve
+assets. But that field **arrives rounded to a tenth of a per cent** — twelve assets sampled
+together came back as exact multiples of 0.1. Displaying it as `-0.90%` claimed a hundredth
+nobody had given us, and made a coarse number look stuck rather than coarse.
 
-**The tempting fix was the wrong one, and only the human's evidence caught it.** The same
-response carries `price_change_24h` and `current_price` at full precision, and deriving from
-them agrees with `market_cap_change_percentage_24h` to within 0.03 points — a value that is
-internally consistent and, for BTC, differs from the given field by 0.15 points. On other assets
-the gap reached a full point, and Litecoin's sign flipped. That looked conclusive.
+**Round two: the obvious fix, rejected.** The same response carries `price_change_24h` and
+`current_price` at full precision, and deriving from them agrees with
+`market_cap_change_percentage_24h` to within 0.03 points. On some assets it differed from the
+given field by a full point, and Litecoin's sign flipped. Conclusive — until screenshots of
+CoinGecko's own site showed BTC at **-0.9% on the markets table** and **-1.1% on the coin page**
+at the same moment. Deriving would have published a fourth number matching none of their
+surfaces, so it was dropped.
 
-Then screenshots of CoinGecko's own site showed BTC at **-0.9% on the markets table** and
-**-1.1% on the coin page**, at the same moment. Four answers to one question, three of them
-theirs:
+**Round three: there was a better endpoint all along.** Three routes to the same fact, sampled
+together:
 
-| Source                                       | BTC 24h |
-| -------------------------------------------- | ------- |
-| CoinGecko markets table                      | -0.9%   |
-| CoinGecko coin page                          | -1.1%   |
-| `price_change_percentage_24h` — what we read | -0.9%   |
-| derived from `price_change_24h`              | -0.745% |
+| Endpoint         | BTC 24h change | Its own `last_updated` |
+| ---------------- | -------------- | ---------------------- |
+| `/coins/markets` | `-0.9`         | 174s ago               |
+| `/simple/price`  | `-1.0944`      | 134s ago               |
+| `/coins/{id}`    | `-1.0944`      | 25s ago                |
 
-They are inconsistent across their own surfaces, so "correct" is not on the menu. The only
-question left is which of their numbers a reader can reconcile — and the rounded field is the one
-on the listing anybody would check. Deriving would have invented a fourth answer that matches
-nothing.
+`/coins/markets` is both the least precise and the stalest of the three. The other two carry
+full precision and agree with each other, and `-1.0944` is what CoinGecko's per-coin page shows
+as `-1.1%` — the figure the human had identified as the accurate one.
 
-So: the field is read as given, the display shows one decimal, and the reasoning sits in
-`clients/coinGeckoClient.js` so the derivation is not "fixed" back in later. The prompt was
-handed the same false precision, which is where an early insight got "a spread of about 3.23
-percentage points" from figures accurate to a tenth.
+So the client now calls **`/simple/price`**: full precision, fresher, one request for every
+asset, and a much smaller payload. `/coins/{id}` is marginally fresher still but needs one
+request per coin, and this free tier returned 429 after three requests in thirty seconds.
+
+Two consequences worth knowing. `symbol` and `name` are no longer read from CoinGecko — they
+come from `data/supportedAssets.js`, which is where they always belonged, so the client returns
+only what the API actually knows and the cache stores no repeated copies of the word "Bitcoin".
+And the ordering is now part of the client's contract rather than fixed up afterwards: a keyed
+response has no order of its own, so it returns quotes in the order they were asked for and
+`sortAsChosen` was deleted.
+
+The display still shows one decimal, but for a different reason than before: it is a reading
+decision, not a limit. The second decimal of a daily change is noise, and it matches how
+CoinGecko itself presents the number. The rounding now happens once, in our formatter, on a
+figure that was never rounded upstream.
 
 ## The insight is written from events, never from figures
 
