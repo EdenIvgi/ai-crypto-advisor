@@ -329,6 +329,40 @@ So: the field is read as given, the display shows one decimal, and the reasoning
 handed the same false precision, which is where an early insight got "a spread of about 3.23
 percentage points" from figures accurate to a tenth.
 
+## The insight is written from events, never from figures
+
+The section is generated once and stored for the day. A 24-hour percentage is not true for a
+day. Those two facts were in direct conflict, and the conflict shipped: an insight written at
+09:00 said "Bitcoin's 1.70% decline leaves it about 1.9 percentage points lower than Dogecoin's
+0.20% gain", and by afternoon Bitcoin was at -0.9% — with the prices card two inches away
+showing the current figure, live, while the paragraph beside it quoted a different morning.
+
+Raising the cache rate was the obvious fix and the wrong one: it would spend a model call per
+reader per refresh to keep restating what the card already says better.
+
+**Headlines do not spoil that way.** An event that happened this morning still happened this
+evening. So prices are out of the prompt entirely — the model is given the reader's asset
+_names_, their style, and the day's headlines, and is forbidden to mention a price, a
+percentage, or even a direction. What it produces is interpretation, which is also the one
+thing the two cards beside it cannot do, so the duplication problem disappeared with the
+staleness problem.
+
+Three consequences worth knowing:
+
+- **The style hints had to be rewritten too.** "Cares about the spread between these assets"
+  kept dragging the paragraph back to percentages. A hint naming something the model cannot see
+  is a request to make it up — the same lesson as the invented fee statistic, learned twice.
+- **The prompt gets exactly the headlines the news card shows**, not a longer list fetched for
+  the model. An insight whose source material is visible on the same screen is one a reader can
+  check.
+- **Only the news feed can now taint it.** A CoinGecko outage no longer touches this section,
+  because it no longer reads prices.
+
+The composed fallback still uses figures, and that is not an inconsistency: it is rebuilt on
+every request and never stored, so its numbers are always the current ones. The rule is not
+"no numbers" — it is that a paragraph kept for a day may not contain anything that expires
+sooner.
+
 ## Only the production frontend can sign in, and Vercel preview URLs cannot
 
 `CLIENT_ORIGIN` is one exact origin. Vercel also publishes a unique URL per deployment —
