@@ -8,6 +8,29 @@
       name="description"
       content="A personalized crypto dashboard: prices, news, an AI insight, and a meme, tuned to how you invest."
     />
+    <script>
+      /*
+       * Sets the theme before the first paint. React renders too late to help: without this, a
+       * reader who chose dark gets a white flash on every single load, which is worse than not
+       * offering the choice at all.
+       *
+       * A classic script runs before the deferred module below, which is the whole point, and is
+       * also why it cannot import `src/lib/theme.js` and repeats the key instead.
+       *
+       * The system preference is only the starting point. Once somebody has picked a side it is
+       * stored, and stored beats the operating system from then on.
+       */
+      try {
+        var storedTheme = localStorage.getItem('ai-crypto-advisor.theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+        if (storedTheme === 'dark' || (storedTheme === null && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      } catch (storageError) {
+        /* Storage is unavailable, so the light theme stands. Not worth breaking the page over. */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -66,6 +66,10 @@ something is needed, and it turns out it isn't.
   `req.query` through a getter with no setter, so writing the parsed value back threw. No route
   had needed it, so nothing had ever failed. It was proven with a throwaway script rather than
   reasoned about, and the same script proved the fix.
+- **An accessible name that was two things run together.** Each quiz option's name was computed
+  from its title and the whole sentence explaining it — "Day TraderYou are in and out, and the
+  charts matter today" — which is the name of nothing. Found by reading the accessibility tree
+  rather than the markup.
 
 ## Where it was wrong, and how that showed up
 

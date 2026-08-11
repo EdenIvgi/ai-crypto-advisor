@@ -21,7 +21,8 @@ renders.
 
 All three answers are editable later from the profile link in the header, and the dashboard is
 rebuilt from the new ones — including the insight, which is rewritten on the spot if you changed
-how you invest.
+how you invest. There is a light and a dark theme; the first visit follows your system and every
+visit after that follows whichever you last picked.
 
 Every section takes a thumbs up or down, and each vote is stored against the exact content it was
 cast on, so the feedback is usable as a training signal rather than as a counter. Pressing a
@@ -78,6 +79,7 @@ where the `.env` parser treats it as a comment.
 npm run lint
 npm run format
 npm test
+npm run test:e2e                        # Playwright, against a local stack it will start for you
 npm run build
 npm run seed:demo --workspace server    # create the demo account
 npm run check:db --workspace server     # confirm the database is reachable
@@ -180,20 +182,23 @@ There are no git hooks — [CI](.github/workflows/ci.yml) runs `lint`, `format:c
 
 Small on purpose, with the reasoning written into
 [`.claude/docs/testing-policy.md`](.claude/docs/testing-policy.md) so it can't quietly grow. Two
-integration tests carry the load — the auth flow, and voting including the revote path that proves
-the unique index — plus a cache unit test and an end-to-end smoke test.
+integration tests carry the load — the auth flow, and voting including the revote and withdrawal
+paths that prove the unique index and the delete — plus a cache unit test.
 
 Tests run against a real MongoDB in memory rather than a mocked Mongoose, because the behaviour
 worth covering — a unique compound index, for instance — lives in the database, and a mock
 wouldn't have it.
 
+`npm run test:e2e` is separate, and separate on purpose. Three Playwright tests cover what only a
+browser can answer: a vote surviving a reload rather than being optimistically painted, a theme
+choice beating a system preference set the other way, and a quiz answer changed with the keyboard
+alone. They are not in CI — there is no database or seeded demo account there — so they run locally.
+
 ## Roadmap
 
-- A dark-mode toggle. The palette is already there in both themes; the switch isn't.
-- An accessibility pass, and a Playwright smoke test over the signup → quiz → dashboard → vote
-  path.
 - Turning the collected votes into a training signal — the data model is designed for it and the
   votes are being stored; the write-up of how to use them isn't done.
+- Read-only database access for reviewers who want to see the stored feedback for themselves.
 
 ## Documentation
 
