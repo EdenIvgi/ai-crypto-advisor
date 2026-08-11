@@ -32,22 +32,22 @@ mongodb-memory-server, Playwright.
 
 ## Progress
 
-| Milestone                             | Status |
-| ------------------------------------- | ------ |
-| M0 — Workspace and conventions        | done   |
-| M1 — Scaffold and middleware skeleton | done   |
-| M2 — Database and JWT auth            | done   |
-| M3 — Frontend auth and Demo Mode      | done   |
-| M4 — Onboarding quiz                  | done   |
-| M5 — Dashboard UI on mock data        | done   |
-| M6 — Feedback voting                  | done   |
-| M7 — First deploy                     | done   |
-| M8 — Coin prices (CoinGecko)          | done   |
-| M9 — Market news (publisher RSS)      | done   |
-| M10 — Crypto meme (static, in-repo)   | done   |
-| M11 — AI insight (Hugging Face)       | done   |
-| M12 — Polish and smoke test           | done   |
-| M13 — Docs and handover               | next   |
+| Milestone                             | Status      |
+| ------------------------------------- | ----------- |
+| M0 — Workspace and conventions        | done        |
+| M1 — Scaffold and middleware skeleton | done        |
+| M2 — Database and JWT auth            | done        |
+| M3 — Frontend auth and Demo Mode      | done        |
+| M4 — Onboarding quiz                  | done        |
+| M5 — Dashboard UI on mock data        | done        |
+| M6 — Feedback voting                  | done        |
+| M7 — First deploy                     | done        |
+| M8 — Coin prices (CoinGecko)          | done        |
+| M9 — Market news (publisher RSS)      | done        |
+| M10 — Crypto meme (static, in-repo)   | done        |
+| M11 — AI insight (Hugging Face)       | done        |
+| M12 — Polish and smoke test           | done        |
+| M13 — Docs and handover               | in progress |
 
 ---
 
@@ -613,7 +613,7 @@ on the card.
 - [x] **Step 7:** Green, via `npm run test:e2e`. Confirmed able to fail by stubbing out
       `rememberTheme`. Not wired into CI — no database or seeded account there — and the testing
       policy records why.
-- [ ] **Step 8:** Lint, format, test, commit, open the PR.
+- [x] **Step 8:** Lint, format, test, commit, open the PR.
 
 ---
 
@@ -628,25 +628,39 @@ on the card.
       architecture diagram, the demo account, and pointers to the conventions and decisions.
       **Written early, after M4.** Scheduling it here was a planning error: a public
       repository should never have sat for days with no explanation of what it is.
-- [ ] **Step 1b:** Add to the README what only exists after deploying — the public URLs and a
-      screenshot of the finished dashboard.
-- [ ] **Step 2:** README — a short "known tradeoffs" section: the Atlas `0.0.0.0/0` rule,
-      Render cold starts, and the deliberately capped test suite with the reasoning.
-      (`docs/decisions.md`, added after M4, already covers the reasoning; this step is the
-      deployment-specific part.)
-- [ ] **Step 3:** `docs/feedback-model-proposal.md` (the assignment's bonus, design only):
-      what the votes give you as implicit labels, the features available per event
-      (`investorType`, `sectionType`, content source, time of day), a cold-start-safe
-      ranking approach, how to evaluate it offline, and the fairness and feedback-loop
-      risks of training on self-selected data.
+- [x] **Step 1b:** Both public origins, and the dashboard shot on the live demo account in a
+      `<picture>` that serves the dark capture to a dark reader — so the screenshot matches the
+      page it sits on. Captured with a throwaway Playwright script rather than by hand, which is
+      also how the `COINGECKO · LIVE` label in it was checked: the prices in the shot match what
+      CoinGecko returned at that minute, and are nowhere in the fallback table.
+- [x] **Step 2:** Five tradeoffs, not three — the Atlas rule, cold starts, the capped suite, the
+      e2e tests being outside CI, and the insight being cached until midnight. Each states its cost
+      rather than only its reason, since the reasons already live in `docs/decisions.md`.
+- [x] **Step 3:** `docs/feedback-model-proposal.md`. Writing it turned up something the plan had
+      assumed away: **two of the four sections cannot be trained on at all as they stand.**
+      `contentId` is the date for `coin_prices` and `market_news`, so a thumbs-down records that the
+      card missed and not which headline caused it, and the headlines are gone. So the proposal
+      leads with an impressions log rather than with a model, and says plainly that clicks — not
+      thumbs — are the signal dense enough to learn from.
 - [x] **Step 4:** ~~Finish `docs/ai-collaboration.md` with an entry per milestone.~~ **Rewritten
       instead.** The brief asks for a summary of interactions, and a per-milestone journal had
       grown past the point where the useful parts could be found. It now groups interactions by
       what they did rather than by when they happened.
-- [ ] **Step 5:** Create a read-only Atlas database user for the reviewers and document how
-      to connect.
-- [ ] **Step 6:** Final check: clone into an empty directory and follow the README start to
-      finish, with nothing but what it says.
+- [ ] **Step 5:** Documented, not yet created. The README now names the three collections, shows
+      a vote document, and gives the `mongosh` command — but the Atlas user has to be made in the
+      Atlas console by whoever holds the account, and its credential deliberately does not go in
+      the repository: a connection string in public source is a public database whatever its
+      permissions, so it travels with the submission instead.
+- [x] **Step 6:** Cloned from GitHub into an empty directory and run with nothing but
+      `npm install` and `npm run dev`. The no-configuration path holds: it announces the missing
+      `.env`, starts a throwaway in-memory MongoDB, generates a session secret, and the demo
+      account works without anyone running the seed script. The full Playwright suite passes
+      against that clone.
+- [x] **Step 6b:** A race in the M12 smoke test, found by running it against production rather
+      than locally. `getByText('Bitcoin')` resolved to five elements once the news card landed,
+      and passed only while the news was slower than the prices. Matched on the exact ticker now.
+- [x] **Step 6c:** `format:check` added to the pre-commit rule in the git doc. It is what failed
+      CI twice, and it was the one check the rule never named.
 - [ ] **Step 7:** Commit, open the PR, and merge to `main`.
 
 ---
