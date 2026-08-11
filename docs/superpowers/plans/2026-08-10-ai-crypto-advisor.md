@@ -674,13 +674,13 @@ because the first one needs the second one's service function to clean up after 
       to "For a day trader" off the same headline. The demo account was put back afterwards.
 
       Blocked for a while on a diagnosis of mine that was wrong. The API was binding 5173 and
-          fighting Vite for it, and I read that as `PORT=5173` in `server/.env` — a file I cannot
-          read — and asked for it to be changed. It already said 4000. The real cause was the
-          `full-stack` entry I had just added to `.claude/launch.json`: the harness injects that
-          entry's `port` into the process environment, and `--env-file-if-exists` does not override a
-          variable that is already set, so the declared 5173 beat the file's 4000. Confirmed by
-          declaring 4321 and watching the API bind 4321. Fixed by declaring the API on 4000 and
-          leaving 5173 to the client, which is two entries rather than one.
+              fighting Vite for it, and I read that as `PORT=5173` in `server/.env` — a file I cannot
+              read — and asked for it to be changed. It already said 4000. The real cause was the
+              `full-stack` entry I had just added to `.claude/launch.json`: the harness injects that
+              entry's `port` into the process environment, and `--env-file-if-exists` does not override a
+              variable that is already set, so the declared 5173 beat the file's 4000. Confirmed by
+              declaring 4321 and watching the API bind 4321. Fixed by declaring the API on 4000 and
+              leaving 5173 to the client, which is two entries rather than one.
 
 - [x] **Step 9:** `docs/decisions.md`, the testing policy, the README, and this file.
 - [ ] **Step 10:** Commit, open the PR, and merge once CI is green.
