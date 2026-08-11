@@ -35,14 +35,19 @@ export const formatPriceUsd = (priceUsd) => {
 }
 
 /**
- * A signed percentage. The sign is always written, including for a gain, so the direction
- * survives for anyone who cannot tell the two market colours apart.
+ * A signed percentage, to one decimal place. The sign is always written, including for a gain,
+ * so the direction survives for anyone who cannot tell the two market colours apart.
+ *
+ * One decimal rather than two because that is the precision the source actually has:
+ * CoinGecko's `price_change_percentage_24h` arrives already rounded to a tenth — twelve assets
+ * sampled together came back as exact multiples of 0.1. Rendering `-0.90%` claimed a hundredth
+ * we were never given, and made a coarse figure look stuck rather than simply coarse.
  *
  * @param {number} changePercent
  * @returns {string}
  */
 export const formatChangePercent = (changePercent) =>
-  `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`
+  `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%`
 
 /**
  * How long ago something was published, in the coarsest unit that is still informative.

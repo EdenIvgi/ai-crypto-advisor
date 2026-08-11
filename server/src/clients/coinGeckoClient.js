@@ -63,6 +63,21 @@ const buildRequestHeaders = () => ({
   ...(env.COINGECKO_API_KEY ? { 'x-cg-demo-api-key': env.COINGECKO_API_KEY } : {}),
 })
 
+/**
+ * `price_change_percentage_24h` is read as given, and it is worth writing down why, because the
+ * response contains three other ways to answer the same question and none of them is better.
+ *
+ * That field arrives rounded to a tenth of a per cent. Deriving a precise figure instead — from
+ * `price_change_24h` against `current_price`, both full precision — looks like an obvious
+ * improvement, agrees with `market_cap_change_percentage_24h` to within 0.03 points, and is
+ * wrong for this purpose: it matches nothing a reader can check. CoinGecko's own markets table
+ * shows the rounded field, and their per-coin page shows a third value again — BTC was -0.9% on
+ * one and -1.1% on the other at the same moment, with the derived figure -0.745%.
+ *
+ * They are inconsistent across their own surfaces, so "correct" is unavailable and the choice is
+ * only which number a reader can reconcile. This one matches the listing they would look at.
+ * Deriving would have invented a fourth answer.
+ */
 const toCoinDto = (row) => ({
   id: row.id,
   symbol: row.symbol.toUpperCase(),
