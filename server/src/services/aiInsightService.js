@@ -150,6 +150,28 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssetIds }
 }
 
 /**
+ * Throws today's stored paragraph away, so the next dashboard load writes a new one.
+ *
+ * This cache is keyed by reader and day, and deliberately not by what the paragraph was written
+ * from — that is what stops it rewriting itself on every refresh. The cost is that a reader who
+ * changes how they invest at noon would otherwise spend the rest of the day reading a paragraph
+ * addressed to the profile they just abandoned, under a **Written for you today** label. So the
+ * one event that can invalidate it says so.
+ *
+ * @param {string} userId
+ * @returns {Promise<string>} The `contentId` that has stopped existing, so a vote cast on that
+ *   paragraph can be withdrawn with it.
+ * @throws When the delete fails. The caller decides whether that is worth failing their request.
+ */
+export const forgetTodaysInsight = async (userId) => {
+  const date = getTodayDateKey()
+
+  await DailyAiInsight.deleteOne({ userId, insightDate: date })
+
+  return buildInsightId(userId, date)
+}
+
+/**
  * Today's stored paragraph, or null — including when the read itself fails.
  *
  * A database that cannot be read is a reason to generate a new insight, not a reason to break
@@ -280,9 +302,15 @@ const formatSignedPercent = (changePercent) =>
   `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%`
 
 const buildResponse = (userId, date, text, isFallback) => {
-  const insight = { id: `${userId}:${date}`, text, date }
+  const insight = { id: buildInsightId(userId, date), text, date }
 
   // This section shows exactly one thing, so the vote names it. That is what makes the
   // feedback worth keeping: a thumb down here is about one piece of generated writing.
   return { contentId: insight.id, insight, isFallback }
 }
+
+/**
+ * One reader's paragraph for one day. Derived rather than stored, which is what lets a caller
+ * that only wants to invalidate it name it without reading the document first.
+ */
+const buildInsightId = (userId, date) => `${userId}:${date}`
