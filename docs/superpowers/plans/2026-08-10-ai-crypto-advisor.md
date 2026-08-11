@@ -111,6 +111,14 @@ mongodb-memory-server, Playwright.
 handler automatically, so the planned `asyncHandler` wrapper is unnecessary and was dropped.
 `backend-conventions.md` was updated to match.
 
+**Reversed later — Husky and lint-staged were removed from Step 7.** The pre-commit hook only
+ran `eslint --fix` and `prettier --write` over staged files, and CI already runs `lint`,
+`format:check`, `test` and `build` on every pull request, so nothing unformatted can merge
+either way. What the hook cost was a `prepare` script that runs on every `npm install`,
+including on a production build where `devDependencies` are skipped and the `husky` binary is
+therefore absent — the exact cause of the first failed deploy in M7. Formatting now runs from
+`npm run format` locally and is enforced at the pull request instead of at the commit.
+
 ---
 
 ### Task M2: Database and JWT auth
