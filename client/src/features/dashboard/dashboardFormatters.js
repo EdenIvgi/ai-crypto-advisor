@@ -38,10 +38,11 @@ export const formatPriceUsd = (priceUsd) => {
  * A signed percentage, to one decimal place. The sign is always written, including for a gain,
  * so the direction survives for anyone who cannot tell the two market colours apart.
  *
- * One decimal rather than two because that is the precision the source actually has:
- * CoinGecko's `price_change_percentage_24h` arrives already rounded to a tenth — twelve assets
- * sampled together came back as exact multiples of 0.1. Rendering `-0.90%` claimed a hundredth
- * we were never given, and made a coarse figure look stuck rather than simply coarse.
+ * The value behind this now arrives at full precision — `-1.1862608339690541` — so one decimal
+ * is a reading decision rather than a limit: it is how CoinGecko presents the same figure, and
+ * the second decimal of a 24-hour change is noise nobody acts on. The rounding is ours and
+ * happens once, here, which is the difference from the earlier version of this file: that one
+ * rounded a figure that had *already* been rounded upstream.
  *
  * @param {number} changePercent
  * @returns {string}
