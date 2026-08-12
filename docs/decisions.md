@@ -259,10 +259,6 @@ Both themes were captured and served from a `<picture>` with a `prefers-color-sc
 reader on a dark GitHub sees the dark dashboard. A light screenshot glowing inside a dark page is
 the same mismatch the app itself avoids by applying the theme before the bundle loads.
 
-Captured with a throwaway Playwright script rather than by hand, which is why the shot could be
-checked rather than trusted: the prices in it match what CoinGecko returned that minute and appear
-nowhere in the fallback table, so the `COINGECKO · LIVE` label on the card is accurate.
-
 ## Two of the four sections cannot be trained on as they stand
 
 Found while writing `docs/feedback-model-proposal.md`, and the most useful thing that document
