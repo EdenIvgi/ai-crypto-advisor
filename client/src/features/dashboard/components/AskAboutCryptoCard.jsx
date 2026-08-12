@@ -19,30 +19,24 @@ export const AskAboutCryptoCard = ({ className }) => {
 
   const isTooShort = question.trim().length < MINIMUM_QUESTION_LENGTH
 
-  // Emptied and handed the cursor back once an answer lands, so the next question costs nothing
-  // but typing. Focus matters most after an example was clicked: those buttons disappear with
-  // the answer, and without this the cursor would be left on an element that no longer exists.
-  //
-  // A frame late, because this runs before React has re-rendered, and until it does the input is
-  // still carrying the disabled attribute it had while the request was in flight — and a
-  // disabled element cannot take focus, silently.
-  const askQuestion = (text) =>
-    ask.mutate(text, {
-      onSuccess: () => {
-        setQuestion('')
-        requestAnimationFrame(() => inputRef.current?.focus())
-      },
-    })
-
   const handleSubmit = (event) => {
     event.preventDefault()
     if (isTooShort || ask.isPending) return
-    askQuestion(question.trim())
+    ask.mutate(question.trim())
   }
 
   const handleExampleClicked = (example) => {
     setQuestion(example)
-    askQuestion(example)
+    ask.mutate(example)
+  }
+
+  // Empties the box and puts the card back the way it started, examples and all. The cursor is
+  // handed to the input because the button that was just pressed disappears with the answer,
+  // and focus left on a removed element falls back to the top of the page.
+  const handleAskAnotherClicked = () => {
+    ask.reset()
+    setQuestion('')
+    inputRef.current?.focus()
   }
 
   return (
@@ -102,12 +96,19 @@ export const AskAboutCryptoCard = ({ className }) => {
           <p className="text-sm text-destructive">{toReadableError(ask.error)}</p>
         ) : null}
 
-        {/* The question is echoed because the input no longer holds it — an answer on its own,
-            with an empty box above it, reads as though it arrived unprompted. */}
         {ask.data ? (
-          <div className="max-w-prose border-l-2 border-primary/50 pl-5">
-            <p className="text-sm text-muted-foreground">{ask.variables}</p>
-            <p className="mt-2 text-sm leading-relaxed text-pretty">{ask.data.answer}</p>
+          <div>
+            <p className="max-w-prose border-l-2 border-primary/50 pl-5 text-sm leading-relaxed text-pretty">
+              {ask.data.answer}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={handleAskAnotherClicked}
+            >
+              Ask another question
+            </Button>
           </div>
         ) : null}
       </div>
