@@ -6,8 +6,6 @@ import { fetchQuizOptions, putPreferences, searchAssets } from './preferencesApi
 
 export const MINIMUM_SEARCH_LENGTH = 2
 
-// CoinGecko rebuilds its own search index every ten minutes, so holding a result for that long
-// costs nothing in freshness and keeps a repeated search off the monthly call allowance.
 const ASSET_SEARCH_STALE_TIME_MS = 10 * 60 * 1000
 
 export const useQuizOptions = () =>
@@ -39,12 +37,8 @@ export const useSavePreferences = () => {
       // whether the quiz is done, so a refetch in flight would bounce a new user back to it.
       queryClient.setQueryData(CURRENT_USER_QUERY_KEY, user)
 
-      // Every section is built from these answers, and the insight may have been thrown away and
-      // rewritten server-side, so none of the four cached responses can be trusted afterwards.
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
-      // The server withdraws the thumb on an insight it discarded, so the votes this browser
-      // holds may name content that no longer exists.
       queryClient.invalidateQueries({ queryKey: ['feedback', 'mine'] })
 
       navigate('/dashboard', { replace: true })

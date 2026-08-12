@@ -20,9 +20,6 @@ const dailyAiInsightSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    // Nothing here is an array, and `__v` only ever guards a concurrent array update, so the
-    // field could never have done anything on this document. See `User.js` for the mechanism —
-    // and note that unlike there, dropping it here cannot become wrong later.
     versionKey: false,
   }
 )

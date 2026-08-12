@@ -31,8 +31,6 @@ export const useFeedbackVote = ({ sectionType, contentId }) => {
     null
 
   const voteMutation = useMutation({
-    // One mutation for both directions, because to a reader they are one gesture: the thumb is
-    // pressed or it is not. `null` is the request to withdraw.
     mutationFn: (nextVote) =>
       nextVote
         ? postVote({ sectionType, contentId, vote: nextVote })

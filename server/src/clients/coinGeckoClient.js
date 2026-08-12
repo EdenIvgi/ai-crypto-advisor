@@ -13,8 +13,6 @@ const quoteSchema = z.object({
   usd_24h_change: z.number().nullish(),
 })
 
-// Keyed by coin id, and only the ids CoinGecko recognised — a record rather than a fixed shape,
-// because the caller decides what to ask for and unknown ids are simply left out.
 const simplePriceResponseSchema = z.record(z.string(), quoteSchema)
 
 export const fetchCoinQuotes = async (assetIds) => {
@@ -25,8 +23,6 @@ export const fetchCoinQuotes = async (assetIds) => {
 
   const response = await fetch(requestUrl, {
     headers: buildRequestHeaders(),
-    // Without this, a source that accepts the connection and then says nothing would hold a
-    // dashboard request open until the browser gave up on it.
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
 

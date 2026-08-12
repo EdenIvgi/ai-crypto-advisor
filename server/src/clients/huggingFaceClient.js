@@ -17,9 +17,6 @@ const MODELS_IN_PREFERENCE_ORDER = [
 // and stopped: the model had not run out of things to say, it had run out of allowance.
 const MAX_COMPLETION_TOKENS = 700
 
-// Low, not zero. Zero on a paragraph of prose produces the same stock phrasings every day,
-// which is the opposite of what a daily section is for; higher invents figures, and one model
-// fabricated a transaction-fee statistic at 0.4.
 const SAMPLING_TEMPERATURE = 0.25
 
 export const isHuggingFaceConfigured = Boolean(env.HUGGINGFACE_API_KEY)
@@ -29,9 +26,6 @@ const chatCompletionSchema = z.object({
     .array(
       z.object({
         message: z.object({ content: z.string() }),
-        // Read so that a reply cut off at the token limit can be rejected rather than shown.
-        // Half a sentence is not a shorter insight, it is a broken one, and the next model in
-        // the chain is a better answer than a paragraph that stops mid-word.
         finish_reason: z.string().nullable().optional(),
       })
     )
@@ -47,8 +41,6 @@ export const generateChatCompletion = async (messages) => {
     try {
       return await requestOneModel(model, messages)
     } catch (modelError) {
-      // Kept rather than logged one by one: a model being unavailable is routine, and the
-      // only interesting case is all of them failing, which is what the caller is told about.
       failures.push(`${model}: ${modelError.message}`)
     }
   }
@@ -69,9 +61,6 @@ const requestOneModel = async (model, messages) => {
       max_tokens: MAX_COMPLETION_TOKENS,
       temperature: SAMPLING_TEMPERATURE,
     }),
-    // Generous compared with the other clients, because this one waits on a model rather than
-    // a database read — but still bounded, so a stalled provider cannot hold a dashboard
-    // request open until the browser gives up on it.
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
 

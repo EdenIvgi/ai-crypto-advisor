@@ -12,9 +12,6 @@ import { requireOnboarding } from '../middleware/requireOnboarding.js'
 
 export const dashboardRoutes = Router()
 
-// Every section needs the same three things first: a valid session, the user's document,
-// and the guarantee that they answered the quiz. Applying the chain once at the router
-// keeps it from drifting apart across four routes.
 dashboardRoutes.use(requireAuth, loadCurrentUser, requireOnboarding)
 
 dashboardRoutes.get('/prices', getCoinPrices)

@@ -21,7 +21,6 @@ export const SignupPage = () => {
   }
 
   const fieldErrors = signup.error?.fieldErrors ?? {}
-  // A duplicate email arrives as a 409 with no field attached, so it is shown above the form.
   const formError = signup.isError && !signup.error.fieldErrors ? signup.error.message : null
 
   return (

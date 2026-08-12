@@ -11,8 +11,6 @@ export const CryptoMemeSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
-      // A constant, unlike every other section: this one has no third party behind it, so
-      // there is no live-or-fallback distinction to report. See services/memeService.js.
       sourceLabel={meme.data && 'Drawn for this app'}
       isPending={meme.isPending}
       error={meme.error}
@@ -29,9 +27,6 @@ export const CryptoMemeSection = ({ className }) => {
       }
     >
       {meme.data ? (
-        // Capped rather than filling the card: when the insight is not selected this card
-        // has a whole row to itself, and a meme blown up to eleven hundred pixels is a
-        // worse joke than the same meme at a readable size.
         <figure className="max-w-xl">
           {/*
             A fixed frame with the image contained inside it, never cropped. These are drawn

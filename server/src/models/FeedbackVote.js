@@ -34,9 +34,6 @@ const feedbackVoteSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    // Five scalar fields and no array, and `__v` only ever guards a concurrent array update — so
-    // it was five bytes of nothing on every vote. See `User.js` for the mechanism. What protects
-    // this document from a race is the unique index below, which is enforced by the database.
     versionKey: false,
   }
 )

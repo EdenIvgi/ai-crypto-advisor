@@ -15,8 +15,6 @@ export const MarketNewsSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
-      // Not a publisher's name, unlike the other three sections: this one merges four feeds,
-      // and every headline already carries the name of the publication it came from.
       sourceLabel={news.data && (news.data.isFallback ? 'Sample headlines' : 'Live headlines')}
       isPending={news.isPending}
       error={news.error}

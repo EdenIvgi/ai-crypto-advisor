@@ -75,8 +75,6 @@ describe('feedback voting', () => {
 
     expect(myVotesResponse.body.votes).toEqual([])
 
-    // Withdrawing an opinion nobody holds is not an error. A second click, or a retry after a
-    // dropped response, has to leave the same state rather than reporting a failure.
     expect((await withdrawVote(authCookie)).status).toBe(204)
   })
 

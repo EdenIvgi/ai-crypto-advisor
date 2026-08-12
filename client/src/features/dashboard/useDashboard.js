@@ -16,10 +16,6 @@ export const useCoinPrices = () =>
     queryKey: ['dashboard', 'prices'],
     queryFn: fetchCoinPrices,
     staleTime: PRICES_STALE_TIME_MS,
-    // A price dashboard left open and not moving reads as broken. Deliberately the same
-    // number as the stale time and as the server's own cache: polling faster would spend
-    // requests to be handed the same cached response, and CoinGecko's own figure lags two to
-    // three minutes behind anyway. Background polling stays off — a hidden tab has no reader.
     refetchInterval: PRICES_STALE_TIME_MS,
   })
 

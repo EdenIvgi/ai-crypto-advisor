@@ -44,8 +44,6 @@ authRoutes.post(
 
 authRoutes.post('/login', authRateLimiter, validateRequest({ body: loginBodySchema }), logIn)
 
-// Rate limited like the password endpoints: it writes to the database, so it should not be
-// something a script can hammer for free.
 authRoutes.post('/demo', authRateLimiter, logInAsDemo)
 
 authRoutes.post('/logout', logOut)

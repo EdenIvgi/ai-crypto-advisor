@@ -5,8 +5,6 @@ import { getTodayDateKey } from '../lib/dateKeys.js'
 
 const ARTICLE_COUNT = 5
 
-// Ten times the price cache, because headlines arrive at a tenth of the rate. Prices move
-// between two glances at the screen; a story published four minutes ago is still the news.
 const MARKET_NEWS_CACHE_TTL_MS = 10 * 60 * 1000
 
 // One entry, not one per reader: every dashboard reads the same four feeds, and who follows
@@ -72,8 +70,6 @@ const buildSampleArticles = () => {
 }
 
 const buildResponse = (articles, isFallback) => ({
-  // The vote is on the day's selection of headlines, not on a single article — the section
-  // shows a list and carries one thumb.
   contentId: getTodayDateKey(),
   articles,
   isFallback,

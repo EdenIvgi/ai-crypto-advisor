@@ -19,7 +19,6 @@ export const SettingsPage = () => {
   const quizOptions = useQuizOptions()
   const savePreferences = useSavePreferences()
 
-  // The route requires onboarding, so a reader who reaches this page has answers to edit.
   const savedAnswers = user.preferences
 
   const [draftAnswers, setDraftAnswers] = useState(() => ({
@@ -36,8 +35,6 @@ export const SettingsPage = () => {
     draftAnswers.investorType !== savedAnswers.investorType ||
     !isSameSelection(draftAnswers.contentSections, savedAnswers.contentSections)
 
-  // Mirrors what the API will accept, so the reason a save cannot happen is on screen before the
-  // button is pressed rather than in a rejected response afterwards.
   const isAnswerSetComplete =
     draftAnswers.watchedAssets.length > 0 &&
     Boolean(draftAnswers.investorType) &&

@@ -11,8 +11,6 @@ export const AiInsightSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
-      // Both labels are true statements about live data, which is why neither says "sample":
-      // the fallback here is composed from today's real prices, not a fixed paragraph.
       sourceLabel={
         insight.data &&
         (insight.data.isFallback ? "From today's prices" : 'Written for you today')

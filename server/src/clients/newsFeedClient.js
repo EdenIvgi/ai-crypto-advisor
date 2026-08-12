@@ -56,8 +56,6 @@ const fetchOneFeed = async ({ source, feedUrl }) => {
       accept: 'application/rss+xml, application/xml',
       'user-agent': REQUEST_USER_AGENT,
     },
-    // Without this, a publisher that accepts the connection and then says nothing would hold
-    // a dashboard request open until the browser gave up on it.
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
 
@@ -76,8 +74,6 @@ const toArticleDto = (item, source) => {
   if (Number.isNaN(publishedAt.getTime())) return null
 
   return {
-    // The article's own URL. Stable across refetches, unique across publishers, and already
-    // in hand — an RSS `<guid>` is neither reliably present nor reliably a URL.
     id: item.link,
     title: item.title,
     url: item.link,

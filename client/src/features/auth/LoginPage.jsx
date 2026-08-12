@@ -21,8 +21,6 @@ export const LoginPage = () => {
   }
 
   const fieldErrors = login.error?.fieldErrors ?? {}
-  // A rejected sign-in has no field to attach itself to — the server deliberately will not
-  // say which half was wrong — so it belongs above the form as one message.
   const formError = login.isError && !login.error.fieldErrors ? login.error.message : null
 
   return (

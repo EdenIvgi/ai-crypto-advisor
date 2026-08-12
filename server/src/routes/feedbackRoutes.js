@@ -14,8 +14,6 @@ const voteTargetSchema = z.object({
   contentId: z.string().min(1).max(MAX_CONTENT_ID_LENGTH),
 })
 
-// Extended rather than restated, so casting and withdrawing can never disagree about what
-// identifies the content being voted on.
 const voteBodySchema = voteTargetSchema.extend({
   vote: z.enum(VOTE_VALUES, { message: 'A vote is either up or down' }),
 })

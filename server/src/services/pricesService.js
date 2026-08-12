@@ -2,8 +2,6 @@ import { fetchCoinQuotes } from '../clients/coinGeckoClient.js'
 import { createTtlCache } from '../lib/inMemoryCache.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
 
-// Long enough that a page refresh costs nothing against a rate-limited free API, short
-// enough that a price on screen is never meaningfully behind the market.
 const COIN_PRICES_CACHE_TTL_MS = 60 * 1000
 
 const coinPricesCache = createTtlCache({ ttlMs: COIN_PRICES_CACHE_TTL_MS })

@@ -85,9 +85,6 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssets }) 
     }
   }
 
-  // Only reached with no key or after every model failed, and it is the one path that needs
-  // prices — which is why they are fetched here rather than up front. `loadCoinPrices` is
-  // documented never to throw.
   const { coins } = await loadCoinPrices(watchedAssets)
 
   return buildResponse(userId, date, composeFromPrices(investorType, coins), true)
@@ -132,10 +129,6 @@ const buildBriefingMaterial = (investorType, watchedAssets, articles) =>
     '',
     `Assets they follow: ${describeWatchedAssets(watchedAssets)}.`,
     '',
-    // Exactly the headlines the news section is showing, not a longer list fetched for the
-    // model's benefit. So the reader can always see the material the paragraph was written
-    // from, sitting in the card beside it — an insight whose source is on the same screen is
-    // one they can check.
     "Today's headlines, some of which may be irrelevant to the assets above:",
     ...articles.map((article) => `- ${article.title}`),
   ].join('\n')
@@ -169,8 +162,6 @@ const composeFromPrices = (investorType, allCoins) => {
         ? 'Everything you follow is down today'
         : `${risingCount} of the ${coins.length} assets you follow are up today`
 
-  // "Strongest" and "weakest" rather than "leads" and "trails", which read as nonsense on a
-  // day when everything is red — nothing leads a decline.
   const spread =
     coins.length === 1
       ? `${leader.name} is at ${formatSignedPercent(leader.change24hPercent)} over the last 24 hours.`
@@ -191,8 +182,6 @@ const formatSignedPercent = (changePercent) =>
 const buildResponse = (userId, date, text, isFallback) => {
   const insight = { id: buildInsightId(userId, date), text, date }
 
-  // This section shows exactly one thing, so the vote names it. That is what makes the
-  // feedback worth keeping: a thumb down here is about one piece of generated writing.
   return { contentId: insight.id, insight, isFallback }
 }
 

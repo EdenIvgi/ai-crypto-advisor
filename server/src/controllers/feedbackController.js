@@ -15,8 +15,6 @@ export const withdrawVote = async (request, response) => {
 
   await removeVote({ userId: request.userId, sectionType, contentId })
 
-  // 204 whether or not a row was there. The caller asked for this content to carry no vote from
-  // them, and afterwards it does not — reporting 404 would make a second click look like a bug.
   response.status(204).end()
 }
 
