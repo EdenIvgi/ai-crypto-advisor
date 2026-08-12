@@ -1,12 +1,19 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button.jsx'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu.jsx'
 import { ThemeToggle } from '@/components/layout/ThemeToggle.jsx'
 import { useCurrentUser, useLogout } from '@/features/auth/useAuth.js'
 
 export const AppHeader = () => {
   const { user } = useCurrentUser()
-  const logout = useLogout()
 
   return (
     <header className="border-b border-border">
@@ -19,41 +26,68 @@ export const AppHeader = () => {
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          {user ? <ProfileLink name={user.name} /> : null}
+          {user ? <ProfileMenu name={user.name} /> : null}
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => logout.mutate()}
-            disabled={logout.isPending}
-          >
-            {logout.isPending ? 'Signing out…' : 'Sign out'}
-          </Button>
         </div>
       </div>
     </header>
   )
 }
 
-/**
- * The way into the settings screen, and the only one — which is why the initial stays visible when
- * the name does not. On a narrow screen there is no room for both the name and Sign out, and
- * hiding the whole control would leave a phone with no way to change an answer.
- *
- * The `sr-only` line names the destination rather than the person, since "Eden A" on its own does
- * not tell anybody what the link does.
- */
-const ProfileLink = ({ name }) => (
-  <Button variant="ghost" size="sm" asChild>
-    <Link to="/settings">
-      <span
-        aria-hidden="true"
-        className="flex size-6 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-medium text-primary"
-      >
-        {name.trim().charAt(0).toUpperCase()}
+const ProfileMenu = ({ name }) => {
+  const logout = useLogout()
+  const wasClosedByPointer = useRef(false)
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="hidden max-w-32 truncate text-sm text-muted-foreground sm:inline">
+        {name}
       </span>
-      <span className="sr-only">Your preferences</span>
-      <span className="hidden max-w-32 truncate text-muted-foreground sm:inline">{name}</span>
-    </Link>
-  </Button>
-)
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Your account"
+            className="group hover:bg-transparent dark:hover:bg-transparent"
+          >
+            <span
+              aria-hidden="true"
+              className="flex size-6 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-medium text-primary transition-transform duration-100 ease-out motion-safe:group-hover:scale-110"
+            >
+              {name.trim().charAt(0).toUpperCase()}
+            </span>
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="end"
+          className="w-44"
+          onPointerDownOutside={() => {
+            wasClosedByPointer.current = true
+          }}
+          onCloseAutoFocus={(event) => {
+            if (!wasClosedByPointer.current) return
+            wasClosedByPointer.current = false
+            event.preventDefault()
+          }}
+        >
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to="/settings">Your preferences</Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            disabled={logout.isPending}
+            onSelect={() => logout.mutate()}
+            className="cursor-pointer"
+          >
+            {logout.isPending ? 'Signing out…' : 'Sign out'}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
