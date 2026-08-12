@@ -27,6 +27,11 @@ renders.
   than from figures that expire by the afternoon.
 - **A meme**, rotating daily.
 
+Above them sits **Ask about a coin**, a box that answers what a coin is and how its network
+works. It answers nothing else: questions outside crypto, questions about what to buy or sell,
+and questions about a price are each turned down in a sentence — it is shown no market data, so
+a figure from it would be invented, and the prices are on the same screen anyway.
+
 All three answers are editable later from the profile link in the header, and the dashboard is
 rebuilt from the new ones — including the insight, which is rewritten on the spot if you changed
 how you invest. There is a light and a dark theme; the first visit follows your system and every
@@ -73,11 +78,17 @@ and `JWT_SECRET`.
 | `VITE_API_BASE_URL`   | client | in production | Origin of the API. Defaults to `http://localhost:4000`     |
 | `COINGECKO_API_KEY`   | server | never         | Free demo key. Raises a per-IP allowance, nothing more     |
 | `HUGGINGFACE_API_KEY` | server | never         | Read token. Without it the insight is composed from prices |
+| `ANTHROPIC_API_KEY`   | server | never         | Without it the "Ask about a coin" box is not drawn at all  |
 
-The one key that changes what you see is `HUGGINGFACE_API_KEY`: with it the insight is **written
-by a model** for the way you said you invest; without it the same card is **composed from the
-day's real prices**. Both are true statements about live data, and the card says which one you're
-reading.
+Two keys change what you see. `HUGGINGFACE_API_KEY` decides how the insight is made: with it the
+paragraph is **written by a model** for the way you said you invest, without it the same card is
+**composed from the day's real prices**. Both are true statements about live data, and the card
+says which one you're reading.
+
+`ANTHROPIC_API_KEY` decides whether the assistant exists. Without it the box is not drawn and
+nothing else changes, so a fresh clone runs with no account anywhere. It is the one key billed
+against a real balance rather than a free tier, which is why that route is capped at ten
+questions per reader every ten minutes, counted per person rather than per address.
 
 Percent-encode special characters in the Mongo password — an unquoted `#` truncates the value
 where the `.env` parser treats it as a comment.
@@ -103,7 +114,7 @@ flowchart LR
     Browser["React 19 + Vite<br/>TanStack Query"]
     API["Express 5<br/>routes → controllers → services"]
     DB[("MongoDB Atlas<br/>users · votes · insights")]
-    Ext["CoinGecko · publisher RSS<br/>Hugging Face · meme-api"]
+    Ext["CoinGecko · publisher RSS<br/>Hugging Face · Anthropic · meme-api"]
 
     Browser -- "JWT in an httpOnly cookie" --> API
     API --> DB
