@@ -93,9 +93,15 @@ Two things are not trusted. The `nsfw` and `spoiler` flags are whatever a poster
 marked, so they are honoured but not relied on; what does the real filtering is the file extension,
 because a gallery or a video post answers with a link this card cannot render at all.
 
-The batch is held for the day and the day's meme is picked from it by date, not at random. That is
-what keeps `contentId` stable: a vote on this section names a meme rather than a date, so a thumb
-pressed in the morning is still on the same image in the afternoon.
+**Each reader's meme is chosen once and stored**, in `dailymemes`, keyed by reader and day exactly
+as the insight is. An in-memory choice was the first attempt and it did not survive contact with
+the host: the source returns a different batch on every call, so any cache miss produced a
+different meme, and on a free instance that sleeps after fifteen minutes a miss is the ordinary
+case. A thumb pressed in the morning was landing on an image that no longer existed by lunchtime.
+
+The reader is part of the key rather than only the day, so two people do not see the same meme —
+this is a personalised dashboard, not a front page. Only the batch is cached in memory, and only to
+keep ten readers arriving at once from becoming ten requests to a free public API.
 
 The seven drawn SVGs stay as the fallback rather than being deleted. They are the answer when the
 proxy is down or returns nothing showable, and the card says which of the two it is showing.
@@ -270,8 +276,9 @@ the same mismatch the app itself avoids by applying the theme before the bundle 
 Found while writing `docs/feedback-model-proposal.md`, and the most useful thing that document
 produced. `contentId` is the day for `coin_prices` and `market_news`, so a thumbs-down on the news
 card records that the card missed and not which of five headlines caused it — and those headlines
-came from live RSS and are gone. The meme is the one section where the same content is seen by
-everyone, and the insight is recoverable because its text is stored.
+came from live RSS and are gone. The meme and the insight are the two that survive, and for the
+same reason: what each reader was shown is stored, so a vote can still be resolved to the thing it
+was about.
 
 No model fixes this, so the proposal leads with an impressions log — the ordered item ids, the
 source, `isFallback`, and the exploration probability, written at render time. That is also the
