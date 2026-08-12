@@ -17,7 +17,6 @@ const feedbackVoteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     sectionType: {
       type: String,
@@ -54,6 +53,10 @@ const feedbackVoteSchema = new mongoose.Schema(
 // Changing your mind updates this document; it never adds a second one. Enforced in the
 // database rather than in the service, because a race between two clicks would defeat a
 // check written in JavaScript.
+//
+// `userId` gets no index of its own: it is the leftmost key here, so a lookup of one person's
+// votes already uses this one. A second index on it would be maintained on every write and
+// answer nothing this cannot.
 feedbackVoteSchema.index({ userId: 1, sectionType: 1, contentId: 1 }, { unique: true })
 
 export const FeedbackVote = mongoose.model('FeedbackVote', feedbackVoteSchema)
