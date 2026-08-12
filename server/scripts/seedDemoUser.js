@@ -19,6 +19,8 @@ const demoUser = await logInAsDemoUser()
 
 console.log(`Demo account ready: ${demoUser.email}`)
 console.log(`Onboarding complete: ${demoUser.hasCompletedOnboarding}`)
-console.log(`Watching: ${DEMO_ACCOUNT.preferences.watchedAssetIds.join(', ')}`)
+console.log(
+  `Watching: ${DEMO_ACCOUNT.preferences.watchedAssets.map((asset) => asset.symbol).join(', ')}`
+)
 
 await mongoose.disconnect()
