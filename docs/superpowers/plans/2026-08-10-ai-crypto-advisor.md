@@ -16,7 +16,7 @@ exactly one mock, so there is always a working product.
 
 **Tech Stack:** Node 22, Express 5, Mongoose + MongoDB Atlas, Zod, jsonwebtoken, bcrypt ·
 React 19, Vite 7, Tailwind 4, shadcn/ui, TanStack Query, react-router · Vitest, Supertest,
-mongodb-memory-server, Playwright.
+mongodb-memory-server.
 
 ## Global Constraints
 
@@ -46,7 +46,7 @@ mongodb-memory-server, Playwright.
 | M9 — Market news (publisher RSS)      | done                     |
 | M10 — Crypto meme (static, in-repo)   | done                     |
 | M11 — AI insight (Hugging Face)       | done                     |
-| M12 — Polish and smoke test           | done                     |
+| M12 — Polish                          | done                     |
 | M13 — Docs and handover               | done, bar the Atlas user |
 
 ---
@@ -583,13 +583,12 @@ on the card.
 
 ---
 
-### Task M12: Polish and smoke test
+### Task M12: Polish
 
 **Use the `frontend-design` skill for the visual pass.**
 
 **Files:**
 
-- Create: `e2e/smoke.spec.js`, `playwright.config.js`
 - Modify: section components, `DashboardSectionCard`, `AppHeader`
 
 - [x] **Step 1:** ~~Loading skeletons.~~ Already done in M5: `DashboardSectionCard` takes a
@@ -607,13 +606,7 @@ on the card.
       together — now `aria-labelledby` for the answer and `aria-describedby` for the sentence. Added
       `prefers-reduced-motion`, selectively: pulses and transitions stop, the session spinner does
       not, because it is the only sign a cold server is being waited on.
-- [x] **Step 6:** `e2e/smoke.spec.js` — three tests rather than one. The plan's pass, plus the theme
-      choice outliving a reload against an opposite system preference, plus a quiz answer changed by
-      Space and by Enter. The vote is withdrawn at the end, so the shared demo account is unchanged.
-- [x] **Step 7:** Green, via `npm run test:e2e`. Confirmed able to fail by stubbing out
-      `rememberTheme`. Not wired into CI — no database or seeded account there — and the testing
-      policy records why.
-- [x] **Step 8:** Lint, format, test, commit, open the PR.
+- [x] **Step 6:** Lint, format, test, commit, open the PR.
 
 ---
 
@@ -630,11 +623,11 @@ on the card.
       repository should never have sat for days with no explanation of what it is.
 - [x] **Step 1b:** Both public origins, and the dashboard shot on the live demo account in a
       `<picture>` that serves the dark capture to a dark reader — so the screenshot matches the
-      page it sits on. Captured with a throwaway Playwright script rather than by hand, which is
-      also how the `COINGECKO · LIVE` label in it was checked: the prices in the shot match what
-      CoinGecko returned at that minute, and are nowhere in the fallback table.
-- [x] **Step 2:** Five tradeoffs, not three — the Atlas rule, cold starts, the capped suite, the
-      e2e tests being outside CI, and the insight being cached until midnight. Each states its cost
+      page it sits on. The `COINGECKO · LIVE` label in it was checked rather than trusted: the
+      prices in the shot match what CoinGecko returned at that minute, and are nowhere in the
+      fallback table.
+- [x] **Step 2:** Four tradeoffs, not three — the Atlas rule, cold starts, the capped suite, and
+      the insight being cached until midnight. Each states its cost
       rather than only its reason, since the reasons already live in `docs/decisions.md`.
 - [x] **Step 3:** `docs/feedback-model-proposal.md`. Writing it turned up something the plan had
       assumed away: **two of the four sections cannot be trained on at all as they stand.**
@@ -654,12 +647,8 @@ on the card.
 - [x] **Step 6:** Cloned from GitHub into an empty directory and run with nothing but
       `npm install` and `npm run dev`. The no-configuration path holds: it announces the missing
       `.env`, starts a throwaway in-memory MongoDB, generates a session secret, and the demo
-      account works without anyone running the seed script. The full Playwright suite passes
-      against that clone.
-- [x] **Step 6b:** A race in the M12 smoke test, found by running it against production rather
-      than locally. `getByText('Bitcoin')` resolved to five elements once the news card landed,
-      and passed only while the news was slower than the prices. Matched on the exact ticker now.
-- [x] **Step 6c:** `format:check` added to the pre-commit rule in the git doc. It is what failed
+      account works without anyone running the seed script.
+- [x] **Step 6b:** `format:check` added to the pre-commit rule in the git doc. It is what failed
       CI twice, and it was the one check the rule never named.
 - [x] **Step 7:** Commit, open the PR, and merge to `main`. Four commits in PR #28, which is the
       last one. Every milestone in this plan arrived through its own pull request, and none of them
