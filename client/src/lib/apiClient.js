@@ -1,5 +1,3 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000'
-
 export class ApiRequestError extends Error {
   constructor(message, { statusCode, code, fieldErrors } = {}) {
     super(message)
@@ -29,7 +27,11 @@ export const requestApi = async (path, { method = 'GET', body, signal } = {}) =>
   let response
 
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
+    // Relative on purpose, and deliberately not configurable. An absolute origin here would put
+    // the API on a different site from the page, which makes the session cookie a third-party
+    // cookie — and Safari discards those by default, as does any browser in a private window.
+    // Both environments route /api to the API instead: Vercel by rewrite, Vite by dev proxy.
+    response = await fetch(path, {
       method,
       credentials: 'include',
       signal,

@@ -75,7 +75,6 @@ and `JWT_SECRET`.
 | `CLIENT_ORIGIN`       | server | no            | Exact browser origin, for CORS. No trailing slash          |
 | `MONGODB_URI`         | server | in production | Include the database name before the `?`                   |
 | `JWT_SECRET`          | server | in production | At least 32 characters                                     |
-| `VITE_API_BASE_URL`   | client | in production | Origin of the API. Defaults to `http://localhost:4000`     |
 | `COINGECKO_API_KEY`   | server | never         | Free demo key. Raises a per-IP allowance, nothing more     |
 | `HUGGINGFACE_API_KEY` | server | never         | Read token. Without it the insight is composed from prices |
 | `ANTHROPIC_API_KEY`   | server | never         | Without it the "Ask about a coin" box is not drawn at all  |
@@ -116,10 +115,15 @@ flowchart LR
     DB[("MongoDB Atlas<br/>users · votes · insights")]
     Ext["CoinGecko · publisher RSS<br/>Hugging Face · Anthropic · meme-api"]
 
-    Browser -- "JWT in an httpOnly cookie" --> API
+    Browser -- "/api, same origin<br/>JWT in an httpOnly cookie" --> API
     API --> DB
     API -- "cached, with static fallbacks" --> Ext
 ```
+
+The browser only ever talks to one origin. `/api` is rewritten to the Render service by
+`client/vercel.json` in production and by the Vite dev server locally, so the session cookie is
+never a third-party cookie — which is what Safari, and any browser in a private window, throws
+away by default.
 
 The API is layered, and the layers aren't skipped. Routes map a path to a middleware chain and
 one controller. Controllers read `request.userId`, call exactly one service, and send JSON — they
