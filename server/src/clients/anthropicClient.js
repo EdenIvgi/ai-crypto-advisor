@@ -2,11 +2,12 @@ import Anthropic from '@anthropic-ai/sdk'
 
 import { env } from '../config/env.js'
 
-const MODEL_ID = 'claude-opus-5'
+// The cheapest model in the family, and the one that fits: these questions are explanatory
+// rather than hard, and the answer is three sentences long. It is also old enough to predate the
+// effort parameter, which is why there is none below — sending one to this model is a 400.
+const MODEL_ID = 'claude-haiku-4-5'
 
-// Thinking is on by default on this model and is spent from the same allowance as the answer,
-// so this is not a three-sentence budget — it is three sentences plus the reasoning behind them.
-const MAX_ANSWER_TOKENS = 2000
+const MAX_ANSWER_TOKENS = 1000
 
 // A retried attempt costs the reader the whole wait again, so these two multiply: this is a
 // thirty-second ceiling in front of somebody who is watching a spinner, not a fifteen-second one.
@@ -31,9 +32,6 @@ export const generateAnswer = async ({ systemPrompt, question }) => {
   const message = await anthropic.messages.create({
     model: MODEL_ID,
     max_tokens: MAX_ANSWER_TOKENS,
-    // The reader is waiting at an input, and the questions here are explanatory rather than
-    // hard. Low keeps the reasoning short enough to answer at the speed of a search box.
-    output_config: { effort: 'low' },
     system: systemPrompt,
     messages: [{ role: 'user', content: question }],
   })
@@ -41,8 +39,6 @@ export const generateAnswer = async ({ systemPrompt, question }) => {
   if (message.stop_reason === 'refusal') throw new Error('the model declined to answer')
   if (message.stop_reason === 'max_tokens') throw new Error('ran out of tokens mid-answer')
 
-  // Thinking arrives as its own blocks in the same array, and their text is empty unless it is
-  // asked for — so the answer is the text blocks, not the first block.
   const answer = message.content
     .filter((block) => block.type === 'text')
     .map((block) => block.text)

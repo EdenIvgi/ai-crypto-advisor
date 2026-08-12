@@ -10,11 +10,7 @@ import { useAskAboutCrypto } from '../useDashboard.js'
 
 const MINIMUM_QUESTION_LENGTH = 3
 
-const EXAMPLE_QUESTIONS = [
-  'What is staking?',
-  'What does Solana do differently?',
-  'What is a Bitcoin halving?',
-]
+const EXAMPLE_QUESTIONS = ['What is staking?', 'How does Solana work?', 'What is a halving?']
 
 export const AskAboutCryptoCard = ({ className }) => {
   const [question, setQuestion] = useState('')

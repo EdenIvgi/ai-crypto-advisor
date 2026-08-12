@@ -35,23 +35,25 @@ export const DashboardPage = () => {
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-6 sm:py-14">
-      <header>
-        <p className="eyebrow">{formatBriefingDate()}</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-          {firstName ? `Your briefing, ${firstName}` : 'Your briefing'}
-        </h1>
-        <p className="mt-3 max-w-lg text-pretty text-muted-foreground">
-          Built from the answers you gave. Every section below is one you asked for.
-        </p>
-      </header>
+      {/* The box shares the row with the heading rather than taking a band of its own. The space
+          beside a two-line title is dead otherwise, and this keeps the grid below untouched. */}
+      <div className="flex flex-wrap items-start gap-5 sm:gap-6">
+        <header className="min-w-0 grow basis-full lg:basis-96">
+          <p className="eyebrow">{formatBriefingDate()}</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            {firstName ? `Your briefing, ${firstName}` : 'Your briefing'}
+          </h1>
+          <p className="mt-3 max-w-lg text-pretty text-muted-foreground">
+            Built from the answers you gave. Every section below is one you asked for.
+          </p>
+        </header>
 
-      {/* Inside the same row rather than above it, so the space between the box and the prices
-          is the gap every other pair of cards has instead of a margin invented for one case. */}
-      <div className="mt-10 flex flex-wrap gap-5 sm:mt-12 sm:gap-6">
         {quizOptions.data?.isAssistantAvailable ? (
-          <AskAboutCryptoCard className="basis-full" />
+          <AskAboutCryptoCard className="min-w-0 grow basis-full lg:basis-96" />
         ) : null}
+      </div>
 
+      <div className="mt-10 flex flex-wrap gap-5 sm:mt-12 sm:gap-6">
         {visibleSections.map(({ preference, Section, widthClassName }) => (
           <Section key={preference} className={widthClassName} />
         ))}
