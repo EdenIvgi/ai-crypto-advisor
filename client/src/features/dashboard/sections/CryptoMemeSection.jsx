@@ -11,7 +11,9 @@ export const CryptoMemeSection = ({ className }) => {
     <DashboardSectionCard
       className={className}
       title={SECTION_TITLE}
-      sourceLabel={meme.data && 'Drawn for this app'}
+      sourceLabel={
+        meme.data && (meme.data.isFallback ? 'Drawn for this app' : 'r/cryptocurrencymemes')
+      }
       isPending={meme.isPending}
       error={meme.error}
       onRetry={meme.refetch}

@@ -54,8 +54,9 @@ The API comes up on `http://localhost:4000` and the client on `http://localhost:
 **No configuration and no API keys are needed to run it.** With no `server/.env`, the API starts a
 throwaway in-memory MongoDB and generates a session secret for that process, and says so in the
 log — everything works, nothing survives a restart. Prices come from CoinGecko's public tier and
-news from the publishers' RSS feeds, neither of which needs an account, and the memes are drawn
-in this repository.
+news from the publishers' RSS feeds, and memes from `r/cryptocurrencymemes` through a free proxy —
+none of which needs an account. When the meme source is unreachable the card falls back to seven
+SVGs drawn in this repository.
 
 To keep your data, copy `server/.env.example` to `server/.env` and fill in a real `MONGODB_URI`
 and `JWT_SECRET`.
@@ -102,7 +103,7 @@ flowchart LR
     Browser["React 19 + Vite<br/>TanStack Query"]
     API["Express 5<br/>routes → controllers → services"]
     DB[("MongoDB Atlas<br/>users · votes · insights")]
-    Ext["CoinGecko · publisher RSS<br/>Hugging Face"]
+    Ext["CoinGecko · publisher RSS<br/>Hugging Face · meme-api"]
 
     Browser -- "JWT in an httpOnly cookie" --> API
     API --> DB

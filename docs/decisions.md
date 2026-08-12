@@ -82,17 +82,23 @@ Matching a headline to a coin is a guess: "the largest cryptocurrency just recov
 Bitcoin and never says so. As a filter, a bad guess costs the reader an article. As a ranking it
 can only reorder, and the card always has five items.
 
-## The memes are static SVGs drawn here, not scraped from Reddit
+## The memes come from a proxy of Reddit, not from Reddit directly
 
-The brief allows either, and Reddit answers a plain server request with 403 — harder still from
-cloud ranges — so a live route would have served the fallback most of its life. A "live"
-integration whose normal state is fallback is worse than an honest static one, because it also
-carries the code to fail.
+Reddit answers a plain server request with 403, and harder still from cloud ranges, so scraping it
+from Render would have served the fallback most of its life. `meme-api.com` makes that call
+instead and needs no key, which keeps the promise that a fresh clone runs without signing up for
+anything. Only `r/cryptocurrencymemes` is asked for, so the section stays on subject.
 
-The seven memes are drawn for this app rather than linked: a hotlink breaks the day its host
-expires the URL, which defeats the point of going static, and copying real memes in would put
-other people's content, with unclear rights, into a public repository. Swapping in real images
-means editing `server/src/data/dailyMemes.js` and nothing else.
+Two things are not trusted. The `nsfw` and `spoiler` flags are whatever a poster or a moderator
+marked, so they are honoured but not relied on; what does the real filtering is the file extension,
+because a gallery or a video post answers with a link this card cannot render at all.
+
+The batch is held for the day and the day's meme is picked from it by date, not at random. That is
+what keeps `contentId` stable: a vote on this section names a meme rather than a date, so a thumb
+pressed in the morning is still on the same image in the afternoon.
+
+The seven drawn SVGs stay as the fallback rather than being deleted. They are the answer when the
+proxy is down or returns nothing showable, and the card says which of the two it is showing.
 
 ## The insight has no sample text, unlike the other sections
 
