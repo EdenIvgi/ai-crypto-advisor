@@ -1,6 +1,5 @@
 import { SelectableOption } from '../components/SelectableOption.jsx'
 
-/** What each section actually puts on the dashboard, so the choice is concrete. */
 const CONTENT_SECTION_DESCRIPTIONS = {
   coin_prices: 'Live prices and the last 24 hours for the assets you picked.',
   // Not "filtered down to those assets": headlines about them are lifted to the top, and the
@@ -11,7 +10,6 @@ const CONTENT_SECTION_DESCRIPTIONS = {
   fun_meme: 'One crypto meme. It changes daily.',
 }
 
-/** Multiple choice. Anything left unpicked simply will not appear on the dashboard. */
 export const ContentPreferencesQuestion = ({
   contentSections,
   selectedSections,

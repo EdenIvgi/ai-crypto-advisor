@@ -1,9 +1,5 @@
 import { isTest } from '../config/env.js'
 
-/**
- * One line per finished request: method, path, status, duration. Logging on `finish`
- * rather than on the way in means the status code and timing are already known.
- */
 export const requestLogger = (request, response, next) => {
   if (isTest) return next()
 

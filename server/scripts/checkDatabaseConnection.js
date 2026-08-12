@@ -1,11 +1,5 @@
 import mongoose from 'mongoose'
 
-/**
- * Confirms the configured MongoDB is reachable and reports what is in it, without ever
- * printing the connection string — it carries the cluster password.
- *
- * Run with: npm run check:db --workspace server
- */
 const connectionUri = process.env.MONGODB_URI
 
 if (!connectionUri) {

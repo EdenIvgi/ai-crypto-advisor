@@ -6,16 +6,6 @@ import { AiInsightSection } from './sections/AiInsightSection.jsx'
 import { CryptoMemeSection } from './sections/CryptoMemeSection.jsx'
 import { MarketNewsSection } from './sections/MarketNewsSection.jsx'
 
-/**
- * The reading order of the dashboard, and the only place it is decided. Not the order the
- * user happened to tick the boxes in during onboarding — that is click order, which carries
- * no meaning and would give two people with identical answers different layouts.
- *
- * The widths are flex bases rather than grid columns so the row arranges itself around
- * whatever the user chose: with both the insight and the meme selected they share a row in
- * proportion, and with only one of them selected it grows to the full width instead of
- * leaving a hole where the other card would have been.
- */
 const SECTIONS_IN_READING_ORDER = [
   { preference: 'coin_prices', Section: CoinPricesSection, widthClassName: 'basis-full' },
   {

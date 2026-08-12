@@ -17,20 +17,6 @@ const ACTIVE_UP_CLASSES =
 const ACTIVE_DOWN_CLASSES =
   'bg-market-down/10 text-market-down hover:bg-market-down/15 hover:text-market-down'
 
-/**
- * The thumbs on a section. Every vote is stored against the exact content that was on screen,
- * which is what makes the feedback worth keeping.
- *
- * @param {object} props
- * @param {string} props.sectionType
- * @param {string} [props.contentId] - What the section is currently showing.
- * @param {string} props.sectionLabel - Names the section in the buttons' accessible labels,
- *   so four identical pairs of thumbs do not all announce themselves as "useful".
- *
- * Each thumb is a toggle: pressing the pressed one withdraws the vote. The labels stay fixed and
- * `aria-pressed` carries the state, which is what a screen reader expects from a toggle — a label
- * that flipped to "remove" would announce the action twice and the state not at all.
- */
 export const FeedbackVoteButtons = ({ sectionType, contentId, sectionLabel }) => {
   const { currentVote, toggleVote, hasFailed } = useFeedbackVote({ sectionType, contentId })
 

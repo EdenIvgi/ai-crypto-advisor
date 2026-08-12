@@ -2,18 +2,6 @@ import mongoose from 'mongoose'
 
 import { INVESTOR_TYPES, CONTENT_SECTIONS } from '../data/preferenceOptions.js'
 
-/**
- * Quiz answers. Embedded rather than a separate collection: it is one-to-one with the user,
- * always read together with them, and small. A separate collection would only add a lookup.
- *
- * `_id: false` because these are a property of the user, not a document in their own right.
- */
-/**
- * The name and symbol are stored beside the id rather than looked up, because the id can be any
- * coin CoinGecko knows and this application keeps a list of eight. They arrive in the search
- * result the asset was picked from, so storing them costs nothing and a card can still name a
- * coin when CoinGecko is unreachable.
- */
 const watchedAssetSchema = new mongoose.Schema(
   {
     id: { type: String, required: true },

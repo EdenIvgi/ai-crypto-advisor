@@ -2,11 +2,6 @@ import { Button } from '@/components/ui/button.jsx'
 
 import { useDemoLogin } from './useAuth.js'
 
-/**
- * Signs the visitor straight into a shared account that has already answered the quiz.
- * Deliberately below the real form and styled as a secondary action: it is an escape hatch
- * for someone evaluating the product, not the way an actual user is meant to arrive.
- */
 export const DemoAccountButton = () => {
   const demoLogin = useDemoLogin()
 

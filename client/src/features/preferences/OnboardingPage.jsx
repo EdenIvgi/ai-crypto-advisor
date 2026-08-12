@@ -34,11 +34,6 @@ const EMPTY_ANSWERS = {
   contentSections: [],
 }
 
-/**
- * Three questions, held in local state and submitted once at the end. Saving step by step
- * would leave half-answered accounts in the database, and `preferences` being absent is
- * precisely what marks someone as not yet onboarded.
- */
 export const OnboardingPage = () => {
   const { user } = useCurrentUser()
   const quizOptions = useQuizOptions()
@@ -61,11 +56,6 @@ export const OnboardingPage = () => {
     savePreferences.mutate(answers)
   }
 
-  /**
-   * Updating from the previous state rather than from `answers` directly. Two clicks landing
-   * in the same render would otherwise both read the same stale selection, and the second
-   * would silently discard the first.
-   */
   const toggleAnswerIn = (field) => (value) =>
     setAnswers((current) => ({ ...current, [field]: toggleSelection(current[field], value) }))
 

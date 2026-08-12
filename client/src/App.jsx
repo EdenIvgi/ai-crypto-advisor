@@ -8,7 +8,6 @@ import { OnboardingPage } from '@/features/preferences/OnboardingPage.jsx'
 import { SettingsPage } from '@/features/preferences/SettingsPage.jsx'
 import { DashboardPage } from '@/features/dashboard/DashboardPage.jsx'
 
-/** Signed-in screens share the header; the auth screens have their own full-page layout. */
 const SignedInLayout = () => (
   <div className="min-h-svh">
     <AppHeader />

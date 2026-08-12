@@ -1,14 +1,4 @@
-/**
- * Errors that a service or controller can throw to produce a specific HTTP response.
- * `errorHandler` is the only place that turns these into a response — nothing else in the
- * codebase should be building an error body by hand.
- */
 export class ApiError extends Error {
-  /**
-   * @param {string} message - Safe to show the user; never include internals or secrets.
-   * @param {number} statusCode
-   * @param {string} code - Stable machine-readable code the client can branch on.
-   */
   constructor(message, statusCode, code) {
     super(message)
     this.name = new.target.name
@@ -18,10 +8,6 @@ export class ApiError extends Error {
 }
 
 export class BadRequestError extends ApiError {
-  /**
-   * @param {string} message
-   * @param {unknown} [fieldErrors] - Per-field validation detail, when there is any.
-   */
   constructor(message = 'The request was not valid', fieldErrors) {
     super(message, 400, 'BAD_REQUEST')
     this.fieldErrors = fieldErrors
@@ -47,12 +33,6 @@ export class NotFoundError extends ApiError {
 }
 
 export class ConflictError extends ApiError {
-  /**
-   * @param {string} message
-   * @param {string} [code] - Override when the client has to branch on which conflict it
-   *   was. `requireOnboarding` sends `ONBOARDING_REQUIRED` so the client can redirect to the
-   *   quiz instead of showing an error.
-   */
   constructor(
     message = 'That conflicts with something that already exists',
     code = 'CONFLICT'

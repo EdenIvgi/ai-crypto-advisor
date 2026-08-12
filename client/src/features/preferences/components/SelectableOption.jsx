@@ -3,20 +3,6 @@ import { Check } from 'lucide-react'
 
 import { cn } from '@/lib/utils.js'
 
-/**
- * One answer in the quiz. A real `<button>` rather than a styled `div`, so it is reachable
- * by Tab and activated by Enter or Space without any key handling of our own.
- *
- * Single-choice questions get radio semantics and multiple-choice questions get
- * `aria-pressed`, so a screen reader announces "one of these" or "any of these" correctly
- * instead of both reading as generic buttons.
- *
- * The title is the name and the subtitle is the description, wired explicitly rather than left
- * to name-from-content. Left to itself, the option's name became the title and the whole
- * explanation run together — "Day TraderYou are in and out, and the charts matter today" — which
- * is the name of nothing. Now the name is the answer and the sentence explaining it arrives as
- * the description, which is the order somebody choosing needs them in.
- */
 export const SelectableOption = ({
   isSelected,
   isSingleChoice = false,

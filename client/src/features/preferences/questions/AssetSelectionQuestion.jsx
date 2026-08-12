@@ -12,14 +12,6 @@ import { useDebouncedValue } from '../useDebouncedValue.js'
 const MAX_WATCHED_ASSETS = 12
 const SEARCH_DEBOUNCE_MS = 300
 
-/**
- * The eight suggestions are a starting point, not the choice: anything CoinGecko lists can be
- * found through the search box above them. A coin picked from a search is shown alongside the
- * suggestions afterwards, so it can be seen and unpicked without being searched for again.
- *
- * The cap is the server's, enforced here by disabling the unpicked options once it is reached —
- * the person finds out before they submit, not after.
- */
 export const AssetSelectionQuestion = ({ suggestedAssets, selectedAssets, onToggleAsset }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const debouncedSearchTerm = useDebouncedValue(searchTerm, SEARCH_DEBOUNCE_MS)

@@ -1,13 +1,5 @@
 import { requestApi } from '@/lib/apiClient.js'
 
-/**
- * Every auth call the client can make. Components reach these through the hooks in
- * useAuth.js rather than calling them directly.
- *
- * None of these handle the token: it travels as an httpOnly cookie the browser attaches on
- * its own, which is why there is nothing here that reads or stores one.
- */
-
 export const fetchCurrentUser = () => requestApi('/api/auth/me')
 
 export const postRegistration = ({ email, name, password }) =>

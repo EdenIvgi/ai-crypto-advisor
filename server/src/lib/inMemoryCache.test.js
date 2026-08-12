@@ -4,10 +4,6 @@ import { createTtlCache } from './inMemoryCache.js'
 
 const TTL_MS = 60_000
 
-/**
- * The one unit test in the capped suite (see .claude/docs/testing-policy.md). Fake timers
- * rather than real waiting, so the expiry boundary is exact and the test costs nothing.
- */
 describe('inMemoryCache', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => vi.useRealTimers())

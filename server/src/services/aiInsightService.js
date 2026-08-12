@@ -10,21 +10,6 @@ import { getTodayDateKey } from '../lib/dateKeys.js'
 
 const DUPLICATE_KEY_ERROR_CODE = 11000
 
-/**
- * What the model is and is not allowed to do.
- *
- * **No figures, and that is the load-bearing rule.** This paragraph is written once and stored
- * for the day, while a 24-hour percentage changes continuously — so an insight that cited
- * "Bitcoin is down 0.9%" was quoting a number that had stopped being true by lunchtime, on a
- * page whose prices card was showing the current one two inches away. Headlines do not spoil
- * that way: an event that happened this morning still happened this evening. So the prompt is
- * given events and asked for interpretation, which is also the one thing the cards beside it
- * cannot do.
- *
- * Rule 3 must not be relaxed — this section is a daily read on the market, not an adviser, and a
- * model asked for an "insight" about somebody's own holdings drifts into telling them what to buy
- * unless it is forbidden.
- */
 const INSIGHT_SYSTEM_PROMPT = [
   'You write the "Insight of the day" paragraph for a crypto dashboard, addressed to one',
   'reader whose assets and investing style you are given.',
@@ -60,17 +45,6 @@ const INSIGHT_SYSTEM_PROMPT = [
   'so never write as though you do.',
 ].join('\n')
 
-/**
- * What each style actually attends to, rather than what it sounds like. The first version of
- * this feature passed only the label, and the model read "HODLer" as an instruction about tone;
- * a paragraph is only genuinely different when the thing being looked at is different.
- *
- * Every hint is answerable from headlines alone. That is a constraint learned twice. First a
- * hint about fees and congestion — data this application never supplies — had the model invent a
- * twenty per cent fee rise and credit it to "data". Then a hint about the spread between assets
- * kept pulling the paragraph back to percentages, which is exactly what this section must not
- * talk about. **A hint that names something the model cannot see is a request to make it up.**
- */
 const ATTENTION_BY_INVESTOR_TYPE = {
   hodler:
     'cares only about things that change an asset for years rather than for a day — protocol ' +
@@ -83,33 +57,6 @@ const ATTENTION_BY_INVESTOR_TYPE = {
     'upgrades, marketplaces, and where new activity is going',
 }
 
-/**
- * Today's insight for one reader, written for the way they said they invest.
- *
- * Resolved in three steps, and the first is the one that matters most:
- *
- * 1. **Today's stored insight**, if there is one. One model call per person per day, so a
- *    refresh costs nothing and — more importantly — shows the same paragraph as an hour ago.
- * 2. **A generated one**, written from today's headlines and stored if those headlines were
- *    live. An insight inherits the honesty of its material: written from the sample feed it
- *    reports `isFallback: true` even though a model wrote it, and is not cached — otherwise a
- *    refused source would hold events that never happened on the page for a full day.
- * 3. **A composed one**, assembled from live prices when no key is configured or every model
- *    fails. It reports `isFallback: true`.
- *
- * Note the asymmetry between 2 and 3, which is deliberate: the generated paragraph is never
- * allowed to mention a figure, because it is stored for a day and a percentage is not true for
- * a day. The composed one is built from figures and is fine, because it is rebuilt on every
- * request and never stored, so its numbers are always the current ones.
- *
- * There is no sample text behind this section. Both paths run on live material, so falling back
- * to a fixed paragraph about a market that never happened would be the worse answer.
- *
- * This function never throws. A section of a dashboard is not worth an error page.
- *
- * @param {{ userId: string, investorType: string, watchedAssets: Array<{ id: string, name: string, symbol: string }> }} reader
- * @returns {Promise<{ contentId: string, insight: { id: string, text: string, date: string }, isFallback: boolean }>}
- */
 export const loadDailyInsight = async ({ userId, investorType, watchedAssets }) => {
   const date = getTodayDateKey()
 
@@ -146,20 +93,6 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssets }) 
   return buildResponse(userId, date, composeFromPrices(investorType, coins), true)
 }
 
-/**
- * Throws today's stored paragraph away, so the next dashboard load writes a new one.
- *
- * This cache is keyed by reader and day, and deliberately not by what the paragraph was written
- * from — that is what stops it rewriting itself on every refresh. The cost is that a reader who
- * changes how they invest at noon would otherwise spend the rest of the day reading a paragraph
- * addressed to the profile they just abandoned, under a **Written for you today** label. So the
- * one event that can invalidate it says so.
- *
- * @param {string} userId
- * @returns {Promise<string>} The `contentId` that has stopped existing, so a vote cast on that
- *   paragraph can be withdrawn with it.
- * @throws When the delete fails. The caller decides whether that is worth failing their request.
- */
 export const forgetTodaysInsight = async (userId) => {
   const date = getTodayDateKey()
 
@@ -168,14 +101,6 @@ export const forgetTodaysInsight = async (userId) => {
   return buildInsightId(userId, date)
 }
 
-/**
- * Today's stored paragraph, or null — including when the read itself fails.
- *
- * A database that cannot be read is a reason to generate a new insight, not a reason to break
- * the section. Swallowing this is what keeps the promise in the doc comment above: the only
- * unguarded call in `loadDailyInsight` would otherwise be this one, and a momentary Mongo
- * hiccup would turn a dashboard card into a 500.
- */
 const readStoredInsight = async (userId, insightDate) => {
   try {
     const stored = await DailyAiInsight.findOne({ userId, insightDate }).lean()
@@ -186,16 +111,6 @@ const readStoredInsight = async (userId, insightDate) => {
   }
 }
 
-/**
- * Writes today's paragraph. Every failure is swallowed, for two different reasons.
- *
- * A duplicate key is not a failure at all: two dashboard loads racing on a cold cache both find
- * nothing and both generate, and the unique index rejecting the second write is exactly the
- * outcome that index exists for — somebody else just stored today's.
- *
- * Any other write error is real, but losing the cache is a far smaller loss than losing the
- * paragraph. The reader gets what the model wrote; tomorrow's restart is when it matters.
- */
 const rememberTodaysInsight = async (userId, insightDate, insightText) => {
   try {
     await DailyAiInsight.create({ userId, insightDate, insightText })
@@ -205,29 +120,11 @@ const rememberTodaysInsight = async (userId, insightDate, insightText) => {
   }
 }
 
-/**
- * The exact conversation the model is sent. Exported because the prompt is the part of this
- * feature most likely to need looking at: rendering it, or running the same day's material
- * through several investing styles to see whether the paragraphs really differ, should not
- * require reaching into a private function or duplicating its wording somewhere else.
- *
- * @param {string} investorType - One of `INVESTOR_TYPES`
- * @param {Array<{ id: string, name: string, symbol: string }>} watchedAssets
- * @param {Array<{ title: string }>} articles
- * @returns {Array<{ role: 'system' | 'user', content: string }>}
- */
 export const buildInsightMessages = (investorType, watchedAssets, articles) => [
   { role: 'system', content: INSIGHT_SYSTEM_PROMPT },
   { role: 'user', content: buildBriefingMaterial(investorType, watchedAssets, articles) },
 ]
 
-/**
- * Everything the model is given about today, as plain lines rather than JSON.
- *
- * The assets are named and nothing more — no price, no change, no direction. The model needs to
- * know which coins matter so it can pick the headline that touches them; it does not need, and
- * must not be given, a figure it would then quote into a paragraph that outlives the figure.
- */
 const buildBriefingMaterial = (investorType, watchedAssets, articles) =>
   [
     `Reader's style: ${INVESTOR_TYPE_LABELS[investorType] ?? 'HODLer'}, who ` +
@@ -249,14 +146,6 @@ const describeWatchedAssets = (watchedAssets) => {
   return names.length > 0 ? names.join(', ') : 'none in particular'
 }
 
-/**
- * The paragraph when no model wrote one. Assembled from the same live prices the model would
- * have been given, so it is a true statement about today rather than a placeholder.
- *
- * The closing line is framing rather than a claim about today's figures — it says what this
- * reader's horizon makes a day like this mean, which is the one thing the numbers cannot say
- * for themselves. It is still not advice.
- */
 const composeFromPrices = (investorType, allCoins) => {
   // An asset CoinGecko could not price carries no figure, and a sentence about the strongest
   // and weakest of them has to be built from the ones that do.
@@ -307,8 +196,4 @@ const buildResponse = (userId, date, text, isFallback) => {
   return { contentId: insight.id, insight, isFallback }
 }
 
-/**
- * One reader's paragraph for one day. Derived rather than stored, which is what lets a caller
- * that only wants to invalidate it name it without reading the document first.
- */
 const buildInsightId = (userId, date) => `${userId}:${date}`

@@ -1,9 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000'
 
-/**
- * An API call that failed. Carries the server's machine-readable code so callers can
- * branch on the reason (`ONBOARDING_REQUIRED`, `UNAUTHORIZED`) instead of matching prose.
- */
 export class ApiRequestError extends Error {
   constructor(message, { statusCode, code, fieldErrors } = {}) {
     super(message)
@@ -29,17 +25,6 @@ const readErrorFromResponse = async (response) => {
   }
 }
 
-/**
- * The only place in the client that calls `fetch`. Feature modules wrap this; components
- * never call it directly.
- *
- * `credentials: 'include'` is what carries the auth cookie to the API on a different
- * origin — without it every authenticated request silently comes back 401 in production.
- *
- * @param {string} path - Path below the API root, e.g. `/api/auth/me`.
- * @param {{ method?: string, body?: unknown, signal?: AbortSignal }} [options]
- * @returns {Promise<unknown>} The parsed JSON body, or null for an empty response.
- */
 export const requestApi = async (path, { method = 'GET', body, signal } = {}) => {
   let response
 

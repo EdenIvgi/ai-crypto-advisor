@@ -52,10 +52,6 @@ export const CoinPricesSection = ({ className }) => {
   )
 }
 
-/**
- * Exactly zero is not a gain, and it is also what the API reports when it has no 24-hour
- * figure for an asset. Colouring it green would turn both of those into good news.
- */
 const getMovementClassName = (changePercent) => {
   if (changePercent > 0) return 'text-market-up'
   if (changePercent < 0) return 'text-market-down'

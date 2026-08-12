@@ -14,11 +14,6 @@ const NEW_ACCOUNT = {
 
 const registerNewAccount = () => request(app).post('/api/auth/register').send(NEW_ACCOUNT)
 
-/**
- * Integration test #1 of the capped suite (see .claude/docs/testing-policy.md). One pass
- * through the auth flow covers the JWT, the cookie, and `requireAuth` together — the three
- * pieces that have to agree for anything else in the app to work.
- */
 describe('auth flow', () => {
   beforeAll(startTestDatabase)
   afterAll(stopTestDatabase)

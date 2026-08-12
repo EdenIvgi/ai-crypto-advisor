@@ -10,16 +10,6 @@ import {
   LIGHT_THEME,
 } from '@/lib/theme.js'
 
-/**
- * Switches between the two themes and remembers which one.
- *
- * The icon shows where the button goes rather than where you are — a sun to go light, a moon to go
- * dark — which is what the accessible label says out loud. A control named for its destination is
- * one you can use without first working out which state you are in.
- *
- * The initial value is read from the class the inline script in `index.html` already applied, not
- * from storage, so the button cannot start out disagreeing with the page.
- */
 export const ThemeToggle = () => {
   const [theme, setTheme] = useState(readAppliedTheme)
 

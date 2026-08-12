@@ -12,11 +12,6 @@ import {
 
 export const CURRENT_USER_QUERY_KEY = ['auth', 'me']
 
-/**
- * Who is signed in, or `null`. A 401 is the expected answer for a visitor, not a failure, so
- * it resolves to null instead of putting the query into an error state — otherwise every
- * screen would have to special-case "errored because signed out".
- */
 export const useCurrentUser = () => {
   const query = useQuery({
     queryKey: CURRENT_USER_QUERY_KEY,
@@ -39,11 +34,6 @@ export const useCurrentUser = () => {
   }
 }
 
-/**
- * Shared by every way of starting a session. Each one puts the returned user straight into
- * the cache, so the next screen renders without a second round trip, then sends the person
- * where they belong: the quiz if they have not answered it, the dashboard if they have.
- */
 const useStartSession = (submitCredentials) => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()

@@ -2,24 +2,6 @@ import { Button } from '@/components/ui/button.jsx'
 import { Card } from '@/components/ui/card.jsx'
 import { cn } from '@/lib/utils'
 
-/**
- * The shell every dashboard section wears: the provenance eyebrow, the heading, a slot for
- * the vote buttons M6 adds, and the loading and error states. Sections supply only their
- * content, which is what keeps four independently-sourced cards looking like one product.
- *
- * @param {object} props
- * @param {string} props.title
- * @param {string} [props.sourceLabel] - Where this section's data came from. Left undefined
- *   while the query is in flight: a placeholder is honest, a guessed source name is not.
- * @param {boolean} props.isPending
- * @param {Error | null} props.error
- * @param {() => void} props.onRetry
- * @param {import('react').ReactNode} [props.skeleton] - Shaped like the real content, so
- *   nothing moves when the data lands.
- * @param {import('react').ReactNode} [props.actions] - Reserved for the M6 vote buttons.
- * @param {import('react').ReactNode} props.children
- * @param {string} [props.className]
- */
 export const DashboardSectionCard = ({
   title,
   sourceLabel,
@@ -61,10 +43,6 @@ const SectionPlaceholder = ({ title, children }) => (
   </div>
 )
 
-/**
- * Worded as a state of the section rather than an apology, and always paired with the one
- * action that can change it. A failing source degrades this card and nothing else.
- */
 const SectionError = ({ error, onRetry }) => (
   <div role="alert" className="flex flex-wrap items-center gap-x-4 gap-y-3">
     <p className="text-sm text-muted-foreground">{error.message}</p>

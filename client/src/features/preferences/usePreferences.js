@@ -10,10 +10,6 @@ export const MINIMUM_SEARCH_LENGTH = 2
 // costs nothing in freshness and keeps a repeated search off the monthly call allowance.
 const ASSET_SEARCH_STALE_TIME_MS = 10 * 60 * 1000
 
-/**
- * The questions come from the server so the options can never drift from what the API will
- * accept. They do not change between sessions, so they are cached indefinitely.
- */
 export const useQuizOptions = () =>
   useQuery({
     queryKey: ['preferences', 'options'],
@@ -21,12 +17,6 @@ export const useQuizOptions = () =>
     staleTime: Infinity,
   })
 
-/**
- * Coins matching what somebody typed. Idle until the term is long enough to mean anything, so
- * a single stray character never reaches the API.
- *
- * @param {string} query
- */
 export const useAssetSearch = (query) => {
   const trimmedQuery = query.trim()
 
@@ -38,14 +28,6 @@ export const useAssetSearch = (query) => {
   })
 }
 
-/**
- * Saves a complete set of answers, from onboarding or from the settings screen, and lands on the
- * dashboard — which is the answer to "did that work", because the dashboard is what the answers
- * configure.
- *
- * Both callers share this, and the cache work matters more for the second one: the first time
- * through there is nothing cached to be wrong.
- */
 export const useSavePreferences = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()

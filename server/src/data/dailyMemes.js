@@ -1,22 +1,6 @@
 const REPOSITORY_MEMES_URL =
   'https://github.com/EdenIvgi/ai-crypto-advisor/blob/main/client/public/memes'
 
-/**
- * The memes this dashboard rotates through, one per day.
- *
- * The brief allows "Reddit scraping or static JSON" for this section, and this is the second.
- * Reddit answers a plain request from a server with 403, so the live route would have spent
- * most of its life in a fallback anyway — and hotlinking someone's upload means the section
- * breaks the day that host expires the URL.
- *
- * So these are drawn for this application and served from its own `public/` directory. They
- * cannot break, they need no key, and none of them is anyone else's artwork. `sourceUrl`
- * points at the file in the repository, because that is honestly where it came from.
- *
- * `title` is also the image's alt text, so it has to read as the joke rather than describe
- * the picture — a screen reader given "a line chart trending downwards" gets the setup and
- * none of the punchline.
- */
 export const DAILY_MEMES = [
   {
     id: 'buying-the-dip',

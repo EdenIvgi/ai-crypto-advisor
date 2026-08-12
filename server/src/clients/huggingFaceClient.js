@@ -5,21 +5,6 @@ import { env } from '../config/env.js'
 const HUGGING_FACE_CHAT_URL = 'https://router.huggingface.co/v1/chat/completions'
 const REQUEST_TIMEOUT_MS = 20000
 
-/**
- * Tried in order, first success wins.
- *
- * Chosen for quality rather than price, which is only defensible because the prices were
- * checked: at roughly 700 tokens in and 220 out, one insight costs between $0.000014 and
- * $0.000052 on these three. With one call per person per day the monthly credit is not the
- * constraint, so there is no reason to reach for the cheapest model available.
- *
- * The provider is deliberately not pinned — `model:provider` is accepted, but leaving it off
- * lets Hugging Face route to whichever provider is live, which is one fewer thing to break.
- *
- * Rejected, and worth saying why: the `Coder` variants of Qwen are cheaper and write prose
- * like a commit message, the `Thinking` variants emit their reasoning as part of the answer,
- * and two entries priced at zero are promotional listings rather than a free tier.
- */
 const MODELS_IN_PREFERENCE_ORDER = [
   'openai/gpt-oss-120b',
   'openai/gpt-oss-20b',
@@ -37,18 +22,8 @@ const MAX_COMPLETION_TOKENS = 700
 // fabricated a transaction-fee statistic at 0.4.
 const SAMPLING_TEMPERATURE = 0.25
 
-/**
- * Whether a live call is possible at all. The service reads this and composes from prices
- * instead, rather than failing a request per reader to discover the same thing.
- */
 export const isHuggingFaceConfigured = Boolean(env.HUGGINGFACE_API_KEY)
 
-/**
- * Only the one field this application uses. `choices[0].message.content` is the OpenAI-shaped
- * contract that Hugging Face's router implements, and parsing narrowly means a provider that
- * answers with something else fails here, at the boundary, rather than storing an empty
- * paragraph in the database.
- */
 const chatCompletionSchema = z.object({
   choices: z
     .array(
@@ -63,13 +38,6 @@ const chatCompletionSchema = z.object({
     .min(1, 'the model returned no choices'),
 })
 
-/**
- * Sends a chat conversation to the first model that answers, and returns its reply as text.
- *
- * @param {Array<{ role: 'system' | 'user', content: string }>} messages
- * @returns {Promise<string>} The reply, trimmed.
- * @throws When the key is missing, or when every model in the chain fails.
- */
 export const generateChatCompletion = async (messages) => {
   if (!isHuggingFaceConfigured) throw new Error('HUGGINGFACE_API_KEY is not configured')
 

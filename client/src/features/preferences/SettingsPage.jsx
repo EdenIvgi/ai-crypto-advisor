@@ -11,20 +11,9 @@ import { AssetSelectionQuestion } from './questions/AssetSelectionQuestion.jsx'
 import { InvestorTypeQuestion } from './questions/InvestorTypeQuestion.jsx'
 import { ContentPreferencesQuestion } from './questions/ContentPreferencesQuestion.jsx'
 
-/** Compares answers where only membership means anything — the order they were ticked in does not. */
 const isSameSelection = (left, right) =>
   left.length === right.length && [...left].sort().join() === [...right].sort().join()
 
-/**
- * The same three questions as onboarding, all at once and prefilled.
- *
- * Not the wizard again, deliberately: a wizard is for someone answering for the first time, who
- * benefits from being asked one thing at a time. Somebody coming back to change one answer should
- * see all three and reach the one they came for, so this is a form with a Save button.
- *
- * Saving lands on the dashboard rather than staying here with a "Saved" message, because the
- * dashboard is what these answers configure and therefore the real confirmation that it worked.
- */
 export const SettingsPage = () => {
   const { user } = useCurrentUser()
   const quizOptions = useQuizOptions()
@@ -54,11 +43,6 @@ export const SettingsPage = () => {
     Boolean(draftAnswers.investorType) &&
     draftAnswers.contentSections.length > 0
 
-  /**
-   * Updating from the previous state rather than from `draftAnswers` directly — two clicks landing
-   * in the same render would otherwise both read the same stale selection, and the second would
-   * discard the first. The same bug the quiz had, and the same fix.
-   */
   const toggleAnswerIn = (field) => (value) =>
     setDraftAnswers((current) => ({
       ...current,

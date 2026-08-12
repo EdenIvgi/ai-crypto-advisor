@@ -8,11 +8,6 @@ import {
   clearAuthCookie,
 } from '../services/authService.js'
 
-/**
- * Signing in and signing up are the same thing from here on: create or verify the account,
- * then hand out a cookie. Keeping that in one helper is why a newly registered user is
- * logged in immediately, with no second round trip.
- */
 const respondWithSession = (response, user, statusCode = 200) => {
   setAuthCookie(response, issueAccessToken(user.id))
   response.status(statusCode).json({ user })

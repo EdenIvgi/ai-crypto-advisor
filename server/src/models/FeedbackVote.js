@@ -3,14 +3,6 @@ import mongoose from 'mongoose'
 import { CONTENT_SECTIONS } from '../data/preferenceOptions.js'
 import { VOTE_VALUES } from '../data/feedbackOptions.js'
 
-/**
- * A thumb on one section's content. Its own collection rather than an array on the user,
- * because votes are append-heavy, unbounded per person, and the thing the assignment calls
- * training data — they get queried on their own, across users, not as a property of one.
- *
- * `contentId` is whatever the section that was voted on calls the thing it showed: the
- * insight's id, the meme's id, or the day for the sections that show a list.
- */
 const feedbackVoteSchema = new mongoose.Schema(
   {
     userId: {

@@ -1,14 +1,6 @@
 import { ApiError } from '../lib/httpErrors.js'
 import { isTest } from '../config/env.js'
 
-/**
- * The single place an error becomes a response. Express identifies an error handler by its
- * arity, so this must keep all four parameters.
- *
- * Known `ApiError`s carry a status and a message meant for the user. Anything else is a bug,
- * so it is logged in full on the server and reported to the client as a generic 500: an
- * unexpected error message can leak file paths, query fragments, or credentials.
- */
 export const errorHandler = (error, request, response, next) => {
   if (response.headersSent) return next(error)
 

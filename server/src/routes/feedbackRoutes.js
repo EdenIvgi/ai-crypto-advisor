@@ -9,13 +9,6 @@ import { VOTE_VALUES } from '../data/feedbackOptions.js'
 
 const MAX_CONTENT_ID_LENGTH = 200
 
-/**
- * What a vote points at — the same pair the unique index is built on.
- *
- * `contentId` is opaque here on purpose: each section decides what identifies the thing it
- * showed, and the API only insists that it is a short string. It is bounded because it goes
- * into an index, and unbounded index keys are how a collection becomes unqueryable.
- */
 const voteTargetSchema = z.object({
   sectionType: z.enum(CONTENT_SECTIONS, { message: 'That is not a section you can vote on' }),
   contentId: z.string().min(1).max(MAX_CONTENT_ID_LENGTH),

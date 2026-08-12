@@ -27,12 +27,6 @@ const castVote = (authCookie, vote) =>
 const withdrawVote = (authCookie) =>
   request(app).delete('/api/feedback').query(VOTED_CONTENT).set('Cookie', authCookie)
 
-/**
- * Integration test #2 of the capped suite (see .claude/docs/testing-policy.md). It exists for
- * one assertion: that changing your mind updates a vote instead of adding a second one. That
- * guarantee lives in a unique compound index, which is exactly the kind of thing a mocked
- * Mongoose would happily pretend to have.
- */
 describe('feedback voting', () => {
   beforeAll(async () => {
     await startTestDatabase()
@@ -66,11 +60,6 @@ describe('feedback voting', () => {
     expect(storedVotes[0].vote).toBe('down')
   })
 
-  /**
-   * Withdrawing is the one operation whose failure is invisible from the interface: the thumb is
-   * cleared optimistically, so a delete that answers 204 without removing anything looks perfect
-   * until a reload brings the vote back. Hence both halves — the row, and what `/mine` reports.
-   */
   it('removes the vote when it is withdrawn, and stays removed', async () => {
     const authCookie = await signUpAndGetCookie('grace@example.com')
     await castVote(authCookie, 'up')

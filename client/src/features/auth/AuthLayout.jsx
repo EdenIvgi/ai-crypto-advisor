@@ -7,12 +7,6 @@ const MARKET_TICKER_ROWS = [
   { symbol: 'ADA', label: 'Cardano' },
 ]
 
-/**
- * The frame both auth screens sit in. On wide viewports it is two columns: what the product
- * is on the left, the form on the right. Below `lg` the left column is dropped rather than
- * stacked — on a phone it would push the form below the fold, and the form is the reason
- * someone opened the page.
- */
 export const AuthLayout = ({ eyebrow, title, description, children, footer }) => (
   <div className="grid min-h-svh lg:grid-cols-[1.1fr_1fr]">
     <IntroductionPanel />
@@ -49,12 +43,6 @@ const ProductMark = () => (
   </span>
 )
 
-/**
- * The left column. The ticker rail is the page's one piece of atmosphere: four asset rows
- * with the numbers deliberately withheld behind a dashed placeholder, because at this point
- * we genuinely have no data for this visitor — showing invented prices on a sign-in screen
- * would be a small lie that the rest of the product would have to live up to.
- */
 const IntroductionPanel = () => (
   <aside className="relative hidden overflow-hidden border-r border-border bg-secondary/40 lg:flex lg:flex-col lg:justify-between lg:p-12">
     <Link to="/" className="inline-flex text-lg">

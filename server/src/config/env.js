@@ -1,10 +1,5 @@
 import { z } from 'zod'
 
-/**
- * The only module in the server that reads `process.env`. Everything else imports `env`
- * from here, so a missing variable fails loudly at boot instead of surfacing as an
- * undefined halfway through a request.
- */
 const MINIMUM_JWT_SECRET_LENGTH = 32
 
 const canBeParsedAsUrl = (value) => URL.canParse(value)

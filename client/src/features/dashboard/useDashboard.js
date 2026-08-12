@@ -11,18 +11,6 @@ const PRICES_STALE_TIME_MS = 60 * 1000
 const NEWS_STALE_TIME_MS = 5 * 60 * 1000
 const DAILY_STALE_TIME_MS = 60 * 60 * 1000
 
-/**
- * Four independent queries rather than one, matching the four endpoints. Each section
- * subscribes only to its own, so one failure leaves the other three untouched.
- *
- * The stale times mirror how often each source actually changes: refetching prices is worth
- * it, refetching a meme chosen once a day is not. They match the server-side cache for the
- * same section, so a refetch that beats the cache would only return identical bytes.
- *
- * Only prices poll. The other three change at most once a day, so an interval on them would
- * be a request that is guaranteed to return what the page already has.
- */
-
 export const useCoinPrices = () =>
   useQuery({
     queryKey: ['dashboard', 'prices'],
