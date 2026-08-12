@@ -73,13 +73,5 @@ constraint, an external quirk, a deliberate tradeoff.
 Do not comment what the next line does, do not leave commented-out code, and do not narrate
 the change in a comment — that is what the commit message is for.
 
-Use JSDoc on exported service functions and anything whose shape is not obvious from the
-signature. It replaces what types would have given the reader:
-
-```js
-/**
- * Returns the user's coin prices, served from cache when fresh.
- * @param {string[]} watchedAssetIds - CoinGecko ids, e.g. ['bitcoin', 'ethereum']
- * @returns {Promise<{ coins: Array<{ id, symbol, name, priceUsd, change24hPercent }>, isFallback: boolean }>}
- */
-```
+No JSDoc, and no block comments. If a line needs explaining, one `//` above it is the whole
+budget, and most lines do not need it.
