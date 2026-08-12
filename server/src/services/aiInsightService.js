@@ -1,6 +1,5 @@
 import { DailyAiInsight } from '../models/DailyAiInsight.js'
 import { INVESTOR_TYPE_LABELS } from '../data/preferenceOptions.js'
-import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
 import {
   generateChatCompletion,
   isHuggingFaceConfigured,
@@ -8,8 +7,6 @@ import {
 import { loadCoinPrices } from './pricesService.js'
 import { loadMarketNews } from './newsService.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
-
-const ASSETS_BY_ID = new Map(SUPPORTED_ASSETS.map((asset) => [asset.id, asset]))
 
 const DUPLICATE_KEY_ERROR_CODE = 11000
 
@@ -110,10 +107,10 @@ const ATTENTION_BY_INVESTOR_TYPE = {
  *
  * This function never throws. A section of a dashboard is not worth an error page.
  *
- * @param {{ userId: string, investorType: string, watchedAssetIds: string[] }} reader
+ * @param {{ userId: string, investorType: string, watchedAssets: Array<{ id: string, name: string, symbol: string }> }} reader
  * @returns {Promise<{ contentId: string, insight: { id: string, text: string, date: string }, isFallback: boolean }>}
  */
-export const loadDailyInsight = async ({ userId, investorType, watchedAssetIds }) => {
+export const loadDailyInsight = async ({ userId, investorType, watchedAssets }) => {
   const date = getTodayDateKey()
 
   const storedText = await readStoredInsight(userId, date)
@@ -121,9 +118,9 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssetIds }
 
   if (isHuggingFaceConfigured) {
     try {
-      const news = await loadMarketNews(watchedAssetIds)
+      const news = await loadMarketNews(watchedAssets)
       const insightText = await generateChatCompletion(
-        buildInsightMessages(investorType, watchedAssetIds, news.articles)
+        buildInsightMessages(investorType, watchedAssets, news.articles)
       )
 
       // A paragraph is only as true as the material it was written from, and this is the case
@@ -144,7 +141,7 @@ export const loadDailyInsight = async ({ userId, investorType, watchedAssetIds }
   // Only reached with no key or after every model failed, and it is the one path that needs
   // prices — which is why they are fetched here rather than up front. `loadCoinPrices` is
   // documented never to throw.
-  const { coins } = await loadCoinPrices(watchedAssetIds)
+  const { coins } = await loadCoinPrices(watchedAssets)
 
   return buildResponse(userId, date, composeFromPrices(investorType, coins), true)
 }
@@ -215,13 +212,13 @@ const rememberTodaysInsight = async (userId, insightDate, insightText) => {
  * require reaching into a private function or duplicating its wording somewhere else.
  *
  * @param {string} investorType - One of `INVESTOR_TYPES`
- * @param {string[]} watchedAssetIds - CoinGecko ids, e.g. ['bitcoin', 'ethereum']
+ * @param {Array<{ id: string, name: string, symbol: string }>} watchedAssets
  * @param {Array<{ title: string }>} articles
  * @returns {Array<{ role: 'system' | 'user', content: string }>}
  */
-export const buildInsightMessages = (investorType, watchedAssetIds, articles) => [
+export const buildInsightMessages = (investorType, watchedAssets, articles) => [
   { role: 'system', content: INSIGHT_SYSTEM_PROMPT },
-  { role: 'user', content: buildBriefingMaterial(investorType, watchedAssetIds, articles) },
+  { role: 'user', content: buildBriefingMaterial(investorType, watchedAssets, articles) },
 ]
 
 /**
@@ -231,12 +228,12 @@ export const buildInsightMessages = (investorType, watchedAssetIds, articles) =>
  * know which coins matter so it can pick the headline that touches them; it does not need, and
  * must not be given, a figure it would then quote into a paragraph that outlives the figure.
  */
-const buildBriefingMaterial = (investorType, watchedAssetIds, articles) =>
+const buildBriefingMaterial = (investorType, watchedAssets, articles) =>
   [
     `Reader's style: ${INVESTOR_TYPE_LABELS[investorType] ?? 'HODLer'}, who ` +
       `${ATTENTION_BY_INVESTOR_TYPE[investorType] ?? ATTENTION_BY_INVESTOR_TYPE.hodler}.`,
     '',
-    `Assets they follow: ${describeWatchedAssets(watchedAssetIds)}.`,
+    `Assets they follow: ${describeWatchedAssets(watchedAssets)}.`,
     '',
     // Exactly the headlines the news section is showing, not a longer list fetched for the
     // model's benefit. So the reader can always see the material the paragraph was written
@@ -246,11 +243,8 @@ const buildBriefingMaterial = (investorType, watchedAssetIds, articles) =>
     ...articles.map((article) => `- ${article.title}`),
   ].join('\n')
 
-const describeWatchedAssets = (watchedAssetIds) => {
-  const names = watchedAssetIds
-    .map((assetId) => ASSETS_BY_ID.get(assetId))
-    .filter((asset) => asset !== undefined)
-    .map((asset) => `${asset.name} (${asset.symbol})`)
+const describeWatchedAssets = (watchedAssets) => {
+  const names = watchedAssets.map((asset) => `${asset.name} (${asset.symbol})`)
 
   return names.length > 0 ? names.join(', ') : 'none in particular'
 }
@@ -263,7 +257,11 @@ const describeWatchedAssets = (watchedAssetIds) => {
  * reader's horizon makes a day like this mean, which is the one thing the numbers cannot say
  * for themselves. It is still not advice.
  */
-const composeFromPrices = (investorType, coins) => {
+const composeFromPrices = (investorType, allCoins) => {
+  // An asset CoinGecko could not price carries no figure, and a sentence about the strongest
+  // and weakest of them has to be built from the ones that do.
+  const coins = allCoins.filter((coin) => typeof coin.change24hPercent === 'number')
+
   if (coins.length === 0) {
     return 'Prices for the assets you follow are unavailable right now, so there is nothing to read into today.'
   }

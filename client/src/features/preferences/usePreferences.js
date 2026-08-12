@@ -2,7 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
 import { CURRENT_USER_QUERY_KEY } from '@/features/auth/useAuth.js'
-import { fetchQuizOptions, putPreferences } from './preferencesApi.js'
+import { fetchQuizOptions, putPreferences, searchAssets } from './preferencesApi.js'
+
+export const MINIMUM_SEARCH_LENGTH = 2
+
+// CoinGecko rebuilds its own search index every ten minutes, so holding a result for that long
+// costs nothing in freshness and keeps a repeated search off the monthly call allowance.
+const ASSET_SEARCH_STALE_TIME_MS = 10 * 60 * 1000
 
 /**
  * The questions come from the server so the options can never drift from what the API will
@@ -14,6 +20,23 @@ export const useQuizOptions = () =>
     queryFn: fetchQuizOptions,
     staleTime: Infinity,
   })
+
+/**
+ * Coins matching what somebody typed. Idle until the term is long enough to mean anything, so
+ * a single stray character never reaches the API.
+ *
+ * @param {string} query
+ */
+export const useAssetSearch = (query) => {
+  const trimmedQuery = query.trim()
+
+  return useQuery({
+    queryKey: ['assets', 'search', trimmedQuery.toLowerCase()],
+    queryFn: () => searchAssets(trimmedQuery),
+    enabled: trimmedQuery.length >= MINIMUM_SEARCH_LENGTH,
+    staleTime: ASSET_SEARCH_STALE_TIME_MS,
+  })
+}
 
 /**
  * Saves a complete set of answers, from onboarding or from the settings screen, and lands on the

@@ -9,19 +9,17 @@ import { loadDailyMeme } from '../services/memeService.js'
  */
 
 export const getCoinPrices = async (request, response) => {
-  response.json(await loadCoinPrices(request.currentUser.preferences.watchedAssetIds))
+  response.json(await loadCoinPrices(request.currentUser.preferences.watchedAssets))
 }
 
 export const getMarketNews = async (request, response) => {
-  response.json(await loadMarketNews(request.currentUser.preferences.watchedAssetIds))
+  response.json(await loadMarketNews(request.currentUser.preferences.watchedAssets))
 }
 
 export const getAiInsight = async (request, response) => {
-  const { investorType, watchedAssetIds } = request.currentUser.preferences
+  const { investorType, watchedAssets } = request.currentUser.preferences
 
-  response.json(
-    await loadDailyInsight({ userId: request.userId, investorType, watchedAssetIds })
-  )
+  response.json(await loadDailyInsight({ userId: request.userId, investorType, watchedAssets }))
 }
 
 export const getCryptoMeme = async (_request, response) => {

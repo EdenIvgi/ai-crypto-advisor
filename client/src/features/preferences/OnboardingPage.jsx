@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { useCurrentUser } from '@/features/auth/useAuth.js'
 
 import { useQuizOptions, useSavePreferences } from './usePreferences.js'
-import { toggleSelection } from './toggleSelection.js'
+import { toggleSelection, toggleAssetSelection } from './toggleSelection.js'
 import { AssetSelectionQuestion } from './questions/AssetSelectionQuestion.jsx'
 import { InvestorTypeQuestion } from './questions/InvestorTypeQuestion.jsx'
 import { ContentPreferencesQuestion } from './questions/ContentPreferencesQuestion.jsx'
@@ -29,7 +29,7 @@ const QUIZ_STEPS = [
 ]
 
 const EMPTY_ANSWERS = {
-  watchedAssetIds: [],
+  watchedAssets: [],
   investorType: null,
   contentSections: [],
 }
@@ -51,7 +51,7 @@ export const OnboardingPage = () => {
   const isFinalStep = stepIndex === QUIZ_STEPS.length - 1
 
   const canContinueFromStep = {
-    assets: answers.watchedAssetIds.length > 0,
+    assets: answers.watchedAssets.length > 0,
     investorType: Boolean(answers.investorType),
     contentSections: answers.contentSections.length > 0,
   }[currentStep.key]
@@ -68,6 +68,12 @@ export const OnboardingPage = () => {
    */
   const toggleAnswerIn = (field) => (value) =>
     setAnswers((current) => ({ ...current, [field]: toggleSelection(current[field], value) }))
+
+  const toggleAsset = (asset) =>
+    setAnswers((current) => ({
+      ...current,
+      watchedAssets: toggleAssetSelection(current.watchedAssets, asset),
+    }))
 
   if (quizOptions.isPending) return <QuizPlaceholder />
 
@@ -102,9 +108,9 @@ export const OnboardingPage = () => {
 
       {currentStep.key === 'assets' ? (
         <AssetSelectionQuestion
-          assets={quizOptions.data.assets}
-          selectedAssetIds={answers.watchedAssetIds}
-          onToggleAsset={toggleAnswerIn('watchedAssetIds')}
+          suggestedAssets={quizOptions.data.assets}
+          selectedAssets={answers.watchedAssets}
+          onToggleAsset={toggleAsset}
         />
       ) : null}
 

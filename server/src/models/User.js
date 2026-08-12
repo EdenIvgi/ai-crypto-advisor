@@ -8,13 +8,28 @@ import { INVESTOR_TYPES, CONTENT_SECTIONS } from '../data/preferenceOptions.js'
  *
  * `_id: false` because these are a property of the user, not a document in their own right.
  */
+/**
+ * The name and symbol are stored beside the id rather than looked up, because the id can be any
+ * coin CoinGecko knows and this application keeps a list of eight. They arrive in the search
+ * result the asset was picked from, so storing them costs nothing and a card can still name a
+ * coin when CoinGecko is unreachable.
+ */
+const watchedAssetSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+    symbol: { type: String, required: true },
+  },
+  { _id: false }
+)
+
 const userPreferencesSchema = new mongoose.Schema(
   {
-    watchedAssetIds: {
-      type: [String],
+    watchedAssets: {
+      type: [watchedAssetSchema],
       required: true,
       validate: {
-        validator: (assetIds) => assetIds.length > 0,
+        validator: (assets) => assets.length > 0,
         message: 'Pick at least one asset to follow',
       },
     },
@@ -72,7 +87,7 @@ const userSchema = new mongoose.Schema(
     // a field on the user that said nothing about the user. `updatedAt` answers what it looked
     // like it answered.
     //
-    // Put it back if anything here starts loading a user, mutating `preferences.watchedAssetIds`
+    // Put it back if anything here starts loading a user, mutating `preferences.watchedAssets`
     // in place and saving it: without the version key, two of those racing lose an update
     // silently instead of raising a `VersionError`.
     versionKey: false,

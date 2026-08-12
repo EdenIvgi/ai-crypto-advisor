@@ -10,22 +10,12 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { healthRoutes } from './routes/healthRoutes.js'
 import { authRoutes } from './routes/authRoutes.js'
 import { preferencesRoutes } from './routes/preferencesRoutes.js'
+import { assetsRoutes } from './routes/assetsRoutes.js'
 import { dashboardRoutes } from './routes/dashboardRoutes.js'
 import { feedbackRoutes } from './routes/feedbackRoutes.js'
 
-/**
- * Builds the Express app without starting a server, so tests can drive it in-process
- * through Supertest. `index.js` is what actually listens.
- *
- * Middleware order matters and is deliberate: security headers, then the cross-origin
- * policy, then body and cookie parsing so handlers see parsed input, then logging, then
- * routes, and finally the two terminal handlers.
- */
 export const createApp = () => {
   const app = express()
-
-  // Render terminates TLS at its proxy. Without this, Express sees the request as
-  // insecure and refuses to set the `Secure` auth cookie in production.
   app.set('trust proxy', 1)
 
   app.use(helmet())
@@ -37,6 +27,7 @@ export const createApp = () => {
   app.use('/api', healthRoutes)
   app.use('/api/auth', authRoutes)
   app.use('/api/preferences', preferencesRoutes)
+  app.use('/api/assets', assetsRoutes)
   app.use('/api/dashboard', dashboardRoutes)
   app.use('/api/feedback', feedbackRoutes)
 
