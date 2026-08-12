@@ -1,6 +1,7 @@
 import { User } from '../models/User.js'
 import { toUserDto } from './authService.js'
 import { forgetTodaysInsight } from './aiInsightService.js'
+import { isCryptoAssistantAvailable } from './cryptoAnswerService.js'
 import { removeVote } from './feedbackService.js'
 import { NotFoundError } from '../lib/httpErrors.js'
 import { SUGGESTED_ASSETS } from '../data/suggestedAssets.js'
@@ -19,6 +20,9 @@ export const getQuizOptions = () => ({
     value,
     label: CONTENT_SECTION_LABELS[value],
   })),
+  // The dashboard asks the same endpoint whether to draw the assistant, because a clone without
+  // an Anthropic key should be missing that box rather than showing one that answers 503.
+  isAssistantAvailable: isCryptoAssistantAvailable,
 })
 
 export const loadPreferences = async (userId) => {

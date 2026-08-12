@@ -1,6 +1,8 @@
 import { useCurrentUser } from '@/features/auth/useAuth.js'
+import { useQuizOptions } from '@/features/preferences/usePreferences.js'
 
 import { formatBriefingDate } from './dashboardFormatters.js'
+import { AskAboutCryptoCard } from './components/AskAboutCryptoCard.jsx'
 import { CoinPricesSection } from './sections/CoinPricesSection.jsx'
 import { AiInsightSection } from './sections/AiInsightSection.jsx'
 import { CryptoMemeSection } from './sections/CryptoMemeSection.jsx'
@@ -23,6 +25,7 @@ const SECTIONS_IN_READING_ORDER = [
 
 export const DashboardPage = () => {
   const { user } = useCurrentUser()
+  const quizOptions = useQuizOptions()
 
   const firstName = user?.name?.split(' ')[0]
   const selectedSections = user?.preferences?.contentSections ?? []
@@ -42,7 +45,13 @@ export const DashboardPage = () => {
         </p>
       </header>
 
+      {/* Inside the same row rather than above it, so the space between the box and the prices
+          is the gap every other pair of cards has instead of a margin invented for one case. */}
       <div className="mt-10 flex flex-wrap gap-5 sm:mt-12 sm:gap-6">
+        {quizOptions.data?.isAssistantAvailable ? (
+          <AskAboutCryptoCard className="basis-full" />
+        ) : null}
+
         {visibleSections.map(({ preference, Section, widthClassName }) => (
           <Section key={preference} className={widthClassName} />
         ))}

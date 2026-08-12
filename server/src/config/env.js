@@ -33,6 +33,8 @@ const environmentSchema = z.object({
   COINGECKO_API_KEY: z.string().min(1).optional(),
 
   HUGGINGFACE_API_KEY: z.string().min(1).optional(),
+
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
 })
 
 const exitWithConfigurationProblems = (problems) => {
