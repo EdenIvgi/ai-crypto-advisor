@@ -10,7 +10,7 @@ stops when nobody is using it.
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/dashboard-dark.png">
   <img
-    alt="The dashboard on the demo account: live coin prices, an insight written for a long-term holder, the day's meme, and market news with Bitcoin headlines at the top"
+    alt="The dashboard on the demo account: the ask-about-a-coin box beside the heading, live coin prices, an insight written for a long-term holder, the day's meme, and market news with Bitcoin headlines at the top"
     src="docs/dashboard-light.png"
   >
 </picture>
