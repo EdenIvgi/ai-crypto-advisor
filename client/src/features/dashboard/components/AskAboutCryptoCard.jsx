@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ArrowUp, Sparkles } from 'lucide-react'
 
 import { Button } from '@/components/ui/button.jsx'
@@ -14,19 +14,35 @@ const EXAMPLE_QUESTIONS = ['What is staking?', 'How does Solana work?', 'What is
 
 export const AskAboutCryptoCard = ({ className }) => {
   const [question, setQuestion] = useState('')
+  const inputRef = useRef(null)
   const ask = useAskAboutCrypto()
 
   const isTooShort = question.trim().length < MINIMUM_QUESTION_LENGTH
 
+  // Emptied and handed the cursor back once an answer lands, so the next question costs nothing
+  // but typing. Focus matters most after an example was clicked: those buttons disappear with
+  // the answer, and without this the cursor would be left on an element that no longer exists.
+  //
+  // A frame late, because this runs before React has re-rendered, and until it does the input is
+  // still carrying the disabled attribute it had while the request was in flight — and a
+  // disabled element cannot take focus, silently.
+  const askQuestion = (text) =>
+    ask.mutate(text, {
+      onSuccess: () => {
+        setQuestion('')
+        requestAnimationFrame(() => inputRef.current?.focus())
+      },
+    })
+
   const handleSubmit = (event) => {
     event.preventDefault()
     if (isTooShort || ask.isPending) return
-    ask.mutate(question.trim())
+    askQuestion(question.trim())
   }
 
   const handleExampleClicked = (example) => {
     setQuestion(example)
-    ask.mutate(example)
+    askQuestion(example)
   }
 
   return (
@@ -50,6 +66,7 @@ export const AskAboutCryptoCard = ({ className }) => {
         </Label>
         <Input
           id="crypto-question"
+          ref={inputRef}
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
           placeholder="What is staking?"
@@ -85,10 +102,13 @@ export const AskAboutCryptoCard = ({ className }) => {
           <p className="text-sm text-destructive">{toReadableError(ask.error)}</p>
         ) : null}
 
+        {/* The question is echoed because the input no longer holds it — an answer on its own,
+            with an empty box above it, reads as though it arrived unprompted. */}
         {ask.data ? (
-          <p className="max-w-prose border-l-2 border-primary/50 pl-5 text-sm leading-relaxed text-pretty">
-            {ask.data.answer}
-          </p>
+          <div className="max-w-prose border-l-2 border-primary/50 pl-5">
+            <p className="text-sm text-muted-foreground">{ask.variables}</p>
+            <p className="mt-2 text-sm leading-relaxed text-pretty">{ask.data.answer}</p>
+          </div>
         ) : null}
       </div>
     </Card>
