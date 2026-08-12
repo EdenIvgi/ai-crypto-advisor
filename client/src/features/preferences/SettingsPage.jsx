@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { useCurrentUser } from '@/features/auth/useAuth.js'
 
 import { useQuizOptions, useSavePreferences } from './usePreferences.js'
-import { toggleSelection } from './toggleSelection.js'
+import { toggleSelection, toggleAssetSelection } from './toggleSelection.js'
 import { AssetSelectionQuestion } from './questions/AssetSelectionQuestion.jsx'
 import { InvestorTypeQuestion } from './questions/InvestorTypeQuestion.jsx'
 import { ContentPreferencesQuestion } from './questions/ContentPreferencesQuestion.jsx'
@@ -34,20 +34,23 @@ export const SettingsPage = () => {
   const savedAnswers = user.preferences
 
   const [draftAnswers, setDraftAnswers] = useState(() => ({
-    watchedAssetIds: [...savedAnswers.watchedAssetIds],
+    watchedAssets: [...savedAnswers.watchedAssets],
     investorType: savedAnswers.investorType,
     contentSections: [...savedAnswers.contentSections],
   }))
 
   const hasUnsavedChanges =
-    !isSameSelection(draftAnswers.watchedAssetIds, savedAnswers.watchedAssetIds) ||
+    !isSameSelection(
+      draftAnswers.watchedAssets.map((asset) => asset.id),
+      savedAnswers.watchedAssets.map((asset) => asset.id)
+    ) ||
     draftAnswers.investorType !== savedAnswers.investorType ||
     !isSameSelection(draftAnswers.contentSections, savedAnswers.contentSections)
 
   // Mirrors what the API will accept, so the reason a save cannot happen is on screen before the
   // button is pressed rather than in a rejected response afterwards.
   const isAnswerSetComplete =
-    draftAnswers.watchedAssetIds.length > 0 &&
+    draftAnswers.watchedAssets.length > 0 &&
     Boolean(draftAnswers.investorType) &&
     draftAnswers.contentSections.length > 0
 
@@ -60,6 +63,12 @@ export const SettingsPage = () => {
     setDraftAnswers((current) => ({
       ...current,
       [field]: toggleSelection(current[field], value),
+    }))
+
+  const toggleAsset = (asset) =>
+    setDraftAnswers((current) => ({
+      ...current,
+      watchedAssets: toggleAssetSelection(current.watchedAssets, asset),
     }))
 
   if (quizOptions.isPending) return <SettingsPlaceholder />
@@ -96,9 +105,9 @@ export const SettingsPage = () => {
           guidance="Prices and news are drawn from these."
         >
           <AssetSelectionQuestion
-            assets={quizOptions.data.assets}
-            selectedAssetIds={draftAnswers.watchedAssetIds}
-            onToggleAsset={toggleAnswerIn('watchedAssetIds')}
+            suggestedAssets={quizOptions.data.assets}
+            selectedAssets={draftAnswers.watchedAssets}
+            onToggleAsset={toggleAsset}
           />
         </SettingsSection>
 
@@ -147,7 +156,7 @@ export const SettingsPage = () => {
               variant="ghost"
               onClick={() =>
                 setDraftAnswers({
-                  watchedAssetIds: [...savedAnswers.watchedAssetIds],
+                  watchedAssets: [...savedAnswers.watchedAssets],
                   investorType: savedAnswers.investorType,
                   contentSections: [...savedAnswers.contentSections],
                 })

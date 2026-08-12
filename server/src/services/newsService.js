@@ -1,10 +1,7 @@
-import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
 import { MOCK_NEWS_ARTICLES } from '../data/mockDashboard.js'
 import { fetchLatestArticles } from '../clients/newsFeedClient.js'
 import { createTtlCache } from '../lib/inMemoryCache.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
-
-const ASSETS_BY_ID = new Map(SUPPORTED_ASSETS.map((asset) => [asset.id, asset]))
 
 const ARTICLE_COUNT = 5
 
@@ -34,10 +31,10 @@ const marketNewsCache = createTtlCache({ ttlMs: MARKET_NEWS_CACHE_TTL_MS })
  *
  * This function never throws. A section of a dashboard is not worth an error page.
  *
- * @param {string[]} watchedAssetIds - CoinGecko ids, e.g. ['bitcoin', 'ethereum']
+ * @param {Array<{ id: string, name: string, symbol: string }>} watchedAssets
  * @returns {Promise<{ contentId: string, articles: Array<{ id: string, title: string, url: string, source: string, publishedAt: string }>, isFallback: boolean }>}
  */
-export const loadMarketNews = async (watchedAssetIds) => {
+export const loadMarketNews = async (watchedAssets) => {
   try {
     const { value: articles, isStale } = await marketNewsCache.getOrFetch(
       SHARED_FEED_CACHE_KEY,
@@ -45,7 +42,7 @@ export const loadMarketNews = async (watchedAssetIds) => {
     )
 
     return buildResponse(
-      rankForReader(articles, watchedAssetIds).slice(0, ARTICLE_COUNT),
+      rankForReader(articles, watchedAssets).slice(0, ARTICLE_COUNT),
       isStale
     )
   } catch (newsLookupError) {
@@ -58,8 +55,8 @@ export const loadMarketNews = async (watchedAssetIds) => {
  * Lifts the headlines naming one of the reader's assets to the top. The list arrives newest
  * first and both groups are built by walking it in order, so recency survives inside each.
  */
-const rankForReader = (articles, watchedAssetIds) => {
-  const headlineMatchers = buildHeadlineMatchers(watchedAssetIds)
+const rankForReader = (articles, watchedAssets) => {
+  const headlineMatchers = buildHeadlineMatchers(watchedAssets)
   if (headlineMatchers.length === 0) return articles
 
   const articlesNamingWatchedAssets = []
@@ -83,14 +80,15 @@ const rankForReader = (articles, watchedAssetIds) => {
  * be: `DOT` is Polkadot and `dot` is punctuation, and `\bATOM\b` without that rule would claim
  * every headline containing the word "atom".
  */
-const buildHeadlineMatchers = (watchedAssetIds) =>
-  watchedAssetIds
-    .map((assetId) => ASSETS_BY_ID.get(assetId))
-    .filter((asset) => asset !== undefined)
-    .flatMap((asset) => [
-      new RegExp(`\\b${asset.name}\\b`, 'i'),
-      new RegExp(`\\b${asset.symbol}\\b`),
-    ])
+const buildHeadlineMatchers = (watchedAssets) =>
+  watchedAssets.flatMap((asset) => [
+    new RegExp(`\\b${escapeForRegExp(asset.name)}\\b`, 'i'),
+    new RegExp(`\\b${escapeForRegExp(asset.symbol)}\\b`),
+  ])
+
+// A coin name is whatever CoinGecko calls it, and plenty contain characters a regular
+// expression reads as syntax — "Curve DAO (old)" would throw rather than match.
+const escapeForRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * `hoursAgo` becomes a timestamp at the moment the request is served, so the sample feed

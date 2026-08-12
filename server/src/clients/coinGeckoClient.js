@@ -3,7 +3,9 @@ import { z } from 'zod'
 import { env } from '../config/env.js'
 
 const COIN_GECKO_SIMPLE_PRICE_URL = 'https://api.coingecko.com/api/v3/simple/price'
+const COIN_GECKO_SEARCH_URL = 'https://api.coingecko.com/api/v3/search'
 const REQUEST_TIMEOUT_MS = 8000
+const SEARCH_RESULT_LIMIT = 10
 
 /**
  * `/simple/price`, not `/coins/markets`, and the difference is the whole reason this file was
@@ -70,6 +72,45 @@ export const fetchCoinQuotes = async (assetIds) => {
   return assetIds
     .filter((assetId) => quotesById[assetId] !== undefined)
     .map((assetId) => toQuoteDto(assetId, quotesById[assetId]))
+}
+
+const searchResponseSchema = z.object({
+  coins: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      symbol: z.string(),
+    })
+  ),
+})
+
+/**
+ * Coins matching a search term, most relevant first, as CoinGecko ranks them.
+ *
+ * @param {string} query
+ * @returns {Promise<Array<{ id: string, name: string, symbol: string }>>}
+ * @throws When the request fails, times out, or comes back in an unexpected shape.
+ */
+export const searchCoins = async (query) => {
+  const requestUrl = new URL(COIN_GECKO_SEARCH_URL)
+  requestUrl.searchParams.set('query', query)
+
+  const response = await fetch(requestUrl, {
+    headers: buildRequestHeaders(),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+
+  if (!response.ok) {
+    throw new Error(`CoinGecko answered ${response.status}`)
+  }
+
+  const { coins } = searchResponseSchema.parse(await response.json())
+
+  return coins.slice(0, SEARCH_RESULT_LIMIT).map((coin) => ({
+    id: coin.id,
+    name: coin.name,
+    symbol: coin.symbol.toUpperCase(),
+  }))
 }
 
 /**

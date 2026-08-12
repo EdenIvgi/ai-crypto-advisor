@@ -37,7 +37,7 @@ export const CoinPricesSection = ({ className }) => {
         ) : null
       }
     >
-      {prices.data?.coins.length ? (
+      {prices.data?.coins.some((coin) => coin.priceUsd !== null) ? (
         <ul className="grid gap-x-10 sm:grid-cols-2 xl:grid-cols-3">
           {prices.data.coins.map((coin) => (
             <CoinPriceRow key={coin.id} coin={coin} />
@@ -70,16 +70,22 @@ const CoinPriceRow = ({ coin }) => (
     </div>
 
     <div className="text-right">
-      <p className="font-mono text-sm font-medium" data-numeric>
-        {formatPriceUsd(coin.priceUsd)}
-      </p>
-      <p
-        className={cn('font-mono text-xs', getMovementClassName(coin.change24hPercent))}
-        data-numeric
-      >
-        {formatChangePercent(coin.change24hPercent)}
-        <span className="sr-only"> over the last 24 hours</span>
-      </p>
+      {coin.priceUsd === null ? (
+        <p className="text-sm text-muted-foreground">No price right now</p>
+      ) : (
+        <>
+          <p className="font-mono text-sm font-medium" data-numeric>
+            {formatPriceUsd(coin.priceUsd)}
+          </p>
+          <p
+            className={cn('font-mono text-xs', getMovementClassName(coin.change24hPercent))}
+            data-numeric
+          >
+            {formatChangePercent(coin.change24hPercent)}
+            <span className="sr-only"> over the last 24 hours</span>
+          </p>
+        </>
+      )}
     </div>
   </li>
 )

@@ -8,19 +8,24 @@ import {
 } from '../controllers/preferencesController.js'
 import { validateRequest } from '../middleware/validateRequest.js'
 import { requireAuth } from '../middleware/requireAuth.js'
-import { SUPPORTED_ASSET_IDS } from '../data/supportedAssets.js'
 import { INVESTOR_TYPES, CONTENT_SECTIONS } from '../data/preferenceOptions.js'
 
-const MAX_WATCHED_ASSETS = 8
+const MAX_WATCHED_ASSETS = 12
+const MAX_ASSET_FIELD_LENGTH = 100
 
 /**
- * Built from the same lists the quiz is served from and the schema enumerates, so an answer
- * the UI can produce is always an answer this accepts. The asset cap is a real limit, not a
- * formality: every id here becomes part of a CoinGecko request on every dashboard load.
+ * An asset is whatever CoinGecko returned for a search, so this describes its shape rather
+ * than enumerating a closed set — there is no list of valid coins to check against.
  */
+const watchedAssetSchema = z.object({
+  id: z.string().trim().min(1).max(MAX_ASSET_FIELD_LENGTH),
+  name: z.string().trim().min(1).max(MAX_ASSET_FIELD_LENGTH),
+  symbol: z.string().trim().min(1).max(MAX_ASSET_FIELD_LENGTH),
+})
+
 const preferencesBodySchema = z.object({
-  watchedAssetIds: z
-    .array(z.enum(SUPPORTED_ASSET_IDS, { message: 'That is not an asset we can follow' }))
+  watchedAssets: z
+    .array(watchedAssetSchema)
     .min(1, 'Pick at least one asset')
     .max(MAX_WATCHED_ASSETS, `Pick up to ${MAX_WATCHED_ASSETS} assets`),
   investorType: z.enum(INVESTOR_TYPES, { message: 'Pick how you invest' }),

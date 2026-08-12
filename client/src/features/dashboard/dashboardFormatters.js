@@ -47,8 +47,13 @@ export const formatPriceUsd = (priceUsd) => {
  * @param {number} changePercent
  * @returns {string}
  */
-export const formatChangePercent = (changePercent) =>
-  `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%`
+export const formatChangePercent = (changePercent) => {
+  // CoinGecko has no 24-hour figure for a coin it has not tracked for a full day, and any coin
+  // it lists can now be followed.
+  if (changePercent === null || changePercent === undefined) return '—'
+
+  return `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%`
+}
 
 /**
  * How long ago something was published, in the coarsest unit that is still informative.

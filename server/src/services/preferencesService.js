@@ -3,7 +3,7 @@ import { toUserDto } from './authService.js'
 import { forgetTodaysInsight } from './aiInsightService.js'
 import { removeVote } from './feedbackService.js'
 import { NotFoundError } from '../lib/httpErrors.js'
-import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
+import { SUGGESTED_ASSETS } from '../data/suggestedAssets.js'
 import {
   INVESTOR_TYPES,
   CONTENT_SECTIONS,
@@ -13,14 +13,14 @@ import {
 } from '../data/preferenceOptions.js'
 
 /**
- * Everything the quiz needs to render itself. Serving the options from here rather than
- * hardcoding them in the client means the two can never disagree about what a valid answer
- * is — the same lists feed this endpoint, the Zod schema, and the Mongoose enum.
+ * Everything the quiz needs to render itself. The investor types and content sections are
+ * closed sets served from here so the client can never offer an answer the schema rejects.
+ * The assets are only the suggestions shown before anybody searches.
  *
  * @returns {{ assets: Array<{id, symbol, name}>, investorTypes: Array<{value, label}>, contentSections: Array<{value, label}> }}
  */
 export const getQuizOptions = () => ({
-  assets: SUPPORTED_ASSETS,
+  assets: SUGGESTED_ASSETS,
   investorTypes: INVESTOR_TYPES.map((value) => ({ value, label: INVESTOR_TYPE_LABELS[value] })),
   contentSections: CONTENT_SECTIONS.map((value) => ({
     value,
@@ -48,7 +48,7 @@ export const loadPreferences = async (userId) => {
  * only a comparison can say whether it is still addressed to the right person.
  *
  * @param {string} userId
- * @param {{ watchedAssetIds: string[], investorType: string, contentSections: string[] }} preferences
+ * @param {{ watchedAssets: Array<{ id: string, name: string, symbol: string }>, investorType: string, contentSections: string[] }} preferences
  * @returns {Promise<ReturnType<typeof toUserDto>>}
  */
 export const savePreferences = async (userId, preferences) => {
@@ -87,9 +87,15 @@ const changesWhatTheInsightWouldSay = (before, after) => {
 
   return (
     before.investorType !== after.investorType ||
-    [...before.watchedAssetIds].sort().join() !== [...after.watchedAssetIds].sort().join()
+    toSortedAssetIds(before.watchedAssets) !== toSortedAssetIds(after.watchedAssets)
   )
 }
+
+const toSortedAssetIds = (watchedAssets) =>
+  watchedAssets
+    .map((asset) => asset.id)
+    .sort()
+    .join()
 
 /**
  * Drops today's insight and the thumb that was cast on it.

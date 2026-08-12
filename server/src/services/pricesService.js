@@ -1,10 +1,6 @@
-import { SUPPORTED_ASSETS } from '../data/supportedAssets.js'
-import { MOCK_COIN_PRICES } from '../data/mockDashboard.js'
 import { fetchCoinQuotes } from '../clients/coinGeckoClient.js'
 import { createTtlCache } from '../lib/inMemoryCache.js'
 import { getTodayDateKey } from '../lib/dateKeys.js'
-
-const ASSETS_BY_ID = new Map(SUPPORTED_ASSETS.map((asset) => [asset.id, asset]))
 
 // Long enough that a page refresh costs nothing against a rate-limited free API, short
 // enough that a price on screen is never meaningfully behind the market.
@@ -15,65 +11,52 @@ const coinPricesCache = createTtlCache({ ttlMs: COIN_PRICES_CACHE_TTL_MS })
 /**
  * Prices for the assets this user follows, in the order they were chosen.
  *
- * Three sources, in order of preference: a live CoinGecko response, the last one that
- * succeeded, and finally the sample data the dashboard was built against. The last two both
- * report `isFallback: true`, because both mean the same thing to a reader — these are not the
- * numbers the market is quoting right now.
+ * Every asset gets a row whether or not it could be priced. A coin somebody deliberately chose
+ * disappearing from their dashboard reads as a bug, so an unpriced one keeps its name and
+ * reports `priceUsd: null` for the card to render as unavailable.
  *
  * This function never throws. A section of a dashboard is not worth an error page.
  *
- * @param {string[]} watchedAssetIds - CoinGecko ids, e.g. ['bitcoin', 'ethereum']
- * @returns {Promise<{ contentId: string, coins: Array<{ id: string, symbol: string, name: string, priceUsd: number, change24hPercent: number }>, isFallback: boolean }>}
+ * @param {Array<{ id: string, name: string, symbol: string }>} watchedAssets
+ * @returns {Promise<{ contentId: string, coins: Array<{ id: string, symbol: string, name: string, priceUsd: number | null, change24hPercent: number | null }>, isFallback: boolean }>}
  */
-export const loadCoinPrices = async (watchedAssetIds) => {
-  const knownAssetIds = watchedAssetIds.filter((assetId) => ASSETS_BY_ID.has(assetId))
+export const loadCoinPrices = async (watchedAssets) => {
+  const assetIds = watchedAssets.map((asset) => asset.id)
 
   try {
     // Keyed by the sorted ids so that two people following the same assets in a different
-    // order share one cached response rather than each paying for their own. The client
-    // returns them in the order asked, so the cache holds one person's order — which is why
-    // the naming happens below, over the ids this caller actually asked about.
+    // order share one cached response rather than each paying for their own.
     const { value: quotes, isStale } = await coinPricesCache.getOrFetch(
-      [...knownAssetIds].sort().join(','),
-      () => fetchCoinQuotes([...knownAssetIds].sort())
+      [...assetIds].sort().join(','),
+      () => fetchCoinQuotes([...assetIds].sort())
     )
 
-    return buildResponse(nameQuotesInChosenOrder(quotes, knownAssetIds), isStale)
+    return buildResponse(joinQuotesToAssets(watchedAssets, quotes), isStale)
   } catch (priceLookupError) {
-    console.warn('Falling back to sample prices:', priceLookupError.message)
-    return buildResponse(buildSampleCoins(knownAssetIds), true)
+    console.warn('Serving unpriced coins:', priceLookupError.message)
+    return buildResponse(joinQuotesToAssets(watchedAssets, []), true)
   }
 }
 
 /**
- * Joins each quote to the asset's display name and ticker, in the order this reader chose.
- *
- * The names come from `data/supportedAssets.js` rather than from CoinGecko, which is why the
- * client does not return them: they are ours, they never change between requests, and there is
- * no reason to cache twelve copies of the word "Bitcoin".
+ * Joins each asset to its quote, keeping the reader's order and keeping assets CoinGecko had
+ * nothing for.
  */
-const nameQuotesInChosenOrder = (quotes, watchedAssetIds) => {
+const joinQuotesToAssets = (watchedAssets, quotes) => {
   const quotesById = new Map(quotes.map((quote) => [quote.id, quote]))
 
-  return watchedAssetIds
-    .filter((assetId) => quotesById.has(assetId))
-    .map((assetId) => {
-      const { symbol, name } = ASSETS_BY_ID.get(assetId)
-      const { priceUsd, change24hPercent } = quotesById.get(assetId)
+  return watchedAssets.map(({ id, symbol, name }) => {
+    const quote = quotesById.get(id)
 
-      return { id: assetId, symbol, name, priceUsd, change24hPercent }
-    })
+    return {
+      id,
+      symbol,
+      name,
+      priceUsd: quote?.priceUsd ?? null,
+      change24hPercent: quote?.change24hPercent ?? null,
+    }
+  })
 }
-
-const buildSampleCoins = (watchedAssetIds) =>
-  watchedAssetIds
-    .filter((assetId) => MOCK_COIN_PRICES[assetId])
-    .map((assetId) => ({
-      id: assetId,
-      symbol: ASSETS_BY_ID.get(assetId).symbol,
-      name: ASSETS_BY_ID.get(assetId).name,
-      ...MOCK_COIN_PRICES[assetId],
-    }))
 
 const buildResponse = (coins, isFallback) => ({
   contentId: getTodayDateKey(),
