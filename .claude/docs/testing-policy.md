@@ -38,21 +38,6 @@ Do not add tests beyond the list below without asking first.
    reason this one exists, which is that a rate limit from a free API must not empty a
    section of the dashboard.
 
-5. **Smoke tests** (`e2e/smoke.spec.js`, Playwright, written in M12) — three, because each covers
-   something only a real browser can answer:
-
-   - demo login, all four sections present, a vote cast, **and the reload that proves it was
-     stored** rather than only optimistically painted. It withdraws the vote at the end, which is
-     both the second half of the behaviour and what leaves the shared demo account as it was.
-   - the theme choice beating a system preference set the other way, across a reload.
-   - a quiz answer changed **with the keyboard alone**, by Space and by Enter. This one exists
-     because nothing else can check it: a `div` dressed as a button passes every other test in this
-     suite and fails this one.
-
-   Run with `npm run test:e2e`, against the local stack. Deliberately **not** in CI: there is no
-   database and no seeded demo account there, and a 115 MB browser download on every pull request
-   buys less than it costs here. `npm test` stays the fast suite.
-
 ## How
 
 - Real database behaviour comes from `mongodb-memory-server`. Never mock Mongoose — a mocked

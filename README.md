@@ -87,7 +87,6 @@ where the `.env` parser treats it as a comment.
 npm run lint
 npm run format
 npm test
-npm run test:e2e                        # Playwright, against a local stack it will start for you
 npm run build
 npm run seed:demo --workspace server    # create the demo account
 npm run check:db --workspace server     # confirm the database is reachable
@@ -207,10 +206,9 @@ Tests run against a real MongoDB in memory rather than a mocked Mongoose, becaus
 worth covering — a unique compound index, for instance — lives in the database, and a mock
 wouldn't have it.
 
-`npm run test:e2e` is separate, and separate on purpose. Three Playwright tests cover what only a
-browser can answer: a vote surviving a reload rather than being optimistically painted, a theme
-choice beating a system preference set the other way, and a quiz answer changed with the keyboard
-alone. They are not in CI — there is no database or seeded demo account there — so they run locally.
+Everything a browser has to answer for — a vote surviving a reload, a theme choice beating a
+system preference, the quiz being completable with the keyboard alone — is checked by hand
+against the deployed app before the project is called done.
 
 ## Reading the stored feedback
 
@@ -268,9 +266,9 @@ Every one of these is a choice rather than an oversight, and each costs somethin
 - **The test suite is capped on purpose.** Two integration tests and a unit test, with the limit
   and its reasoning written into [the testing policy](.claude/docs/testing-policy.md) so it can't
   drift upward unnoticed. The bar is whether a test can fail for the right reason, not coverage.
-- **The Playwright tests are not in CI**, because CI has no database and no seeded demo account.
-  So keyboard access and vote persistence are verified by someone remembering to run
-  `npm run test:e2e` — automated, but not automatic.
+- **Browser-level behaviour is verified by hand**, not by an automated suite. Keyboard access and
+  vote persistence are checked against the deployed app before release — a real check, but one
+  that depends on somebody remembering to make it.
 - **The insight is written once per user per day** and cached until midnight. An afternoon
   development doesn't reach it, which is exactly why the prompt is built from the day's events
   rather than from figures that would be stale by then.

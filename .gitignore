@@ -15,7 +15,5 @@ npm-debug.log*
 Thumbs.db
 
 .vercel/
-playwright-report/
-test-results/
 
 .claude/settings.local.json

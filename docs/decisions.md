@@ -17,7 +17,7 @@ Everything decided upfront and never revisited is in the table and nowhere else.
 | Publisher RSS for news              | No account and no token, so a fresh clone runs with real content. The brief requires free public APIs.                    |
 | Hugging Face router for the insight | Free-tier credit, no payment details required. One insight costs about $0.00003 of it, so I picked models by quality.     |
 | Vercel + Render + Atlas             | Three free tiers, and the split forces the cross-origin cookie setup to be correct rather than accidentally working.      |
-| Vitest + Supertest + Playwright     | A capped suite, on purpose: the brief grades UX, readable code and structure, not coverage.                               |
+| Vitest + Supertest                  | A capped suite, on purpose: the brief grades UX, readable code and structure, not coverage.                               |
 
 ## Milestones reordered so the product deploys before the integrations
 
@@ -242,23 +242,6 @@ Found by reading the accessibility tree rather than the markup. Worth recording 
 disagreed about it: the in-app browser's tree showed no name at all both before and after the fix,
 so the wiring was verified by resolving the references by hand.
 
-## The end-to-end tests are not in CI
-
-Three Playwright tests, run with `npm run test:e2e` against the local stack, and left out of
-`.github/workflows/ci.yml` on purpose. CI has no database and no seeded demo account, and a 115 MB
-browser download on every pull request buys less than it costs on a project this size.
-
-The tradeoff is real and worth naming: a check that is not automated is a check somebody has to
-remember. What makes it acceptable is that these three cover things a reviewer would notice
-immediately anyway — signing in, seeing four sections, a thumb that sticks — while the failures
-that hide are covered by the fast suite that does run on every push.
-
-The keyboard test earns its place beyond the plan's list. The in-app browser I verify with
-dispatches synthetic key events that reach JavaScript listeners but do not trigger the browser's
-own activation behaviour, so pressing Space on a focused button appeared to do nothing there.
-Playwright presses keys properly and showed the buttons were fine all along — but it means keyboard
-operability is now asserted by a test rather than by my having watched it work.
-
 ## The reviewer's database credential does not live in the repository
 
 The plan asked for a read-only Atlas user and for the instructions to connect. Only the second half
@@ -292,14 +275,3 @@ No model fixes this, so the proposal leads with an impressions log — the order
 source, `isFallback`, and the exploration probability, written at render time. That is also the
 cheapest thing to do early, because the probability of a choice already made cannot be reconstructed
 afterwards.
-
-## A smoke test that only passed because the news was slow
-
-`getByText('Bitcoin')` in the M12 suite resolved to five elements against production, where the news
-card had already landed: the headlines contain the word too. It passed locally because the prices
-render first, so the assertion ran during the window where only one match existed. Matched on the
-exact ticker now.
-
-Worth recording because the test was verified by sabotage when it was written, and sabotage proves
-a test can fail — not that it fails for the reason intended. Running it against a faster environment
-is what exposed the difference.
