@@ -46,6 +46,4 @@ Writing a new backend feature usually means reading two: `naming-and-style` and
 
 - The implementation plan lives at `C:\Users\edena\.claude\plans\idempotent-giggling-book.md`.
   Milestones M0–M13. One branch and one pull request per milestone.
-- After finishing a milestone, append an entry to `docs/ai-collaboration.md`. That journal
-  is a required deliverable — it documents how this project was built with AI tooling.
 - Never commit secrets. `.env` files stay local; `.env.example` documents the keys.
