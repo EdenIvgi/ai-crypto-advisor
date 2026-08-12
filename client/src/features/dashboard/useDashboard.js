@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import {
   fetchCoinPrices,
   fetchMarketNews,
   fetchAiInsight,
   fetchCryptoMeme,
+  postCryptoQuestion,
 } from './dashboardApi.js'
 
 const PRICES_STALE_TIME_MS = 60 * 1000
@@ -39,3 +40,7 @@ export const useCryptoMeme = () =>
     queryFn: fetchCryptoMeme,
     staleTime: DAILY_STALE_TIME_MS,
   })
+
+// A mutation rather than a query, because asking is something the reader does rather than
+// something the page has: nothing is cached, and the same question asked twice is asked twice.
+export const useAskAboutCrypto = () => useMutation({ mutationFn: postCryptoQuestion })

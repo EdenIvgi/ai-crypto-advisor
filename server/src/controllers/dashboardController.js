@@ -2,6 +2,7 @@ import { loadCoinPrices } from '../services/pricesService.js'
 import { loadMarketNews } from '../services/newsService.js'
 import { loadDailyInsight } from '../services/aiInsightService.js'
 import { loadDailyMeme } from '../services/memeService.js'
+import { answerCryptoQuestion } from '../services/cryptoAnswerService.js'
 
 export const getCoinPrices = async (request, response) => {
   response.json(await loadCoinPrices(request.currentUser.preferences.watchedAssets))
@@ -19,4 +20,8 @@ export const getAiInsight = async (request, response) => {
 
 export const getCryptoMeme = async (request, response) => {
   response.json(await loadDailyMeme(request.userId))
+}
+
+export const askAboutCrypto = async (request, response) => {
+  response.json(await answerCryptoQuestion(request.body.question))
 }

@@ -40,3 +40,9 @@ export class ConflictError extends ApiError {
     super(message, 409, code)
   }
 }
+
+export class ServiceUnavailableError extends ApiError {
+  constructor(message = 'That part of the app is unavailable right now') {
+    super(message, 503, 'SERVICE_UNAVAILABLE')
+  }
+}
