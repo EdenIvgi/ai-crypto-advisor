@@ -17,6 +17,6 @@ export const getAiInsight = async (request, response) => {
   response.json(await loadDailyInsight({ userId: request.userId, investorType, watchedAssets }))
 }
 
-export const getCryptoMeme = async (_request, response) => {
-  response.json(await loadDailyMeme())
+export const getCryptoMeme = async (request, response) => {
+  response.json(await loadDailyMeme(request.userId))
 }

@@ -9,12 +9,12 @@ the votes today, and the first section below is the reason I'd be careful about 
 Every thumb is one document, and `contentId` means something different per section. That
 difference decides what can be learned:
 
-| Section       | `contentId`   | So a vote means                                                  |
-| ------------- | ------------- | ---------------------------------------------------------------- |
-| `fun_meme`    | the meme's id | this specific image, and **everyone sees the same one** that day |
-| `ai_insight`  | `userId:date` | this specific paragraph, recoverable from `dailyaiinsights`      |
-| `market_news` | the date      | the news card as a whole, on that day                            |
-| `coin_prices` | the date      | the price card as a whole, on that day                           |
+| Section       | `contentId`   | So a vote means                                                    |
+| ------------- | ------------- | ------------------------------------------------------------------ |
+| `fun_meme`    | the meme's id | **this specific image**, stored per reader per day and recoverable |
+| `ai_insight`  | `userId:date` | this specific paragraph, recoverable from `dailyaiinsights`        |
+| `market_news` | the date      | the news card as a whole, on that day                              |
+| `coin_prices` | the date      | the price card as a whole, on that day                             |
 
 **Two of the four sections cannot be trained on as they stand.** A thumbs-down on
 `market_news / 2026-08-11` says the card missed, and does not say which of the five headlines
