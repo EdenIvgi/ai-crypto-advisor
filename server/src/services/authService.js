@@ -49,7 +49,9 @@ export const verifyAccessToken = (token) => {
 const buildAuthCookieOptions = () => ({
   httpOnly: true,
   secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax',
+  // Lax rather than none, because the browser now reaches the API at /api on the origin it is
+  // already on. A cookie that never travels cross-site is one no privacy setting can drop.
+  sameSite: 'lax',
   path: '/',
 })
 
